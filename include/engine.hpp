@@ -9,25 +9,29 @@ typedef struct s_point {
 
 typedef struct s_player {
 	point_t pos;
+	int layer;
 }	player_t;
 
 typedef struct s_object {
 	point_t pos;
 	float rad;
+	int layer;
 }	object_t;
 
 typedef struct s_item {
-	point_t pos;
+
 }	item_t;
 
 typedef struct s_entity {
 	point_t pos;
 	int size;
+	int layer ;
 }	entity_t;
 
 typedef struct s_wall {
 	point_t p1;
 	point_t p2;
+	int layer;
 }	wall_t;
 
 typedef struct s_light {

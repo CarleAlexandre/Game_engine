@@ -32,7 +32,7 @@ void object_culling() {
 
 }
 
-void walls_culling(scene_t scene, Camera2D camera) {
+void walls_culling(scene_t &scene, Camera2D camera) {
 	
 }
 
