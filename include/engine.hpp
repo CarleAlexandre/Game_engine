@@ -3,19 +3,14 @@
 
 #include <vector>
 
-typedef struct s_point {
-	float x, y;
-}	point_t ;
-
 typedef struct s_player {
-	point_t pos;
-	int layer;
+	Vector3 pos;
 }	player_t;
 
 typedef struct s_object {
-	point_t pos;
-	float rad;
-	int layer;
+	Vector3 pos;
+	float scale;
+	int type;
 }	object_t;
 
 typedef struct s_item {
@@ -23,19 +18,19 @@ typedef struct s_item {
 }	item_t;
 
 typedef struct s_entity {
-	point_t pos;
+	Vector3 pos;
 	int size;
 	int layer ;
 }	entity_t;
 
 typedef struct s_wall {
-	point_t p1;
-	point_t p2;
+	Vector3 p1;
+	Vector3 p2;
 	int layer;
 }	wall_t;
 
 typedef struct s_light {
-	point_t pos;
+	Vector3 pos;
 	int type;
 	int intensity;
 	int pos_loc;
@@ -48,6 +43,17 @@ typedef struct s_map {
 	std::vector<entity_t> entity;
 	std::vector<wall_t> walls;
 }	map_t;
+
+typedef struct s_terrain {
+	Model model;
+	Vector3 pos;
+	float scale;
+}	terrain_t;
+
+typedef struct s_level {
+	terrain_t terrain;
+
+}	level_t;
 
 typedef struct s_scene {
 	std::vector<player_t*> players;

@@ -21,3 +21,8 @@
 ## editor interface
 
 ## animation
+
+
+### Idea
+
+	discret non euclidian voxel element;

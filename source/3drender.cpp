@@ -1,7 +1,7 @@
 #include <raylib.h>
 #include <engine.hpp>
 
-void create_light(std::vector<light_t> lights, point_t pos, int type, int intensity, Shader light_shader) {
+void create_light(std::vector<light_t> lights, Vector3 pos, int type, int intensity, Shader light_shader) {
 	light_t light = {0};
 
 	light.intensity = intensity;
@@ -24,37 +24,11 @@ void update_light(std::vector<light_t> lights, Shader light_shader) {
 	}
 }
 
-void entity_culling() {
-
-}
-
-void object_culling() {
-
-}
-
-void walls_culling(scene_t &scene, Camera2D camera) {
-	
-}
-
-void render(map_t map, RenderTexture2D fbo, Camera2D camera, Shader posprocess_shader, Shader light_shader) {
-	scene_t scene;
-	walls_culling(scene, camera);
-
+void render(level_t level, RenderTexture2D fbo, Camera3D camera, Shader posprocess_shader, Shader light_shader) {
 	BeginTextureMode(fbo);
 		ClearBackground(BLACK);
-		BeginMode2D(camera);
-			for (auto span : scene.walls) {
-				DrawLine(span->p1.x, span->p2.x, span->p1.y, span->p2.y, WHITE);
-			}
-			for (auto span : scene.objects) {
-				DrawCircle(span->pos.x, span->pos.y, span->rad, GREEN);
-			}
-			for (auto span : scene.entities) {
-				DrawCircle(span->pos.x, span->pos.y, span->size, RED);
-			}
-			for (auto span : scene.players) {
-				DrawCircle(span->pos.x, span->pos.y, 5, BLUE);
-			}
+		BeginMode3D(camera);
+			DrawModel(level.terrain.model, level.terrain.pos, level.terrain.scale, WHITE);
 		EndMode2D();
 	EndTextureMode();
 
