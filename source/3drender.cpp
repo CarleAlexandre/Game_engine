@@ -1,6 +1,14 @@
 #include <raylib.h>
 #include <engine.hpp>
 
+void update_light(std::vector<light_t> lights, Shader light_shader) {
+	for (auto light: lights) {
+		SetShaderValue(light_shader, light.pos_loc, &light.pos, SHADER_UNIFORM_VEC2);
+		SetShaderValue(light_shader, light.type_loc, &light.type, SHADER_UNIFORM_INT);
+		SetShaderValue(light_shader, light.intensity_loc, &light.intensity, SHADER_UNIFORM_INT);
+	}
+}
+
 void create_light(std::vector<light_t> lights, Vector3 pos, int type, int intensity, Shader light_shader) {
 	light_t light = {0};
 
@@ -14,14 +22,6 @@ void create_light(std::vector<light_t> lights, Vector3 pos, int type, int intens
 
 	lights.push_back(light);
 	update_light(lights, light_shader);
-}
-
-void update_light(std::vector<light_t> lights, Shader light_shader) {
-	for (auto light: lights) {
-		SetShaderValue(light_shader, light.pos_loc, &light.pos, SHADER_UNIFORM_VEC2);
-		SetShaderValue(light_shader, light.type_loc, &light.type, SHADER_UNIFORM_INT);
-		SetShaderValue(light_shader, light.intensity_loc, &light.intensity, SHADER_UNIFORM_INT);
-	}
 }
 
 void render(level_t level, RenderTexture2D fbo, Camera3D camera, Shader posprocess_shader, Shader light_shader) {

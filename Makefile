@@ -6,7 +6,7 @@ EDITOR = f_engine
 
 SERVER = server
 
-SRC += source/struct.cpp
+SRC += $(wildcard source/*.cpp)
 
 GAME_SRC += game/main.cpp
 
@@ -22,26 +22,26 @@ EDITOR_OBJ = $(EDITOR_SRC:%.cpp=%.o)
 
 SERVER_OBJ = $(SERVER_SRC:%.cpp=%.o)
 
-INCLUDE		+=	-I include
+INCLUDE += -I include
 
-BUILDDIR	=	build/
+BUILDDIR = build/
 
-CC			=	gcc
+CC = gcc
 
-CFLAGS		=	-std=c++20
+CFLAGS = -std=c++20
 
 ifeq ($(OS), Windows_NT)
-CFLAGS		+=	-I C:/mingw64/include -I include
-LIBS		+=	-lraylib -lopengl32 -lgdi32 -lwinmm -lstdc++ -latomic
+CFLAGS += -I C:/mingw64/include -I include
+LIBS += -lraylib -lopengl32 -lgdi32 -lwinmm -lstdc++ -latomic
 endif
 ifeq ($(shell uname -s), Linux)
-CFLAGS		+=	-fsanitize=address -I include
-LIBS		+=	-lasan -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -lstdc++
+CFLAGS += -fsanitize=address -I include
+LIBS += -lasan -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -lstdc++
 endif
 
 $(BUILDDIR)$(LIB) : $(OBJ)
 	mkdir -p $(BUILDDIR)
-	$(CC) $(OBJ) $(LIBS) -o $@
+	ar rcs -o $@ $(OBJ)
 
 $(BUILDDIR)$(GAME) : $(GAME_OBJ)
 	mkdir -p $(BUILDDIR)
@@ -71,7 +71,7 @@ all: $(BUILDDIR)$(LIB) $(BUILDDIR)$(GAME) $(BUILDDIR)$(EDITOR) $(BUILDDIR)$(SERV
 
 lib: $(BUILDDIR)${LIB}
 
-game:	$(BUILDDIR)$(GAME)
+game: $(BUILDDIR)$(GAME)
 
 editor: $(BUILDDIR)$(EDITOR)
 
