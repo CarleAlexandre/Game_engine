@@ -47,7 +47,8 @@ typedef struct s_terrain {
 
 typedef struct s_level {
 	terrain_t terrain;
-
+	std::vector<object_t> objs;
+	std::vector<light_t> lights;
 }	level_t;
 
 typedef struct s_engine {

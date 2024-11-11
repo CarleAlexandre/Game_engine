@@ -1,4 +1,3 @@
-#include <raylib.h>
 #include <engine.hpp>
 
 void update_light(std::vector<light_t> &lights, Shader light_shader) {
@@ -24,18 +23,24 @@ void create_light(std::vector<light_t> &lights, Vector3 pos, int type, int inten
 	update_light(lights, light_shader);
 }
 
-void render(level_t level, RenderTexture2D fbo, Camera3D camera, Shader posprocess_shader, Shader light_shader) {
-	BeginTextureMode(fbo);
+void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
+	BeginTextureMode(engine.fbo);
 		ClearBackground(BLACK);
-		BeginMode3D(camera);
+		BeginShaderMode(engine.light);
+		BeginMode3D(engine.camera);
 			DrawModel(level.terrain.model, level.terrain.pos, level.terrain.scale, WHITE);
-		EndMode2D();
+			for (auto span : level.objs) {
+				DrawCube(span.pos, span.scale, span.scale, span.scale, BLUE);
+			}
+		EndMode3D();
+		EndShaderMode();
 	EndTextureMode();
 
 	BeginDrawing();
 		ClearBackground(BLACK);
-		BeginShaderMode(posprocess_shader);
-			DrawTextureRec(fbo.texture, {0, 0, (float)GetScreenWidth(), (float)-GetScreenHeight()}, {0, 0}, WHITE);
+		BeginShaderMode(engine.posprocess);
+			DrawTextureRec(engine.fbo.texture, {0, 0, (float)GetScreenWidth(), (float)-GetScreenHeight()}, {0, 0}, WHITE);
 		EndShaderMode();
+		render_ui();
 	EndDrawing();
 }
