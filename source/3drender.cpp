@@ -39,5 +39,3 @@ void render(level_t level, RenderTexture2D fbo, Camera3D camera, Shader posproce
 		EndShaderMode();
 	EndDrawing();
 }
-
-

@@ -2,6 +2,7 @@
 # define ENGINE_HPP
 
 #include <vector>
+#include <raylib.h>
 
 typedef struct s_player {
 	Vector3 pos;
@@ -38,12 +39,6 @@ typedef struct s_light {
 	int intensity_loc;
 }	light_t;
 
-typedef struct s_map {
-	std::vector<object_t> objs;
-	std::vector<entity_t> entity;
-	std::vector<wall_t> walls;
-}	map_t;
-
 typedef struct s_terrain {
 	Model model;
 	Vector3 pos;
@@ -55,11 +50,11 @@ typedef struct s_level {
 
 }	level_t;
 
-typedef struct s_scene {
-	std::vector<player_t*> players;
-	std::vector<object_t*> objects;
-	std::vector<entity_t*> entities;
-	std::vector<wall_t*> walls;
-}	scene_t;
+typedef struct s_engine {
+	RenderTexture fbo;
+	Shader posprocess;
+	Shader light;
+	Camera3D camera;
+}	engine_t;
 
 #endif
