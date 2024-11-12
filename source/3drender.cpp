@@ -27,12 +27,12 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 	BeginTextureMode(engine.fbo);
 		ClearBackground(BLACK);
 		BeginShaderMode(engine.light);
-		BeginMode3D(engine.camera);
-			DrawModel(level.terrain.model, level.terrain.pos, level.terrain.scale, WHITE);
-			for (auto span : level.objs) {
-				DrawCube(span.pos, span.scale, span.scale, span.scale, BLUE);
-			}
-		EndMode3D();
+			BeginMode3D(engine.camera);
+				DrawModel(level.terrain.model, level.terrain.pos, level.terrain.scale, WHITE);
+				for (auto span : level.objs) {
+					DrawCube(span.pos, span.scale, span.scale, span.scale, BLUE);
+				}
+			EndMode3D();
 		EndShaderMode();
 	EndTextureMode();
 
