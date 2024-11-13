@@ -9,12 +9,13 @@ int main(void) {
 
 	engine = init_engine();
 
+	level_t level;
+
+	//create_light(level.lights, {10, 10, 10}, GLOBAL_LIGHT, 1, engine.light);
+
 	while (!WindowShouldClose()) {
-		BeginDrawing();
-			BeginMode3D(engine.camera);
-				ClearBackground(BLACK);
-			EndMode3D();
-		EndDrawing();
+	//	update_light(level.lights, engine.light);
+		render(level, engine, NULL);
 	}
-	CloseWindow();
+	void close_engine(engine_t &engine);
 }

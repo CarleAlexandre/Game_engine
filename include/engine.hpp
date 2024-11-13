@@ -62,6 +62,18 @@ typedef struct s_gbuffer{
     unsigned int depthRenderbuffer;
 }	gbuffer_t;
 
+typedef enum {
+   DEFERRED_POSITION,
+   DEFERRED_NORMAL,
+   DEFERRED_ALBEDO,
+   DEFERRED_SHADING
+} deferred_mode;
+
+typedef enum {
+	GLOBAL_LIGHT,
+	DIRECTIONNAL_LIGHT,
+}	light_type;
+
 typedef struct s_engine {
 	RenderTexture fbo;
 	Shader posprocess;
@@ -70,6 +82,7 @@ typedef struct s_engine {
 	Shader deffered_shader;
 	gbuffer_t gbuffer;
 	Camera3D camera;
+	deferred_mode mode;
 }	engine_t;
 
 #endif

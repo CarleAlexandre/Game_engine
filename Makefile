@@ -45,18 +45,18 @@ $(BUILDDIR)$(LIB) : $(OBJ)
 
 $(BUILDDIR)$(GAME) : $(GAME_OBJ)
 	mkdir -p $(BUILDDIR)
-	$(CC) $(GAME_OBJ) $(LIBS) -o $@
+	$(CC) $(GAME_OBJ) $(BUILDDIR)$(LIB) $(LIBS) -o $@
 
 $(BUILDDIR)$(EDITOR) : $(EDITOR_OBJ)
 	mkdir -p $(BUILDDIR)
-	$(CC) $(EDITOR_OBJ) $(LIBS) -o $@
+	$(CC) $(EDITOR_OBJ) $(LIBS) -o $@ $(BUILDDIR)$(LIB)
 
 $(BUILDDIR)$(SERVER) : $(SERVER_OBJ)
 	mkdir -p $(BUILDDIR)
-	$(CC) $(SERVER_OBJ) $(LIBS) -o $@
+	$(CC) $(SERVER_OBJ) $(LIBS) -o $@ $(BUILDDIR)$(LIB)
 
 $(OBJ): %.o : %.cpp
-	$(CC) $(CFLAGS) ${INCLUDE} -c $< -o $@
+	$(CC) $(CFLAGS) $(LIBS) ${INCLUDE} -c $< -o $@
 
 $(GAME_OBJ): %.o : %.cpp
 	$(CC) $(CFLAGS) ${INCLUDE} -c $< -o $@
