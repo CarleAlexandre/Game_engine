@@ -1,5 +1,13 @@
 #include <engine.hpp>
 
+// Deferred mode passes
+typedef enum {
+   DEFERRED_POSITION,
+   DEFERRED_NORMAL,
+   DEFERRED_ALBEDO,
+   DEFERRED_SHADING
+} DeferredMode;
+
 void update_light(std::vector<light_t> &lights, Shader light_shader) {
 	for (auto light: lights) {
 		SetShaderValue(light_shader, light.pos_loc, &light.pos, SHADER_UNIFORM_VEC2);
@@ -26,14 +34,14 @@ void create_light(std::vector<light_t> &lights, Vector3 pos, int type, int inten
 void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 	BeginTextureMode(engine.fbo);
 		ClearBackground(BLACK);
-		BeginShaderMode(engine.light);
-			BeginMode3D(engine.camera);
+		BeginMode3D(engine.camera);
+			BeginShaderMode(engine.light);
 				DrawModel(level.terrain.model, level.terrain.pos, level.terrain.scale, WHITE);
 				for (auto span : level.objs) {
 					DrawCube(span.pos, span.scale, span.scale, span.scale, BLUE);
 				}
-			EndMode3D();
-		EndShaderMode();
+			EndShaderMode();
+		EndMode3D();
 	EndTextureMode();
 
 	BeginDrawing();

@@ -2,7 +2,10 @@
 # define ENGINE_HPP
 
 #include <vector>
+#define GLSL_VERSION 330
 #include <raylib.h>
+#include <rlgl.h>
+#include <raymath.h>
 
 typedef struct s_player {
 	Vector3 pos;
@@ -51,10 +54,21 @@ typedef struct s_level {
 	std::vector<light_t> lights;
 }	level_t;
 
+typedef struct s_gbuffer{
+    unsigned int framebuffer;
+    unsigned int positionTexture;
+    unsigned int normalTexture;
+    unsigned int albedoSpecTexture;
+    unsigned int depthRenderbuffer;
+}	gbuffer_t;
+
 typedef struct s_engine {
 	RenderTexture fbo;
 	Shader posprocess;
 	Shader light;
+	Shader gbuffer_shader;
+	Shader deffered_shader;
+	gbuffer_t gbuffer;
 	Camera3D camera;
 }	engine_t;
 
