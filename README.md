@@ -7,6 +7,7 @@
 ## thread
 
 ## Graphical Pipeline
+	deffered rendering
 
 ## Sound
 

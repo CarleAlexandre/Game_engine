@@ -32,6 +32,20 @@ void create_light(std::vector<light_t> &lights, Vector3 pos, int type, int inten
 }
 
 void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
+	BeginDrawing();
+		rlEnableFramebuffer(engine.gbuffer.framebuffer);
+		rlClearScreenBuffers();
+		rlDisableColorBlend();
+		BeginMode3D(engine.camera);
+			rlEnableShader(engine.gbuffer_shader.id);
+
+			rlDisableShader();
+		EndMode3D();
+		rlEnableColorBlend();
+		rlDisableFramebuffer();
+		rlClearScreenBuffers();
+	EndDrawing();
+
 	BeginTextureMode(engine.fbo);
 		ClearBackground(BLACK);
 		BeginMode3D(engine.camera);
