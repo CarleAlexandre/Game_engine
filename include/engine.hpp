@@ -2,10 +2,12 @@
 # define ENGINE_HPP
 
 #include <vector>
+#include <GLFW/glfw3.h>
 #define GLSL_VERSION 330
 #include <raylib.h>
-#include <rlgl.h>
 #include <raymath.h>
+#include <rlgl.h>
+#include <rcamera.h>
 
 typedef struct s_player {
 	Vector3 pos;
@@ -55,18 +57,18 @@ typedef struct s_level {
 }	level_t;
 
 typedef struct s_gbuffer{
-    unsigned int framebuffer;
-    unsigned int positionTexture;
-    unsigned int normalTexture;
-    unsigned int albedoSpecTexture;
-    unsigned int depthRenderbuffer;
+	unsigned int framebuffer;
+	unsigned int positionTexture;
+	unsigned int normalTexture;
+	unsigned int albedoSpecTexture;
+	unsigned int depthRenderbuffer;
 }	gbuffer_t;
 
 typedef enum {
-   DEFERRED_POSITION,
-   DEFERRED_NORMAL,
-   DEFERRED_ALBEDO,
-   DEFERRED_SHADING
+	DEFERRED_POSITION,
+	DEFERRED_NORMAL,
+	DEFERRED_ALBEDO,
+	DEFERRED_SHADING
 } deferred_mode;
 
 typedef enum {
@@ -84,5 +86,9 @@ typedef struct s_engine {
 	Camera3D camera;
 	deferred_mode mode;
 }	engine_t;
+
+typedef struct sv_player_s {
+
+}	sv_player;
 
 #endif

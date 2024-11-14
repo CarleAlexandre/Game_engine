@@ -13,7 +13,10 @@ int main(void) {
 
 	//create_light(level.lights, {10, 10, 10}, GLOBAL_LIGHT, 1, engine.light);
 
+	HideCursor();
+
 	while (!WindowShouldClose()) {
+		update_input(engine);
 	//	update_light(level.lights, engine.light);
 		render(level, engine, NULL);
 	}
