@@ -120,6 +120,13 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 	// 	// EndShaderMode();
 	// EndDrawing();
 
+		// BeginShaderMode(ctx.filterShader);
+        	// DrawTextureRec(ctx.fbo.texture, {0, 0, static_cast<float>(ctx.width), -static_cast<float>(ctx.height)}, {0, 0}, WHITE);
+		// EndShaderMode();
+		// BeginBlendMode(BLEND_SUBTRACT_COLORS);
+        	// DrawTextureRec(ctx.fbo.texture, {0, 0, static_cast<float>(ctx.width), -static_cast<float>(ctx.height)}, {0, 0}, WHITE);
+		// EndBlendMode();
+
 	// BeginDrawing();
 	// 	ClearBackground(BLACK);
 	// 	BeginShaderMode(engine.posprocess);
