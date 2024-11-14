@@ -27,6 +27,7 @@ void create_light(std::vector<light_t> &lights, Vector3 pos, int type, int inten
 }
 
 void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
+	int screen_height = GetScreenHeight(), screen_width = GetScreenWidth() ;
 	BeginDrawing();
 	ClearBackground(RAYWHITE);
 	rlEnableFramebuffer(engine.gbuffer.framebuffer);
@@ -64,7 +65,7 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 			//cannot get above function
 			glBindTexture(RL_READ_FRAMEBUFFER, engine.gbuffer.framebuffer);
 			glBindTexture(RL_DRAW_FRAMEBUFFER, 0);
-			rlBlitFramebuffer(0, 0, GetScreenWidth(), GetScreenHeight(), 0, 0, GetScreenWidth(), GetScreenHeight(), 0x00000100);    // GL_DEPTH_BUFFER_BIT
+			rlBlitFramebuffer(0, 0, screen_width, screen_height, 0, 0, screen_width, screen_height, 0x00000100);    // GL_DEPTH_BUFFER_BIT
 			rlDisableFramebuffer();
 			// forward rendering
 			BeginMode3D(engine.camera);
@@ -72,38 +73,56 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 			rlDisableShader();
 			EndMode3D();
 			
-			DrawText("FINAL RESULT", 10, GetScreenHeight() - 30, 20, DARKGREEN);
+			DrawText("FINAL RESULT", 10, screen_height - 30, 20, DARKGREEN);
 			break;
 		}
 		case (DEFERRED_POSITION): {
+			DrawTextureRec((Texture2D){
+			.id = engine.gbuffer.normalTexture,
+			.width = screen_width,
+			.height = screen_height,
+			}, (Rectangle) { 0, 0, (float)screen_width, (float)-screen_height }, Vector2Zero(), RAYWHITE);
+
+			DrawText("POSITION TEXTURE", 10, screen_height - 30, 20, DARKGREEN);
 			break;
 		}
 		case (DEFERRED_NORMAL): {
+			DrawTextureRec((Texture2D){
+			.id = engine.gbuffer.normalTexture,
+			.width = screen_width,
+			.height = screen_height,
+			}, (Rectangle) { 0, 0, (float)screen_width, (float)-screen_height }, Vector2Zero(), RAYWHITE);
+
+			DrawText("NORMAL TEXTURE", 10, screen_height - 30, 20, DARKGREEN);
 			break;
 		}
 		case (DEFERRED_ALBEDO): {
+			DrawTextureRec((Texture2D){
+			.id = engine.gbuffer.normalTexture,
+			.width = screen_width,
+			.height = screen_height,
+			}, (Rectangle) { 0, 0, (float)screen_width, (float)-screen_height }, Vector2Zero(), RAYWHITE);
+
+			DrawText("ALBEDO TEXTURE", 10, screen_height - 30, 20, DARKGREEN);
 			break;
 		}
 		default:break;
 	};
 	EndDrawing();
-	// BeginTextureMode(engine.fbo);
+
+	// BeginDrawing();
 	// 	ClearBackground(BLACK);
-	// 	BeginMode3D(engine.camera);
-	// 		BeginShaderMode(engine.light);
-	// 			//DrawModel(level.terrain.model, level.terrain.pos, level.terrain.scale, WHITE);
-	// 			for (auto span : level.objs) {
-	// 				DrawCube(span.pos, span.scale, span.scale, span.scale, BLUE);
-	// 			}
-	// 			DrawCube({0}, 10, 10, 10, BLUE);
-	// 		EndShaderMode();
-	// 	EndMode3D();
-	// EndTextureMode();
+	// 	// BeginBlendMode(BLEND_SUBTRACT_COLORS);
+	// 	DrawTextureRec(engine.fbo.texture, {0, 0, (float)GetScreenWidth(), (float)-GetScreenHeight()}, {0, 0}, WHITE);
+	// 	// EndBlendMode();
+	// 	// BeginShaderMode(engine.posprocess);
+	// 	// 	DrawTextureRec(engine.fbo.texture, {0, 0, (float)GetScreenWidth(), (float)-GetScreenHeight()}, {0, 0}, WHITE);
+	// 	// EndShaderMode();
+	// EndDrawing();
 
 	// BeginDrawing();
 	// 	ClearBackground(BLACK);
 	// 	BeginShaderMode(engine.posprocess);
-	// 		DrawTextureRec(engine.fbo.texture, {0, 0, (float)GetScreenWidth(), (float)-GetScreenHeight()}, {0, 0}, WHITE);
 	// 	EndShaderMode();
 	// 	//render_ui();
 	// EndDrawing();
