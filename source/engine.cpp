@@ -65,15 +65,15 @@ engine_t init_engine(void) {
 
 void close_engine(engine_t &engine) {
 	UnloadShader(engine.deffered_shader);
-    UnloadShader(engine.gbuffer_shader);
+	UnloadShader(engine.gbuffer_shader);
 	UnloadShader(engine.light);
 	UnloadShader(engine.posprocess);
 
-    // Unload geometry buffer and all attached textures
-    rlUnloadFramebuffer(engine.gbuffer.framebuffer);
-    rlUnloadTexture(engine.gbuffer.positionTexture);
-    rlUnloadTexture(engine.gbuffer.normalTexture);
-    rlUnloadTexture(engine.gbuffer.albedoSpecTexture);
-    rlUnloadTexture(engine.gbuffer.depthRenderbuffer);
+	// Unload geometry buffer and all attached textures
+	rlUnloadFramebuffer(engine.gbuffer.framebuffer);
+	rlUnloadTexture(engine.gbuffer.positionTexture);
+	rlUnloadTexture(engine.gbuffer.normalTexture);
+	rlUnloadTexture(engine.gbuffer.albedoSpecTexture);
+	rlUnloadTexture(engine.gbuffer.depthRenderbuffer);
 	CloseWindow();
 }
