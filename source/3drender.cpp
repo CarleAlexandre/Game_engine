@@ -67,7 +67,6 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 		DrawModel(engine.cube, {40, 0, 0}, 1, BLUE);
 		DrawModel(engine.cube, {0, 0, 20}, 1, BLUE);
 		DrawModel(engine.cube, {0, 0, 40}, 1, BLUE);
-
 	rlDisableShader();
 	EndMode3D();
 	rlEnableColorBlend();
@@ -76,27 +75,43 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 
 	switch(engine.mode) {
 		case (DEFERRED_SHADING): {
-			BeginMode3D(engine.camera);
-			rlDisableColorBlend();
-			rlEnableShader(engine.deffered_shader.id);
-			// Activate our g-buffer textures
-			rlActiveTextureSlot(0);
-			rlEnableTexture(engine.gbuffer.positionTexture);
-			rlActiveTextureSlot(1);
-			rlEnableTexture(engine.gbuffer.normalTexture);
-			rlActiveTextureSlot(2);
-			rlEnableTexture(engine.gbuffer.albedoSpecTexture);
-			rlLoadDrawQuad();
-			rlDisableShader();
-			rlEnableColorBlend();
-			EndMode3D();
+				BeginMode3D(engine.camera);
+				rlDisableColorBlend();
+				rlEnableShader(engine.deffered_shader.id);
+				// Activate our g-buffer textures
+				rlActiveTextureSlot(0);
+				rlEnableTexture(engine.gbuffer.positionTexture);
+				rlActiveTextureSlot(1);
+				rlEnableTexture(engine.gbuffer.normalTexture);
+				rlActiveTextureSlot(2);
+				rlEnableTexture(engine.gbuffer.albedoSpecTexture);
+				rlLoadDrawQuad();
+				rlDisableShader();
+				rlEnableColorBlend();
+				EndMode3D();
 
-			glBindFramebuffer(RL_READ_FRAMEBUFFER, engine.gbuffer.framebuffer);
-			glBindFramebuffer(RL_DRAW_FRAMEBUFFER, 0);
-			rlBlitFramebuffer(0, 0, screen_width, screen_height, 0, 0, screen_width, screen_height, 0x00000100);    // GL_DEPTH_BUFFER_BIT
-			rlDisableFramebuffer();
+				glBindFramebuffer(RL_READ_FRAMEBUFFER, engine.gbuffer.framebuffer);
+				glBindFramebuffer(RL_DRAW_FRAMEBUFFER, 0);
+				rlBlitFramebuffer(0, 0, screen_width, screen_height, 0, 0, screen_width, screen_height, 0x00000100);    // GL_DEPTH_BUFFER_BIT
+				rlDisableFramebuffer();
 
 			// forward rendering
+			// rlClearScreenBuffers();
+			BeginShaderMode(engine.posprocess);
+			DrawTextureRec((Texture2D){
+			.id = engine.gbuffer.framebuffer,
+			.width = screen_width,
+			.height = screen_height,
+			}, (Rectangle) { 0, 0, (float)screen_width, (float)-screen_height }, Vector2Zero(), WHITE);
+			EndShaderMode();
+			BeginBlendMode(BLEND_SUBTRACT_COLORS);
+				DrawTextureRec((Texture2D){
+				.id = engine.gbuffer.framebuffer,
+				.width = screen_width,
+				.height = screen_height,
+				}, (Rectangle) { 0, 0, (float)screen_width, (float)-screen_height }, Vector2Zero(), WHITE);
+			EndBlendMode();
+
 			BeginMode3D(engine.camera);
 			rlEnableShader(rlGetShaderIdDefault());
 			for (auto span: engine.lights) {
@@ -104,6 +119,9 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 			}
 			rlDisableShader();
 			EndMode3D();
+
+
+
 			DrawText("FINAL RESULT", 10, screen_height - 30, 20, DARKGREEN);
 			break;
 		}
