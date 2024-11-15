@@ -50,6 +50,7 @@ engine_t init_engine(void) {
 		rlSetUniformSampler(rlGetLocationUniform(engine.deffered_shader.id, "gNormal"), 1);
 		rlSetUniformSampler(rlGetLocationUniform(engine.deffered_shader.id, "gAlbedoSpec"), 2);
 	rlDisableShader();
+
 	engine.cube = LoadModelFromMesh(GenMeshCube(10, 10, 10));
 
 	engine.cube.materials[0].shader = engine.gbuffer_shader;
@@ -60,10 +61,10 @@ engine_t init_engine(void) {
 
 	engine.mode = DEFERRED_SHADING;
 
-	engine.lights[0] = CreateLight(LIGHT_POINT, (Vector3){ -0, 10, -10 }, Vector3Zero(), YELLOW, engine.deffered_shader);
-	engine.lights[1] = CreateLight(LIGHT_POINT, (Vector3){ 0, 10, 10 }, Vector3Zero(), RED, engine.deffered_shader);
-	engine.lights[2] = CreateLight(LIGHT_POINT, (Vector3){ -10, 10, 0 }, Vector3Zero(), GREEN, engine.deffered_shader);
-	engine.lights[3] = CreateLight(LIGHT_POINT, (Vector3){ 10, 10, -0 }, Vector3Zero(), BLUE, engine.deffered_shader);
+	engine.lights[0] = CreateLight(LIGHT_POINT, (Vector3){ -0, 40, -50 }, Vector3Zero(), YELLOW, engine.deffered_shader);
+	engine.lights[1] = CreateLight(LIGHT_POINT, (Vector3){ 0, 40, 50 }, Vector3Zero(), RED, engine.deffered_shader);
+	engine.lights[2] = CreateLight(LIGHT_POINT, (Vector3){ -50, 40, 0 }, Vector3Zero(), GREEN, engine.deffered_shader);
+	engine.lights[3] = CreateLight(LIGHT_POINT, (Vector3){ 50, 40, -0 }, Vector3Zero(), BLUE, engine.deffered_shader);
 
 	return (engine);
 }
