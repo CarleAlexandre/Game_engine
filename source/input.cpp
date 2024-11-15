@@ -26,7 +26,7 @@ void update_input(engine_t &engine) {
 	if (IsKeyPressed(KEY_Q)) {
 		int i = engine.mode;
 		i++;
-		i%= 4;
+		i%= 5;
 		engine.mode = (deferred_mode)i; 
 	}
 	// CameraYaw(&engine.camera, delta.x * DEG2RAD * 0.2, false);

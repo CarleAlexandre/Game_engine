@@ -9,6 +9,15 @@
 #include <raymath.h>
 #include <rcamera.h>
 
+#define MAX_LIGHTS  4
+#define RL_READ_FRAMEBUFFER                     0x8CA8      // GL_READ_FRAMEBUFFER
+#define RL_DRAW_FRAMEBUFFER                     0x8CA9      // GL_DRAW_FRAMEBUFFER
+
+typedef enum {
+    LIGHT_DIRECTIONAL = 0,
+    LIGHT_POINT
+} LightType;
+
 typedef struct s_player {
 	Vector3 pos;
 }	player_t;
@@ -36,12 +45,20 @@ typedef struct s_wall {
 }	wall_t;
 
 typedef struct s_light {
-	Vector3 pos;
 	int type;
-	int intensity;
-	int pos_loc;
-	int type_loc;
-	int intensity_loc;
+	bool enabled;
+	Vector3 position;
+	Vector3 target;
+	Color color;
+	float attenuation;
+
+	// Shader locations
+	int enabledLoc;
+	int typeLoc;
+	int positionLoc;
+	int targetLoc;
+	int colorLoc;
+	int attenuationLoc;
 }	light_t;
 
 typedef struct s_terrain {
@@ -85,10 +102,12 @@ typedef struct s_engine {
 	Camera3D camera;
 	deferred_mode mode;
 	Model cube;
+	light_t lights[MAX_LIGHTS];
 }	engine_t;
 
 typedef struct sv_player_s {
+	Vector3 pos;
 
-}	sv_player;
+}	sv_player_t;
 
 #endif

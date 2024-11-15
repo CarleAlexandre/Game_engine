@@ -1,4 +1,4 @@
-#include <engine.hpp>
+#include <prototype.hpp>
 
 engine_t init_engine(void) {
 	int screenwidth, screenheight;
@@ -59,6 +59,11 @@ engine_t init_engine(void) {
 	SetTargetFPS(60);
 
 	engine.mode = DEFERRED_SHADING;
+
+	engine.lights[0] = CreateLight(LIGHT_POINT, (Vector3){ -0, 10, -10 }, Vector3Zero(), YELLOW, engine.deffered_shader);
+	engine.lights[1] = CreateLight(LIGHT_POINT, (Vector3){ 0, 10, 10 }, Vector3Zero(), RED, engine.deffered_shader);
+	engine.lights[2] = CreateLight(LIGHT_POINT, (Vector3){ -10, 10, 0 }, Vector3Zero(), GREEN, engine.deffered_shader);
+	engine.lights[3] = CreateLight(LIGHT_POINT, (Vector3){ 10, 10, -0 }, Vector3Zero(), BLUE, engine.deffered_shader);
 
 	return (engine);
 }
