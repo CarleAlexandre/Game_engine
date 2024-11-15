@@ -85,9 +85,9 @@ typedef enum {
 	DEFERRED_POSITION,
 	DEFERRED_NORMAL,
 	DEFERRED_ALBEDO,
-	DEFERRED_SHADING
+	DEFERRED_SHADING,
 } deferred_mode;
-
+ 
 typedef enum {
 	GLOBAL_LIGHT,
 	DIRECTIONNAL_LIGHT,
@@ -95,7 +95,6 @@ typedef enum {
 
 typedef struct s_engine {
 	Shader posprocess;
-	Shader light;
 	Shader gbuffer_shader;
 	Shader deffered_shader;
 	gbuffer_t gbuffer;

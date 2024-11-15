@@ -63,6 +63,11 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 	BeginMode3D(engine.camera);
 	rlEnableShader(engine.gbuffer_shader.id);
 		DrawModel(engine.cube, {0, 0, 0}, 1, BLUE);
+		DrawModel(engine.cube, {20, 0, 0}, 1, BLUE);
+		DrawModel(engine.cube, {40, 0, 0}, 1, BLUE);
+		DrawModel(engine.cube, {0, 0, 20}, 1, BLUE);
+		DrawModel(engine.cube, {0, 0, 40}, 1, BLUE);
+
 	rlDisableShader();
 	EndMode3D();
 	rlEnableColorBlend();
@@ -85,19 +90,20 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 			rlDisableShader();
 			rlEnableColorBlend();
 			EndMode3D();
+
 			glBindFramebuffer(RL_READ_FRAMEBUFFER, engine.gbuffer.framebuffer);
 			glBindFramebuffer(RL_DRAW_FRAMEBUFFER, 0);
 			rlBlitFramebuffer(0, 0, screen_width, screen_height, 0, 0, screen_width, screen_height, 0x00000100);    // GL_DEPTH_BUFFER_BIT
 			rlDisableFramebuffer();
+
 			// forward rendering
 			BeginMode3D(engine.camera);
 			rlEnableShader(rlGetShaderIdDefault());
 			for (auto span: engine.lights) {
-				DrawSphere(span.position, 2, span.color);
+				DrawSphere(span.position, 1, span.color);
 			}
 			rlDisableShader();
 			EndMode3D();
-			
 			DrawText("FINAL RESULT", 10, screen_height - 30, 20, DARKGREEN);
 			break;
 		}
@@ -106,7 +112,7 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 			.id = engine.gbuffer.positionTexture,
 			.width = screen_width,
 			.height = screen_height,
-			}, (Rectangle) { 0, 0, (float)screen_width, (float)-screen_height }, Vector2Zero(), RAYWHITE);
+			}, (Rectangle) { 0, 0, (float)screen_width, (float)-screen_height }, Vector2Zero(), WHITE);
 
 			DrawText("POSITION TEXTURE", 10, screen_height - 30, 20, DARKGREEN);
 			break;
@@ -116,7 +122,7 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 			.id = engine.gbuffer.normalTexture,
 			.width = screen_width,
 			.height = screen_height,
-			}, (Rectangle) { 0, 0, (float)screen_width, (float)-screen_height }, Vector2Zero(), RAYWHITE);
+			}, (Rectangle) { 0, 0, (float)screen_width, (float)-screen_height }, Vector2Zero(), WHITE);
 
 			DrawText("NORMAL TEXTURE", 10, screen_height - 30, 20, DARKGREEN);
 			break;
@@ -126,7 +132,7 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 			.id = engine.gbuffer.albedoSpecTexture,
 			.width = screen_width,
 			.height = screen_height,
-			}, (Rectangle) { 0, 0, (float)screen_width, (float)-screen_height }, Vector2Zero(), RAYWHITE);
+			}, (Rectangle) { 0, 0, (float)screen_width, (float)-screen_height }, Vector2Zero(), WHITE);
 
 			DrawText("ALBEDO TEXTURE", 10, screen_height - 30, 20, DARKGREEN);
 			break;

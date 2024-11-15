@@ -16,12 +16,12 @@ engine_t init_engine(void) {
 
 	engine.posprocess = LoadShader(0, "shader/postprocess.fs");
 	engine.deffered_shader = LoadShader("shader/defered.vs", "shader/defered.fs");
-	engine.light = LoadShader("shader/light.vs", "shader/light.fs");
 	engine.gbuffer_shader = LoadShader("shader/gbuffer.vs", "shader/gbuffer.fs");
 	engine.deffered_shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(engine.deffered_shader, "viewPosition");
 
+
 	engine.gbuffer = {0};
-	engine.gbuffer.framebuffer = rlLoadFramebuffer(0,0);
+	engine.gbuffer.framebuffer = rlLoadFramebuffer(screenwidth, screenheight);
 	if (!engine.gbuffer.framebuffer) {
 		TraceLog(LOG_WARNING, "failed to create framebuffer");
 		exit(1);
@@ -71,7 +71,6 @@ engine_t init_engine(void) {
 void close_engine(engine_t &engine) {
 	UnloadShader(engine.deffered_shader);
 	UnloadShader(engine.gbuffer_shader);
-	UnloadShader(engine.light);
 	UnloadShader(engine.posprocess);
 
 	// Unload geometry buffer and all attached textures
