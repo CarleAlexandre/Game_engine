@@ -18,10 +18,10 @@ engine_t init_engine(void) {
 	engine.deffered_shader = LoadShader("shader/defered.vs", "shader/defered.fs");
 	engine.light = LoadShader("shader/light.vs", "shader/light.fs");
 	engine.gbuffer_shader = LoadShader("shader/gbuffer.vs", "shader/gbuffer.fs");
+	engine.deffered_shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(engine.deffered_shader, "viewPosition");
 
-	engine.fbo = LoadRenderTexture(screenwidth, screenheight);
 	engine.gbuffer = {0};
-	engine.gbuffer.framebuffer = rlLoadFramebuffer(screenwidth, screenheight);
+	engine.gbuffer.framebuffer = rlLoadFramebuffer(0,0);
 	if (!engine.gbuffer.framebuffer) {
 		TraceLog(LOG_WARNING, "failed to create framebuffer");
 		exit(1);
@@ -47,15 +47,19 @@ engine_t init_engine(void) {
 
 	rlEnableShader(engine.deffered_shader.id);
 		rlSetUniformSampler(rlGetLocationUniform(engine.deffered_shader.id, "gPosition"), 0);
-    	rlSetUniformSampler(rlGetLocationUniform(engine.deffered_shader.id, "gNormal"), 1);
-        rlSetUniformSampler(rlGetLocationUniform(engine.deffered_shader.id, "gAlbedoSpec"), 2);
+		rlSetUniformSampler(rlGetLocationUniform(engine.deffered_shader.id, "gNormal"), 1);
+		rlSetUniformSampler(rlGetLocationUniform(engine.deffered_shader.id, "gAlbedoSpec"), 2);
 	rlDisableShader();
+	engine.cube = LoadModelFromMesh(GenMeshCube(10, 10, 10));
+
+	engine.cube.materials[0].shader = engine.gbuffer_shader;
 
 	rlEnableDepthTest();
 
 	SetTargetFPS(60);
 
 	engine.mode = DEFERRED_SHADING;
+
 	return (engine);
 }
 

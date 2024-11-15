@@ -35,7 +35,7 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 	rlDisableColorBlend();
 	BeginMode3D(engine.camera);
 	rlEnableShader(engine.gbuffer_shader.id);
-	DrawCube({0}, 10, 10, 10, BLUE);
+		DrawModel(engine.cube, {10, 1, 0}, 1, BLUE);
 	rlDisableShader();
 	EndMode3D();
 	rlEnableColorBlend();
@@ -57,14 +57,9 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 			rlLoadDrawQuad();
 			rlDisableShader();
 			rlEnableColorBlend();
-
-			DrawCube({10, 1, 0}, 10, 10, 10, BLUE);
 			EndMode3D();
-			//rlBindFramebuffer(RL_READ_FRAMEBUFFER, engine.gbuffer.framebuffer);
-			//rlBindFramebuffer(RL_DRAW_FRAMEBUFFER, 0);
-			//cannot get above function
-			glBindTexture(RL_READ_FRAMEBUFFER, engine.gbuffer.framebuffer);
-			glBindTexture(RL_DRAW_FRAMEBUFFER, 0);
+			glBindFramebuffer(RL_READ_FRAMEBUFFER, engine.gbuffer.framebuffer);
+			glBindFramebuffer(RL_DRAW_FRAMEBUFFER, 0);
 			rlBlitFramebuffer(0, 0, screen_width, screen_height, 0, 0, screen_width, screen_height, 0x00000100);    // GL_DEPTH_BUFFER_BIT
 			rlDisableFramebuffer();
 			// forward rendering
@@ -78,7 +73,7 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 		}
 		case (DEFERRED_POSITION): {
 			DrawTextureRec((Texture2D){
-			.id = engine.gbuffer.normalTexture,
+			.id = engine.gbuffer.positionTexture,
 			.width = screen_width,
 			.height = screen_height,
 			}, (Rectangle) { 0, 0, (float)screen_width, (float)-screen_height }, Vector2Zero(), RAYWHITE);
@@ -98,7 +93,7 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 		}
 		case (DEFERRED_ALBEDO): {
 			DrawTextureRec((Texture2D){
-			.id = engine.gbuffer.normalTexture,
+			.id = engine.gbuffer.albedoSpecTexture,
 			.width = screen_width,
 			.height = screen_height,
 			}, (Rectangle) { 0, 0, (float)screen_width, (float)-screen_height }, Vector2Zero(), RAYWHITE);
@@ -109,28 +104,4 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 		default:break;
 	};
 	EndDrawing();
-
-	// BeginDrawing();
-	// 	ClearBackground(BLACK);
-	// 	// BeginBlendMode(BLEND_SUBTRACT_COLORS);
-	// 	DrawTextureRec(engine.fbo.texture, {0, 0, (float)GetScreenWidth(), (float)-GetScreenHeight()}, {0, 0}, WHITE);
-	// 	// EndBlendMode();
-	// 	// BeginShaderMode(engine.posprocess);
-	// 	// 	DrawTextureRec(engine.fbo.texture, {0, 0, (float)GetScreenWidth(), (float)-GetScreenHeight()}, {0, 0}, WHITE);
-	// 	// EndShaderMode();
-	// EndDrawing();
-
-		// BeginShaderMode(ctx.filterShader);
-        	// DrawTextureRec(ctx.fbo.texture, {0, 0, static_cast<float>(ctx.width), -static_cast<float>(ctx.height)}, {0, 0}, WHITE);
-		// EndShaderMode();
-		// BeginBlendMode(BLEND_SUBTRACT_COLORS);
-        	// DrawTextureRec(ctx.fbo.texture, {0, 0, static_cast<float>(ctx.width), -static_cast<float>(ctx.height)}, {0, 0}, WHITE);
-		// EndBlendMode();
-
-	// BeginDrawing();
-	// 	ClearBackground(BLACK);
-	// 	BeginShaderMode(engine.posprocess);
-	// 	EndShaderMode();
-	// 	//render_ui();
-	// EndDrawing();
 }

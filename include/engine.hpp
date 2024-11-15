@@ -2,11 +2,11 @@
 # define ENGINE_HPP
 
 #include <vector>
-#include <GLFW/glfw3.h>
 #define GLSL_VERSION 330
 #include <raylib.h>
-#include <raymath.h>
+#include <glad.h>
 #include <rlgl.h>
+#include <raymath.h>
 #include <rcamera.h>
 
 typedef struct s_player {
@@ -77,7 +77,6 @@ typedef enum {
 }	light_type;
 
 typedef struct s_engine {
-	RenderTexture fbo;
 	Shader posprocess;
 	Shader light;
 	Shader gbuffer_shader;
@@ -85,6 +84,7 @@ typedef struct s_engine {
 	gbuffer_t gbuffer;
 	Camera3D camera;
 	deferred_mode mode;
+	Model cube;
 }	engine_t;
 
 typedef struct sv_player_s {

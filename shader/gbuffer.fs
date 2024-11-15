@@ -1,27 +1,22 @@
-#version 330
+#version 330 core
+layout (location = 0) out vec3 gPosition;
+layout (location = 1) out vec3 gNormal;
+layout (location = 2) out vec4 gAlbedoSpec;
 
-// Input vertex attributes (from vertex shader)
+in vec3 fragPosition;
 in vec2 fragTexCoord;
-in vec4 fragColor;
+in vec3 fragNormal;
 
-// Input uniform values
-uniform sampler2D texture0;
-uniform vec4 colDiffuse;
+uniform sampler2D diffuseTexture;
+uniform sampler2D specularTexture;
 
-// Output fragment color
-out vec4 finalColor;
-
-// NOTE: Add here your custom variables
-
-void main()
-{
-    // Texel color fetching from texture sampler
-    vec4 texelColor = texture(texture0, fragTexCoord);
-
-    // NOTE: Implement here your fragment shader code
-
-    // final color is the color from the texture 
-    //    times the tint color (colDiffuse)
-    //    times the fragment color (interpolated vertex color)
-    finalColor = texelColor*colDiffuse*fragColor;
+void main() {
+    // store the fragment position vector in the first gbuffer texture
+    gPosition = fragPosition;
+    // also store the per-fragment normals into the gbuffer
+    gNormal = normalize(fragNormal);
+    // and the diffuse per-fragment color
+    gAlbedoSpec.rgb = texture(diffuseTexture, fragTexCoord).rgb;
+    // store specular intensity in gAlbedoSpec's alpha component
+    gAlbedoSpec.a = texture(specularTexture, fragTexCoord).r;
 }

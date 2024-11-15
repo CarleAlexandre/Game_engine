@@ -23,7 +23,12 @@ void update_input(engine_t &engine) {
 	if (IsKeyDown(KEY_LEFT_SHIFT)) {
 		step.z--;
 	}
-
+	if (IsKeyPressed(KEY_Q)) {
+		int i = engine.mode;
+		i++;
+		i%= 4;
+		engine.mode = (deferred_mode)i; 
+	}
 	// CameraYaw(&engine.camera, delta.x * DEG2RAD * 0.2, false);
 	// CameraPitch(&engine.camera, -delta.y * DEG2RAD * 0.2, true, false, false);
 	UpdateCameraPro(&engine.camera, step, {(float)(delta.x * 0.2), (float)(delta.y * 0.2), 0}, 0);

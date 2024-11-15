@@ -1,26 +1,24 @@
-#version 330
+#version 330 core
+layout (location = 0) in vec3 vertexPosition;
+layout (location = 1) in vec2 vertexTexCoord;
+layout (location = 2) in vec3 vertexNormal;
 
-// Input vertex attributes
-in vec3 vertexPosition;
-in vec2 vertexTexCoord;
-in vec3 vertexNormal;
-in vec4 vertexColor;
-
-// Input uniform values
-uniform mat4 mvp;
-
-// Output vertex attributes (to fragment shader)
+out vec3 fragPosition;
 out vec2 fragTexCoord;
-out vec4 fragColor;
+out vec3 fragNormal;
 
-// NOTE: Add here your custom variables
+uniform mat4 matModel;
+uniform mat4 matView;
+uniform mat4 matProjection;
 
 void main()
 {
-    // Send vertex attributes to fragment shader
+    vec4 worldPos = matModel * vec4(vertexPosition, 1.0);
+    fragPosition = worldPos.xyz; 
     fragTexCoord = vertexTexCoord;
-    fragColor = vertexColor;
 
-    // Calculate final vertex position
-    gl_Position = mvp*vec4(vertexPosition, 1.0);
+    mat3 normalMatrix = transpose(inverse(mat3(matModel)));
+    fragNormal = normalMatrix * vertexNormal;
+
+    gl_Position = matProjection * matView * worldPos;
 }
