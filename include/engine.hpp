@@ -104,6 +104,7 @@ typedef struct s_engine {
 	RenderTexture2D fbo;
 	deferred_mode mode;
 	Model cube;
+	Model Sphere;
 	light_t lights[MAX_LIGHTS];
 }	engine_t;
 

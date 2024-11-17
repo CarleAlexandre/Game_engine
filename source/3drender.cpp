@@ -71,7 +71,8 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 	rlDisableColorBlend();
 	BeginMode3D(engine.camera);
 	rlEnableShader(engine.gbuffer_shader.id);
-		DrawModel(engine.cube, {0, 0, 0}, 1, WHITE);
+		DrawModel(level.terrain.model, level.terrain.pos, level.terrain.scale, WHITE);
+		DrawModel(engine.Sphere, {0, 0, 0}, 1, WHITE);
 		DrawModel(engine.cube, {20, 0, 0}, 1, WHITE);
 		DrawModel(engine.cube, {40, 0, 0}, 1, WHITE);
 		DrawModel(engine.cube, {0, 0, 20}, 1, WHITE);
