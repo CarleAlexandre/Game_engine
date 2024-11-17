@@ -79,6 +79,7 @@ typedef struct s_gbuffer{
 	unsigned int normalTexture;
 	unsigned int albedoSpecTexture;
 	unsigned int depthRenderbuffer;
+	unsigned int zTexture;
 }	gbuffer_t;
 
 typedef enum {
@@ -86,6 +87,7 @@ typedef enum {
 	DEFERRED_NORMAL,
 	DEFERRED_ALBEDO,
 	DEFERRED_SHADING,
+	DEFERRED_Z,
 } deferred_mode;
  
 typedef enum {
@@ -99,6 +101,7 @@ typedef struct s_engine {
 	Shader deffered_shader;
 	gbuffer_t gbuffer;
 	Camera3D camera;
+	RenderTexture2D fbo;
 	deferred_mode mode;
 	Model cube;
 	light_t lights[MAX_LIGHTS];

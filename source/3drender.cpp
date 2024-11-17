@@ -46,17 +46,26 @@ void UpdateLightValues(Shader shader, light_t light) {
     SetShaderValue(shader, light.colorLoc, color, SHADER_UNIFORM_VEC4);
 }
 
+void frustum_culling(level_t &level, Camera3D camera) {
+	
+}
+
+void view_culling(level_t &level, Camera3D) {
+	
+}
+
 void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 	float camera_pos[3] = {engine.camera.position.x, engine.camera.position.y, engine.camera.position.z};
 	SetShaderValue(engine.deffered_shader, engine.deffered_shader.locs[SHADER_LOC_VECTOR_VIEW], camera_pos, SHADER_UNIFORM_VEC3);
 
-	int screen_height = GetScreenHeight(), screen_width = GetScreenWidth() ;
+	int screen_height = GetScreenHeight(), screen_width = GetScreenWidth();
 	for (int i = 0; i < MAX_LIGHTS; i++) {
 		engine.lights[i].position = Vector3RotateByAxisAngle(engine.lights[i].position, {0, 1, 0}, PI / 360);
 		UpdateLightValues(engine.deffered_shader, engine.lights[i]);
 	}
+
 	BeginDrawing();
-	ClearBackground(RAYWHITE);
+	ClearBackground(BLACK);
 	rlEnableFramebuffer(engine.gbuffer.framebuffer);
 	rlClearScreenBuffers();
 	rlDisableColorBlend();
@@ -78,13 +87,14 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 			BeginMode3D(engine.camera);
 			rlDisableColorBlend();
 			rlEnableShader(engine.deffered_shader.id);
-			// Activate our g-buffer textures
 			rlActiveTextureSlot(0);
 			rlEnableTexture(engine.gbuffer.positionTexture);
 			rlActiveTextureSlot(1);
 			rlEnableTexture(engine.gbuffer.normalTexture);
 			rlActiveTextureSlot(2);
 			rlEnableTexture(engine.gbuffer.albedoSpecTexture);
+			rlActiveTextureSlot(3);
+			rlEnableTexture(engine.gbuffer.zTexture);
 			rlLoadDrawQuad();
 			rlDisableShader();
 			rlEnableColorBlend();
@@ -92,10 +102,9 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 
 			glBindFramebuffer(RL_READ_FRAMEBUFFER, engine.gbuffer.framebuffer);
 			glBindFramebuffer(RL_DRAW_FRAMEBUFFER, 0);
-			rlBlitFramebuffer(0, 0, screen_width, screen_height, 0, 0, screen_width, screen_height, 0x00000100);    // GL_DEPTH_BUFFER_BIT
+			rlBlitFramebuffer(0, 0, screen_width, screen_height, 0, 0, screen_width, screen_height, GL_DEPTH_BUFFER_BIT);
 			rlDisableFramebuffer();
 
-			// forward rendering
 			BeginMode3D(engine.camera);
 			rlEnableShader(rlGetShaderIdDefault());
 			for (auto span: engine.lights) {
@@ -135,6 +144,16 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 			}, (Rectangle) { 0, 0, (float)screen_width, (float)-screen_height }, Vector2Zero(), WHITE);
 
 			DrawText("ALBEDO TEXTURE", 10, screen_height - 30, 20, DARKGREEN);
+			break;
+		}
+		case (DEFERRED_Z): {
+			DrawTextureRec((Texture2D){
+			.id = engine.gbuffer.zTexture,
+			.width = screen_width,
+			.height = screen_height,
+			}, (Rectangle) { 0, 0, (float)screen_width, (float)-screen_height }, Vector2Zero(), WHITE);
+
+			DrawText("Z TEXTURE", 10, screen_height - 30, 20, DARKGREEN);
 			break;
 		}
 		default:break;
