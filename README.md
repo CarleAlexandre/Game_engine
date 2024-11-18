@@ -8,6 +8,7 @@
 
 ## Graphical Pipeline
 	deffered rendering
+	postprocessing
 
 ## Sound
 

@@ -12,4 +12,6 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void));
 
 void update_input(engine_t &engine);
 
+void sv_update_player(Camera3D &camera, level_t level, sv_player_t player);
+
 #endif

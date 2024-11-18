@@ -71,6 +71,10 @@
 		"text_encoding": "cpp",
 		"iostream": "cpp",
 		"istream": "cpp",
-		"cinttypes": "cpp"
+		"cinttypes": "cpp",
+		"ratio": "cpp",
+		"semaphore": "cpp",
+		"stop_token": "cpp",
+		"thread": "cpp"
 	}
 }

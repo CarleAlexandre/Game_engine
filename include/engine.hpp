@@ -20,12 +20,17 @@ typedef enum {
 
 typedef struct s_player {
 	Vector3 pos;
+	BoundingBox bound = {
+		.min = {-0.5, 0, -0.5},
+		.max = {0.5, 2, 0.5}
+	};
 }	player_t;
 
 typedef struct s_object {
 	Vector3 pos;
 	float scale;
 	int type;
+	BoundingBox bound;
 }	object_t;
 
 typedef struct s_item {
@@ -35,13 +40,15 @@ typedef struct s_item {
 typedef struct s_entity {
 	Vector3 pos;
 	int size;
-	int layer ;
+	int layer;
+	BoundingBox bound;
 }	entity_t;
 
 typedef struct s_wall {
 	Vector3 p1;
 	Vector3 p2;
 	int layer;
+	BoundingBox bound;
 }	wall_t;
 
 typedef struct s_light {
@@ -65,6 +72,7 @@ typedef struct s_terrain {
 	Model model;
 	Vector3 pos;
 	float scale;
+	BoundingBox bound;
 }	terrain_t;
 
 typedef struct s_level {
@@ -95,6 +103,14 @@ typedef enum {
 	DIRECTIONNAL_LIGHT,
 }	light_type;
 
+typedef struct sv_player_s {
+	Vector3 pos;
+	BoundingBox bound = {
+		.min = {-0.5, 0, -0.5},
+		.max = {0.5, 2, 0.5}
+	};
+}	sv_player_t;
+
 typedef struct s_engine {
 	Shader posprocess;
 	Shader gbuffer_shader;
@@ -106,11 +122,7 @@ typedef struct s_engine {
 	Model cube;
 	Model Sphere;
 	light_t lights[MAX_LIGHTS];
+	sv_player_t player;
 }	engine_t;
-
-typedef struct sv_player_s {
-	Vector3 pos;
-
-}	sv_player_t;
 
 #endif
