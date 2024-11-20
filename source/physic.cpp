@@ -24,8 +24,18 @@ bool point_intersect(Vector3 point, BoundingBox box) {
 		point.z <= box.max.z);
 }
 
+Vector3 get_vector_intersect(BoundingBox a, BoundingBox b) {
+	Vector3 vec;
+
+	return (vec);
+}
+
+//down collision,
+//up collision
+//forward, backward, left, rigth
 void collider(level_t level, sv_player_t player) {
 	if (bound_intersect(level.terrain.bound, player.bound)) {
+		
 	}
 	for (auto obj : level.objs) {
 		if (bound_intersect(player.bound, obj.bound)) {
