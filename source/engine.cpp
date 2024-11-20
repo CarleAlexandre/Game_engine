@@ -4,7 +4,7 @@
 static gbuffer_t loadGbuffer(int width, int height, Shader deffered_shader) {
 	gbuffer_t buffer = {0};
 
-	buffer.framebuffer = rlLoadFramebuffer(width, height);
+	buffer.framebuffer = rlLoadFramebuffer();
 	if (!buffer.framebuffer) {
 		TraceLog(LOG_WARNING, "failed to create framebuffer");
 		exit(1);

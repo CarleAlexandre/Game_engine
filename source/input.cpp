@@ -29,7 +29,11 @@ void update_input(engine_t &engine) {
 		i%= 5;
 		engine.mode = (deferred_mode)i; 
 	}
-	// CameraYaw(&engine.camera, delta.x * DEG2RAD * 0.2, false);
-	// CameraPitch(&engine.camera, -delta.y * DEG2RAD * 0.2, true, false, false);
+	if (IsKeyPressed(KEY_E)) {
+
+	}
+	if (IsKeyPressed(KEY_TAB)) {
+		engine.player.show_inventory = !engine.player.show_inventory;
+	}
 	UpdateCameraPro(&engine.camera, step, {(float)(delta.x * 0.2), (float)(delta.y * 0.2), 0}, 0);
 }

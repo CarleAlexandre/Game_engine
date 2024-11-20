@@ -14,6 +14,7 @@ bool bound_intersect(BoundingBox a, BoundingBox b) {
 		a.min.z <= b.max.z &&
 		a.max.z >= b.min.z);
 }
+
 bool point_intersect(Vector3 point, BoundingBox box) {
 	return (point.x >= box.min.x &&
 		point.x <= box.max.x &&
@@ -24,9 +25,7 @@ bool point_intersect(Vector3 point, BoundingBox box) {
 }
 
 void collider(level_t level, sv_player_t player) {
-
 	if (bound_intersect(level.terrain.bound, player.bound)) {
-
 	}
 	for (auto obj : level.objs) {
 		if (bound_intersect(player.bound, obj.bound)) {

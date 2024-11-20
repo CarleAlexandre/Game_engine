@@ -72,10 +72,9 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 	BeginMode3D(engine.camera);
 	rlEnableShader(engine.gbuffer_shader.id);
 		DrawModel(level.terrain.model, level.terrain.pos, level.terrain.scale, WHITE);
-		DrawModel(engine.Sphere, {20, 0, 0}, 1, WHITE);
-		DrawModel(engine.cube, {40, 0, 0}, 1, WHITE);
-		DrawModel(engine.cube, {0, 0, 20}, 1, WHITE);
-		DrawModel(engine.cube, {0, 0, 40}, 1, WHITE);
+		for (auto span : level.objs) {
+			DrawModel(engine.models[span.type], span.pos, span.scale, WHITE);
+		}
 	rlDisableShader();
 	EndMode3D();
 	rlEnableColorBlend();
@@ -110,10 +109,14 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 			for (auto span: engine.lights) {
 				DrawSphere(span.position, 1, span.color);
 			}
+			DrawBoundingBox(level.terrain.bound, BLUE);
 			DrawBoundingBox(engine.player.bound, RED);
 			rlDisableShader();
 			EndMode3D();
 
+			if (engine.player.show_inventory) {
+				draw_inventory(std::vector<item_t>());
+			}
 			DrawText("FINAL RESULT", 10, screen_height - 30, 20, DARKGREEN);
 			break;
 		}

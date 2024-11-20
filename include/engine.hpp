@@ -109,6 +109,7 @@ typedef struct sv_player_s {
 		.min = {-0.5, 0, -0.5},
 		.max = {0.5, 2, 0.5}
 	};
+	bool show_inventory = false;
 }	sv_player_t;
 
 typedef struct s_engine {
@@ -123,6 +124,10 @@ typedef struct s_engine {
 	Model Sphere;
 	light_t lights[MAX_LIGHTS];
 	sv_player_t player;
+	std::vector<Model> models;
+	std::vector<ModelAnimation> animation;
 }	engine_t;
+
+typedef std::vector<item_t> inventory_t;
 
 #endif

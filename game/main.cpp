@@ -11,10 +11,11 @@ int main(void) {
 	level_t level = {0};
 
 	HideCursor();
-	level.terrain.model = LoadModelFromMesh(GenMeshPlane(100, 100, 100, 100));
+	level.terrain.model = LoadModelFromMesh(GenMeshHeightmap(LoadImage("assets/heightmap/snowdon.png"), {1000, 100, 1000}));
 	level.terrain.scale = 1;
-	level.terrain.pos = {-10, -5, -10};
+	level.terrain.pos = {0, 0, 0};
 	level.terrain.model.materials[0].shader = engine.gbuffer_shader;
+	level.terrain.bound = GetModelBoundingBox(level.terrain.model);
 
 	while (!WindowShouldClose()) {
 		update_input(engine);
