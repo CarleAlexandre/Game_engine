@@ -31,6 +31,7 @@ typedef struct s_object {
 	float scale;
 	int type;
 	BoundingBox bound;
+	bool render = false;
 }	object_t;
 
 typedef struct s_item {
