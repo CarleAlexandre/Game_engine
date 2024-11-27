@@ -17,8 +17,10 @@ void raycaster(Camera3D camera, level_t level) {
 		for (float x = 0; x < width; x++) {
 			Ray ray = GetScreenToWorldRay({x, y}, camera);
 			for (auto &span : level.objs) {
-				if (GetRayCollisionBox(ray, span.bound).hit) {
+				RayCollision collision = GetRayCollisionBox(ray, span.bound);
+				if (collision.hit) {
 					span.render = true;
+					break;
 				}
 			}
 		}
