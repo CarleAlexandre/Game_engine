@@ -7,12 +7,18 @@ struct Node {
 class SparseVoxelOctree {
 	private:
 
+	Node *root;
+
 	public:
 
-	SparseVoxelOctree() {
+	bool insert(char pos, float size) {
 
 	}
-	~SparseVoxelOctree() {
 
+	SparseVoxelOctree() {
+		root = new Node;
+	}
+	~SparseVoxelOctree() {
+		delete root;
 	}
 };
