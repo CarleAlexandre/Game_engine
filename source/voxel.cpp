@@ -3,9 +3,17 @@
 
 #define GRAY_VALUE(c) ((float)(c.r + c.g + c.b)/3.0f)
 
-void lod_voxel(Vector3 pos) {
+void lod_voxel(Vector3 pos_player, Vector3 pos_obj) {
+	float tmp = Vector3Distance(pos_obj, pos_player);
+	if (tmp < 32) {
 
+	}
+	else {
+
+	}
 }
+
+void renderface(){}
 
 void heightmap_voxel(Image heightmap) {
 	const int mapX = heightmap.width;

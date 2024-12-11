@@ -162,5 +162,6 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 		}
 		default:break;
 	};
+	draw_ui(engine.textures, 0, engine.player);
 	EndDrawing();
 }

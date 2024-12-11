@@ -14,4 +14,6 @@ void update_input(engine_t &engine);
 
 void draw_inventory(inventory_t inventory);
 
+void draw_ui(std::vector<Texture2D> texture, int TEXTURE_CROSSAIR, sv_player_t player);
+
 #endif

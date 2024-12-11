@@ -17,6 +17,9 @@ int main(void) {
 	level.terrain.model.materials[0].shader = engine.gbuffer_shader;
 	level.terrain.bound = GetModelBoundingBox(level.terrain.model);
 
+	engine.player.stats.max_health = 150;
+	engine.player.stats.health = 100;
+
 	while (!WindowShouldClose()) {
 		update_input(engine);
 		// engine.player.pos = camera.position;

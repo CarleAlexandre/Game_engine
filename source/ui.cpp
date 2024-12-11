@@ -15,3 +15,11 @@ void draw_inventory(inventory_t inventory) {
 	BeginScissorMode(view.x + slider.x, view.y + slider.y, view.width, view.height);
 	EndScissorMode();
 }
+
+void draw_ui(std::vector<Texture2D> texture, int TEXTURE_CROSSAIR, sv_player_t player) {
+	if (player.stats.health < player.stats.max_health) {
+		DrawRectangle(30 + player.stats.health, 100, (player.stats.max_health - player.stats.health), 10, GRAY);
+	}
+	DrawRectangle(30, 100, player.stats.health, 10, RED);
+	//DrawTexture(texture[TEXTURE_CROSSAIR], GetScreenWidth(), GetScreenHeight(), WHITE);
+}

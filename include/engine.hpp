@@ -18,6 +18,11 @@ typedef enum {
     LIGHT_POINT
 } LightType;
 
+typedef struct s_stats {
+	int health;
+	int max_health;
+}	stats_t;
+
 typedef struct s_player {
 	Vector3 pos;
 	BoundingBox bound = {
@@ -110,6 +115,7 @@ typedef struct sv_player_s {
 		.min = {-0.5, 0, -0.5},
 		.max = {0.5, 2, 0.5}
 	};
+	stats_t stats;
 	bool show_inventory = false;
 }	sv_player_t;
 
@@ -127,6 +133,7 @@ typedef struct s_engine {
 	sv_player_t player;
 	std::vector<Model> models;
 	std::vector<ModelAnimation> animation;
+	std::vector<Texture2D> textures;
 }	engine_t;
 
 typedef std::vector<item_t> inventory_t;
