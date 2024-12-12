@@ -109,6 +109,11 @@ typedef enum {
 	DIRECTIONNAL_LIGHT,
 }	light_type;
 
+typedef struct s_projectile {
+	Ray shot;
+	float mass;
+}	projectile_t;
+
 typedef struct sv_player_s {
 	Vector3 pos;
 	BoundingBox bound = {

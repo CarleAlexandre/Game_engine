@@ -50,7 +50,7 @@ void frustum_culling(level_t &level, Camera3D camera) {
 	
 }
 
-void view_culling(level_t &level, Camera3D) {
+void view_culling(level_t &level, Camera3D camera) {
 	
 }
 
