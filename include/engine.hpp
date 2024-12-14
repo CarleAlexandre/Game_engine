@@ -112,6 +112,7 @@ typedef enum {
 typedef struct s_projectile {
 	Ray shot;
 	float mass;
+	int lifespan;
 }	projectile_t;
 
 typedef struct sv_player_s {

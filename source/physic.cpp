@@ -44,7 +44,7 @@ void collider(level_t level, sv_player_t player) {
 	}
 } 
 
-void shoot(Camera3D camera) {
-	
-	Ray shot = GetScreenToWorldRay({(float)(GetScreenWidth() * 0.5), (float)(GetScreenWidth() * 0.5)}, camera);
+projectile_t shoot(Camera3D camera) {
+	projectile_t bullet;
+	bullet.shot = GetScreenToWorldRay({(float)(GetScreenWidth() * 0.5), (float)(GetScreenWidth() * 0.5)}, camera);
 }
