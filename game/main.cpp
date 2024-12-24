@@ -42,3 +42,4 @@ int main(void) {
 	std::cout << "INFO: time to launch : " << launch_time * 1000 << " ms\n";
 	std::cout << "INFO: time to close : " <<  GetTime() << " s\n";
 }
+  
