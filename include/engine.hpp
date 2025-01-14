@@ -61,7 +61,8 @@ typedef struct s_object {
 }	object_t;
 
 typedef struct s_item {
-
+	int id;
+	int size;
 }	item_t;
 
 typedef std::vector<item_t> inventory_t;
