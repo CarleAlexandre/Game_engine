@@ -53,3 +53,4 @@ void raycaster(Camera3D camera, level_t level) {
 		}
 	}
 }
+

@@ -115,7 +115,7 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 			EndMode3D();
 
 			if (engine.player.show_inventory) {
-				draw_inventory(std::vector<item_t>());
+				draw_inventory(inventory_t());
 			}
 			DrawText("FINAL RESULT", 10, screen_height - 30, 20, DARKGREEN);
 			break;

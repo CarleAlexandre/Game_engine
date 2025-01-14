@@ -13,10 +13,31 @@
 #define RL_READ_FRAMEBUFFER                     0x8CA8      // GL_READ_FRAMEBUFFER
 #define RL_DRAW_FRAMEBUFFER                     0x8CA9      // GL_DRAW_FRAMEBUFFER
 
+/* 
+	TYPEDEF
+*/
+
 typedef enum {
     LIGHT_DIRECTIONAL = 0,
     LIGHT_POINT
 } LightType;
+
+typedef enum {
+	DEFERRED_POSITION,
+	DEFERRED_NORMAL,
+	DEFERRED_ALBEDO,
+	DEFERRED_SHADING,
+	DEFERRED_Z,
+} deferred_mode;
+ 
+typedef enum {
+	GLOBAL_LIGHT,
+	DIRECTIONNAL_LIGHT,
+}	light_type;
+
+/* 
+	DATA STRUCT
+*/
 
 typedef struct s_stats {
 	int health;
@@ -43,19 +64,20 @@ typedef struct s_item {
 
 }	item_t;
 
+typedef std::vector<item_t> inventory_t;
+
+typedef struct s_projectile {
+	Ray shot;
+	float mass;
+	int lifespan;
+}	projectile_t;
+
 typedef struct s_entity {
 	Vector3 pos;
 	int size;
 	int layer;
 	BoundingBox bound;
 }	entity_t;
-
-typedef struct s_wall {
-	Vector3 p1;
-	Vector3 p2;
-	int layer;
-	BoundingBox bound;
-}	wall_t;
 
 typedef struct s_light {
 	int type;
@@ -87,34 +109,6 @@ typedef struct s_level {
 	std::vector<light_t> lights;
 }	level_t;
 
-typedef struct s_gbuffer{
-	unsigned int framebuffer;
-	unsigned int positionTexture;
-	unsigned int normalTexture;
-	unsigned int albedoSpecTexture;
-	unsigned int depthRenderbuffer;
-	unsigned int zTexture;
-}	gbuffer_t;
-
-typedef enum {
-	DEFERRED_POSITION,
-	DEFERRED_NORMAL,
-	DEFERRED_ALBEDO,
-	DEFERRED_SHADING,
-	DEFERRED_Z,
-} deferred_mode;
- 
-typedef enum {
-	GLOBAL_LIGHT,
-	DIRECTIONNAL_LIGHT,
-}	light_type;
-
-typedef struct s_projectile {
-	Ray shot;
-	float mass;
-	int lifespan;
-}	projectile_t;
-
 typedef struct sv_player_s {
 	Vector3 pos;
 	BoundingBox bound = {
@@ -124,6 +118,15 @@ typedef struct sv_player_s {
 	stats_t stats;
 	bool show_inventory = false;
 }	sv_player_t;
+
+typedef struct s_gbuffer{
+	unsigned int framebuffer;
+	unsigned int positionTexture;
+	unsigned int normalTexture;
+	unsigned int albedoSpecTexture;
+	unsigned int depthRenderbuffer;
+	unsigned int zTexture;
+}	gbuffer_t;
 
 typedef struct s_engine {
 	Shader posprocess;
@@ -141,7 +144,5 @@ typedef struct s_engine {
 	std::vector<ModelAnimation> animation;
 	std::vector<Texture2D> textures;
 }	engine_t;
-
-typedef std::vector<item_t> inventory_t;
 
 #endif
