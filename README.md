@@ -33,3 +33,9 @@
 	discret non euclidian voxel element;
 
 	make the player discover a little bit of the world by himself
+
+	Procedural Dungeon with mob spawn
+
+	Wave mod in certain handcrafted dungeon
+
+	

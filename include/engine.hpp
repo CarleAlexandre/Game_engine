@@ -39,6 +39,14 @@ typedef enum {
 	DATA STRUCT
 */
 
+typedef enum {
+
+}	item_identifier;
+
+typedef enum {
+
+}	model_identifier;
+
 typedef struct s_stats {
 	int health;
 	int max_health;
@@ -58,6 +66,7 @@ typedef struct s_object {
 	int type;
 	BoundingBox bound;
 	bool render = false;
+	int model_id;
 }	object_t;
 
 typedef struct s_item {
@@ -70,6 +79,7 @@ typedef std::vector<item_t> inventory_t;
 typedef struct s_projectile {
 	Ray shot;
 	float mass;
+	int model_id;
 	int lifespan;
 }	projectile_t;
 
@@ -77,6 +87,7 @@ typedef struct s_entity {
 	Vector3 pos;
 	int size;
 	int layer;
+	int model_id;
 	BoundingBox bound;
 }	entity_t;
 
@@ -105,7 +116,7 @@ typedef struct s_terrain {
 }	terrain_t;
 
 typedef struct s_level {
-	terrain_t terrain;
+	terrain_t terrain;//need to delete this
 	std::vector<object_t> objs;
 	std::vector<light_t> lights;
 }	level_t;
