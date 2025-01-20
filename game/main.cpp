@@ -6,7 +6,7 @@
 int main(void) {
 
 
-	InitWindow(720, 480, "Game");
+	InitWindow(1920, 1080, "Game");
 
 	engine_t engine = {0};
 	engine = init_engine();

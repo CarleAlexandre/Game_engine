@@ -54,6 +54,10 @@ void view_culling(level_t &level, Camera3D camera) {
 	
 }
 
+void level_rendering() {
+	
+}
+
 void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 	float camera_pos[3] = {engine.camera.position.x, engine.camera.position.y, engine.camera.position.z};
 	SetShaderValue(engine.deffered_shader, engine.deffered_shader.locs[SHADER_LOC_VECTOR_VIEW], camera_pos, SHADER_UNIFORM_VEC3);
@@ -114,9 +118,6 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 			rlDisableShader();
 			EndMode3D();
 
-			if (engine.player.show_inventory) {
-				draw_inventory(inventory_t());
-			}
 			DrawText("FINAL RESULT", 10, screen_height - 30, 20, DARKGREEN);
 			break;
 		}

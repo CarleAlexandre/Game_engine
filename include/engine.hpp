@@ -157,9 +157,11 @@ typedef struct s_item {
 
 typedef std::vector<item_t> inventory_t;
 
-typedef struct {
-	
-};
+typedef struct s_tool_bar{
+	int current_item;
+	bool gotonext;
+	bool gotoprev;
+}	tool_bar_t;
 
 typedef struct s_projectile {
 	Ray shot;
@@ -184,6 +186,8 @@ typedef struct sv_player_s {
 	};
 	stats_t stats;
 	bool show_inventory = false;
+	tool_bar_t toolbar;
+	inventory_t inventory;
 	unsigned long long uuid;
 }	sv_player_t;
 

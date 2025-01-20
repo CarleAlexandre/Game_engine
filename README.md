@@ -38,4 +38,11 @@
 
 	Wave mod in certain handcrafted dungeon
 
+	sql >> nosql;
+	mongodb; atlas;
 	
+	elastic search
+
+	collection pour reduire base de donnee;
+
+	Optimisation des index;g

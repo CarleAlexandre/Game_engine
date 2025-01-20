@@ -1,5 +1,4 @@
 #include <engine.hpp>
-#include <sql.h>
 
 void generate_player_id() {
 
