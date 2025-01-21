@@ -46,16 +46,11 @@ void UpdateLightValues(Shader shader, light_t light) {
     SetShaderValue(shader, light.colorLoc, color, SHADER_UNIFORM_VEC4);
 }
 
-void frustum_culling(level_t &level, Camera3D camera) {
-	
-}
-
 void view_culling(level_t &level, Camera3D camera) {
-	
 }
 
-void level_rendering() {
-	
+void level_rendering(level_t &level, Camera3D camera) {
+	view_culling(level, camera);
 }
 
 void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
