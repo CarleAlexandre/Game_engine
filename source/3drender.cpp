@@ -70,10 +70,14 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 	rlDisableColorBlend();
 	BeginMode3D(engine.camera);
 	rlEnableShader(engine.gbuffer_shader.id);
+
+
 		DrawModel(level.terrain.model, level.terrain.pos, level.terrain.scale, WHITE);
 		for (auto span : level.objs) {
 			DrawModel(engine.models[span.type], span.pos, span.scale, WHITE);
 		}
+
+
 	rlDisableShader();
 	EndMode3D();
 	rlEnableColorBlend();
@@ -105,11 +109,15 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 
 			BeginMode3D(engine.camera);
 			rlEnableShader(rlGetShaderIdDefault());
+
+
 			for (auto span: engine.lights) {
 				DrawSphere(span.position, 1, span.color);
 			}
 			DrawBoundingBox(level.terrain.bound, BLUE);
 			DrawBoundingBox(engine.player.bound, RED);
+
+
 			rlDisableShader();
 			EndMode3D();
 
