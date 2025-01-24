@@ -9,9 +9,15 @@
 #include <raymath.h>
 #include <rcamera.h>
 
+/*
+	DEFINE
+*/
+
 #define MAX_LIGHTS  4
 #define RL_READ_FRAMEBUFFER                     0x8CA8      // GL_READ_FRAMEBUFFER
 #define RL_DRAW_FRAMEBUFFER                     0x8CA9      // GL_DRAW_FRAMEBUFFER
+
+#define GRAY_VALUE(c) ((float)(c.r + c.g + c.b)/3.0f)
 
 #define ITEM_MAGIC 
 
@@ -36,10 +42,6 @@ typedef enum {
 	GLOBAL_LIGHT,
 	DIRECTIONNAL_LIGHT,
 }	light_type;
-
-/* 
-	DATA STRUCT
-*/
 
 typedef enum {
 
@@ -114,6 +116,10 @@ typedef enum {
 	item_type,
 	item_stats,
 } token_type_e;
+
+/* 
+	DATA STRUCT
+*/
 
 typedef struct s_token {
 	int id;
@@ -216,6 +222,12 @@ typedef struct s_terrain {
 	float scale;
 	BoundingBox bound;
 }	terrain_t;
+
+typedef struct s_chunk {
+
+}	chunk_t;
+//chunk is only used for dungeon generation
+
 
 typedef struct s_level {
 	terrain_t terrain;//need to delete this

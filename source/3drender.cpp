@@ -46,6 +46,35 @@ void UpdateLightValues(Shader shader, light_t light) {
     SetShaderValue(shader, light.colorLoc, color, SHADER_UNIFORM_VEC4);
 }
 
+void renderface(){}
+
+void lod_voxel(Vector3 pos_player, Vector3 pos_obj) {
+	float tmp = Vector3Distance(pos_obj, pos_player);
+	if (tmp < 32) {
+
+	}
+	else {
+
+	}
+}
+
+void raycaster(Camera3D camera, level_t level) {
+	int width = GetScreenWidth(), height = GetScreenHeight();
+	for (float y = 0; y < height; y++) {
+		for (float x = 0; x < width; x++) {
+			Ray ray = GetScreenToWorldRay({x, y}, camera);
+			for (auto &span : level.objs) {
+				RayCollision collision = GetRayCollisionBox(ray, span.bound);
+				if (collision.hit) {
+					span.render = true;
+					break;
+				}
+			}
+		}
+	}
+}
+
+
 void view_culling(level_t &level, Camera3D camera) {
 }
 
