@@ -46,7 +46,9 @@ void UpdateLightValues(Shader shader, light_t light) {
     SetShaderValue(shader, light.colorLoc, color, SHADER_UNIFORM_VEC4);
 }
 
-void renderface(){}
+void renderface() {
+	
+}
 
 void lod_voxel(Vector3 pos_player, Vector3 pos_obj) {
 	float tmp = Vector3Distance(pos_obj, pos_player);

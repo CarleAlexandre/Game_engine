@@ -4,8 +4,6 @@
 #include <iostream>
 
 int main(void) {
-
-
 	InitWindow(1920, 1080, "Game");
 
 	engine_t engine = {0};
@@ -16,8 +14,7 @@ int main(void) {
 	//load all obj,
 	//Load all texture,
 	//Load all model,
-	//Load all osund,
-	//Load all other asset
+	//Load all sound,
 
 	HideCursor();
 	level.terrain.model = LoadModelFromMesh(GenMeshHeightmap(LoadImage("assets/heightmap/snowdon.png"), {1000, 100, 1000}));
