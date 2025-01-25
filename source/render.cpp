@@ -47,7 +47,7 @@ void UpdateLightValues(Shader shader, light_t light) {
 }
 
 void renderface() {
-	
+
 }
 
 void lod_voxel(Vector3 pos_player, Vector3 pos_obj) {
@@ -102,12 +102,10 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 	BeginMode3D(engine.camera);
 	rlEnableShader(engine.gbuffer_shader.id);
 
-
 		DrawModel(level.terrain.model, level.terrain.pos, level.terrain.scale, WHITE);
 		for (auto span : level.objs) {
 			DrawModel(engine.models[span.type], span.pos, span.scale, WHITE);
 		}
-
 
 	rlDisableShader();
 	EndMode3D();

@@ -24,5 +24,3 @@ void add_map_obj() {
 void generate_dungeon() {
 	
 }
-
-
