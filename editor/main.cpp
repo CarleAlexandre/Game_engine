@@ -61,7 +61,7 @@ int	main(void) {
 		.zoom = 0.8,
 	};
 
-	GuiLoadStyle("include/style_terminal.rgs");
+	GuiLoadStyle("include/style_lavanda.rgs");
 
 	fbo = LoadRenderTexture(1590, 960);
 	while (!WindowShouldClose()) {
