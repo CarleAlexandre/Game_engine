@@ -117,6 +117,14 @@ typedef enum {
 	item_stats,
 } token_type_e;
 
+typedef enum {
+	error_dummy = 0,
+	error_file_not_found = 1,
+	error_file_empty = 2,
+	error_file_exist = 3,
+	error_file_corrupted = 4,
+} error_e;
+
 /* 
 	DATA STRUCT
 */
