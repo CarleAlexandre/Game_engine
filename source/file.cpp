@@ -1,22 +1,25 @@
 #include <engine.hpp>
 
-int	check_file(char *magic, const char *filename) {
-	if (!FileExists(filename))
-		return (-1);
-	int filesize = 0;
-	unsigned char *data = LoadFileData(filename, &filesize);
+file_t	*check_file(char *magic, const char *filename) {
+	file_t *file = (file_t *)malloc(sizeof(file_t));
 
-	if (TextIsEqual("item_UwU", (char *)data) == true) {
-		
+	if (!FileExists(filename))
+		return (0x00);
+
+	file->size = 0;
+	file->data = LoadFileData(filename, &file->size);
+
+	if (TextIsEqual("item_UwU", (char *)file->data) == true) {
+		file->type = item_filetype;
 	}
-	if (TextIsEqual("objt_UwU", (char *)data) == true) {
-		
+	if (TextIsEqual("objt_UwU", (char *)file->data) == true) {
+		file->type = object_filetype;
 	}
-	if (TextIsEqual("worldUwU", (char *)data) == true) {
-		
+	if (TextIsEqual("worldUwU", (char *)file->data) == true) {
+		file->type = world_filetype;
 	}
-	if (TextIsEqual("play_UwU", (char *)data) == true) {
-		
+	if (TextIsEqual("play_UwU", (char *)file->data) == true) {
+		file->type = player_filetype;
 	}
 	return (0);
 }

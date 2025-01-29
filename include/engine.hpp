@@ -125,6 +125,13 @@ typedef enum {
 	error_file_corrupted = 4,
 } error_e;
 
+typedef enum {
+	item_filetype,
+	object_filetype,
+	world_filetype,
+	player_filetype,
+} filetype_e;
+
 /* 
 	DATA STRUCT
 */
@@ -133,6 +140,12 @@ typedef struct s_token {
 	int id;
 	char *data;
 } t_token;
+
+typedef	struct s_file {
+	unsigned char	*data;
+	int		size;
+	filetype_e	type;
+}	file_t;
 
 typedef struct s_stats {
 	int health;
