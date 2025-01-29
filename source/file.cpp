@@ -6,7 +6,18 @@ int	check_file(char *magic, const char *filename) {
 	int filesize = 0;
 	unsigned char *data = LoadFileData(filename, &filesize);
 
-	
+	if (TextIsEqual("item_UwU", (char *)data) == true) {
+		
+	}
+	if (TextIsEqual("objt_UwU", (char *)data) == true) {
+		
+	}
+	if (TextIsEqual("worldUwU", (char *)data) == true) {
+		
+	}
+	if (TextIsEqual("play_UwU", (char *)data) == true) {
+		
+	}
 	return (0);
 }
 
