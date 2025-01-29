@@ -78,6 +78,7 @@ void raycaster(Camera3D camera, level_t level) {
 
 
 void view_culling(level_t &level, Camera3D camera) {
+
 }
 
 void level_rendering(level_t &level, Camera3D camera) {

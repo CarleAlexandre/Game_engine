@@ -232,7 +232,7 @@ typedef struct s_terrain {
 }	terrain_t;
 
 typedef struct s_chunk {
-
+	int *blocks;// 16 * 16 * 16;
 }	chunk_t;
 //chunk is only used for dungeon generation
 

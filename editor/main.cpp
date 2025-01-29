@@ -1,5 +1,6 @@
 
 #include <engine.hpp>
+#include <prototype.hpp>
 #define RAYGUI_IMPLEMENTATION
 #include <raygui.h>
 
@@ -46,6 +47,12 @@ void	map_editor() {
 }
 
 void	item_editor() {
+
+	// Name
+	// type
+	// max_stack
+	
+	// description
 
 }
 
