@@ -1,13 +1,13 @@
 #ifndef ENGINE_HPP
 # define ENGINE_HPP
 
-#include <vector>
 #define GLSL_VERSION 330
 #include <raylib.h>
 #include <glad.h>
 #include <rlgl.h>
 #include <raymath.h>
 #include <rcamera.h>
+#include <stdlib.h>
 
 /*
 	DEFINE
@@ -44,11 +44,11 @@ typedef enum {
 }	light_type;
 
 typedef enum {
-
+	item_est,
 }	item_identifier;
 
 typedef enum {
-
+	model_test,
 }	model_identifier;
 
 typedef enum {
@@ -154,10 +154,7 @@ typedef struct s_stats {
 
 typedef struct s_player {
 	Vector3 pos;
-	BoundingBox bound = {
-		.min = {-0.5, 0, -0.5},
-		.max = {0.5, 2, 0.5}
-	};
+	BoundingBox bound;
 }	player_t;
 
 typedef struct s_object {
@@ -165,7 +162,7 @@ typedef struct s_object {
 	float scale;
 	int type;
 	BoundingBox bound;
-	bool render = false;
+	bool render;
 	int model_id;
 }	object_t;
 
@@ -182,12 +179,19 @@ typedef struct s_item {
 	int size;
 }	item_t;
 
-typedef std::vector<item_t> inventory_t;
+typedef	struct s_inventory {
+	item_t *item;
+	unsigned int size;
+}	inventory_t;
 
 typedef struct s_tool_bar{
 	int current_item;
 	bool gotonext;
 	bool gotoprev;
+	Vector2 pos1;
+	Vector2 pos2;
+	Vector2 topos1;
+	Vector2 topos2;
 }	tool_bar_t;
 
 typedef struct s_projectile {
@@ -207,12 +211,9 @@ typedef struct s_entity {
 
 typedef struct sv_player_s {
 	Vector3 pos;
-	BoundingBox bound = {
-		.min = {-0.5, 0, -0.5},
-		.max = {0.5, 2, 0.5}
-	};
+	BoundingBox bound;
 	stats_t stats;
-	bool show_inventory = false;
+	bool show_inventory;
 	tool_bar_t toolbar;
 	inventory_t inventory;
 	unsigned long long uuid;
@@ -249,13 +250,6 @@ typedef struct s_chunk {
 }	chunk_t;
 //chunk is only used for dungeon generation
 
-
-typedef struct s_level {
-	terrain_t terrain;//need to delete this
-	std::vector<object_t> objs;
-	std::vector<light_t> lights;
-}	level_t;
-
 typedef struct s_gbuffer{
 	unsigned int framebuffer;
 	unsigned int positionTexture;
@@ -277,9 +271,6 @@ typedef struct s_engine {
 	Model Sphere;
 	light_t lights[MAX_LIGHTS];
 	sv_player_t player;
-	std::vector<Model> models;
-	std::vector<ModelAnimation> animation;
-	std::vector<Texture2D> textures;
 }	engine_t;
 
 #endif

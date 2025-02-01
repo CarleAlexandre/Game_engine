@@ -6,21 +6,21 @@ EDITOR = f_engine
 
 SERVER = server
 
-SRC += $(wildcard source/*.cpp)
+SRC += $(wildcard source/*.c)
 
-GAME_SRC += game/main.cpp
+GAME_SRC += game/main.c
 
-EDITOR_SRC += editor/main.cpp
+EDITOR_SRC += editor/main.c
 
-SERVER_SRC += server/main.cpp
+SERVER_SRC += server/main.c
 
-OBJ = $(SRC:%.cpp=%.o)
+OBJ = $(SRC:%.c=%.o)
 
-GAME_OBJ = $(GAME_SRC:%.cpp=%.o)
+GAME_OBJ = $(GAME_SRC:%.c=%.o)
 
-EDITOR_OBJ = $(EDITOR_SRC:%.cpp=%.o)
+EDITOR_OBJ = $(EDITOR_SRC:%.c=%.o)
 
-SERVER_OBJ = $(SERVER_SRC:%.cpp=%.o)
+SERVER_OBJ = $(SERVER_SRC:%.c=%.o)
 
 INCLUDE += -I include
 
@@ -28,7 +28,7 @@ BUILDDIR = build/
 
 CC = gcc
 
-CFLAGS = -std=c++20
+CFLAGS = -std=c99
 
 ifeq ($(OS), Windows_NT)
 CFLAGS += -I C:/mingw64/include -I include
@@ -55,19 +55,19 @@ $(BUILDDIR)$(SERVER) : $(SERVER_OBJ)
 	mkdir -p $(BUILDDIR)
 	$(CC) $(SERVER_OBJ) $(LIBS) -o $@ $(BUILDDIR)$(LIB)
 
-$(OBJ): %.o : %.cpp
+$(OBJ): %.o : %.c
 	$(CC) $(CFLAGS) $(LIBS) ${INCLUDE} -c $< -o $@
 
-$(GAME_OBJ): %.o : %.cpp
+$(GAME_OBJ): %.o : %.c
 	$(CC) $(CFLAGS) ${INCLUDE} -c $< -o $@
 
-$(EDITOR_OBJ): %.o : %.cpp
+$(EDITOR_OBJ): %.o : %.c
 	$(CC) $(CFLAGS) ${INCLUDE} -c $< -o $@
 
-$(SERVER_OBJ): %.o : %.cpp
+$(SERVER_OBJ): %.o : %.c
 	$(CC) $(CFLAGS) ${INCLUDE} -c $< -o $@
 
-all: $(BUILDDIR)$(LIB) $(BUILDDIR)$(GAME) $(BUILDDIR)$(EDITOR) $(BUILDDIR)$(SERVER)
+all: lib game editor server
 
 lib: $(BUILDDIR)${LIB}
 

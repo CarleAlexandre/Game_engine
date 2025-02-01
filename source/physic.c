@@ -1,4 +1,4 @@
-#include <engine.hpp>
+#include <engine.h>
 #include <raymath.h>
 
 Vector3 apply_gravity(Vector3 vel, float mass) {
@@ -33,18 +33,11 @@ Vector3 get_vector_intersect(BoundingBox a, BoundingBox b) {
 //down collision,
 //up collision
 //forward, backward, left, rigth
-void collider(level_t level, sv_player_t player) {
-	if (bound_intersect(level.terrain.bound, player.bound)) {
-		
-	}
-	for (auto obj : level.objs) {
-		if (bound_intersect(player.bound, obj.bound)) {
+void collider(sv_player_t player) {
 
-		}
-	}
 } 
 
 projectile_t shoot(Camera3D camera) {
 	projectile_t bullet;
-	bullet.shot = GetScreenToWorldRay({(float)(GetScreenWidth() * 0.5), (float)(GetScreenWidth() * 0.5)}, camera);
+	bullet.shot = GetScreenToWorldRay((Vector2){(float)(GetScreenWidth() * 0.5), (float)(GetScreenWidth() * 0.5)}, camera);
 }

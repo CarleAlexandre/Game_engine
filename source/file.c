@@ -1,4 +1,22 @@
-#include <engine.hpp>
+#include <engine.h>
+
+/*
+
+	item_header:
+	magic|number of entry|filesize|entry_size
+
+	object_header:
+	magic|number of entry|filesize|entry_size
+
+	world_header:
+	magic|number of entry|filesize|entry_size
+
+
+	player_header:
+	magic|number of entry|filesize|entry_size
+
+
+*/
 
 file_t	*check_file(char *magic, const char *filename) {
 	file_t *file = (file_t *)malloc(sizeof(file_t));
@@ -8,6 +26,8 @@ file_t	*check_file(char *magic, const char *filename) {
 
 	file->size = 0;
 	file->data = LoadFileData(filename, &file->size);
+
+	
 
 	if (TextIsEqual("item_UwU", (char *)file->data) == true) {
 		file->type = item_filetype;
@@ -21,7 +41,7 @@ file_t	*check_file(char *magic, const char *filename) {
 	if (TextIsEqual("play_UwU", (char *)file->data) == true) {
 		file->type = player_filetype;
 	}
-	return (0);
+	return (file);
 }
 
 // typedef struct s_item {
@@ -46,5 +66,10 @@ char	*format_item(item_t item) {
 }
 
 void	save_item() {
+
+}
+
+
+void	create_data_file() {
 
 }

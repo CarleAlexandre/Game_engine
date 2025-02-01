@@ -1,6 +1,6 @@
 
-#include <engine.hpp>
-#include <prototype.hpp>
+#include <engine.h>
+#include <prototype.h>
 #define RAYGUI_IMPLEMENTATION
 #include <raygui.h>
 
@@ -19,17 +19,17 @@ void	startscreen() {
 // ui
 
 void	top_bar() {
-	GuiStatusBar({0, 0, (float)GetScreenWidth(), 30}, "");
-	if (GuiDropdownBox({0, 0, 120, 30}, "map;item;obj;ui", &editor_mode, mode_enable))
+	GuiStatusBar((Rectangle){0, 0, (float)GetScreenWidth(), 30}, "");
+	if (GuiDropdownBox((Rectangle){0, 0, 120, 30}, "map;item;obj;ui", &editor_mode, mode_enable))
 		mode_enable = !mode_enable;
 }
 
 void	left_bar() {
-	GuiDummyRec({0, 30, 200, (float)GetScreenHeight() - 30}, "Debug");
+	GuiDummyRec((Rectangle){0, 30, 200, (float)GetScreenHeight() - 30}, "Debug");
 }
 
 void	right_bar() {
-	GuiDummyRec({(float)GetScreenWidth() - 200, 30, 200, (float)GetScreenHeight() - 30}, "setting");
+	GuiDummyRec((Rectangle){(float)GetScreenWidth() - 200, 30, 200, (float)GetScreenHeight() - 30}, "setting");
 }
 
 //editor mode
@@ -75,7 +75,7 @@ int	main(void) {
 	fbo = LoadRenderTexture(GetScreenWidth() - 400, GetScreenHeight() - 30);
 
 	SetTargetFPS(30);
-	EnableEventWaiting();
+	// EnableEventWaiting();
 	while (!WindowShouldClose()) {
 
 		BeginTextureMode(fbo);
@@ -104,7 +104,7 @@ int	main(void) {
 		BeginDrawing();
 			ClearBackground(BLACK);
 
-			DrawTextureRec(fbo.texture, (Rectangle){0, 0, (float)fbo.texture.width, (float)-fbo.texture.height}, {200, 30}, WHITE);
+			DrawTextureRec(fbo.texture, (Rectangle){0, 0, (float)fbo.texture.width, (float)-fbo.texture.height}, (Vector2){200, 30}, WHITE);
 
 			right_bar();
 			left_bar();

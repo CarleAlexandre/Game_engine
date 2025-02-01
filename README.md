@@ -49,3 +49,7 @@
 
 	Commerce de dofus, et le temps passer sur un craft item /fm augmente ca valeur focus et valeur des auugmentes en fonction des build
 	
+## TODO 
+
+	chunk rendering
+

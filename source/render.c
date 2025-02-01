@@ -1,4 +1,4 @@
-#include <prototype.hpp>
+#include <prototype.h>
 
 static int lightsCount = 0;
 
@@ -46,67 +46,24 @@ void UpdateLightValues(Shader shader, light_t light) {
     SetShaderValue(shader, light.colorLoc, color, SHADER_UNIFORM_VEC4);
 }
 
-void renderface() {
-
-}
-
-void lod_voxel(Vector3 pos_player, Vector3 pos_obj) {
-	float tmp = Vector3Distance(pos_obj, pos_player);
-	if (tmp < 32) {
-
-	}
-	else {
-
-	}
-}
-
-void raycaster(Camera3D camera, level_t level) {
-	int width = GetScreenWidth(), height = GetScreenHeight();
-	for (float y = 0; y < height; y++) {
-		for (float x = 0; x < width; x++) {
-			Ray ray = GetScreenToWorldRay({x, y}, camera);
-			for (auto &span : level.objs) {
-				RayCollision collision = GetRayCollisionBox(ray, span.bound);
-				if (collision.hit) {
-					span.render = true;
-					break;
-				}
-			}
-		}
-	}
-}
-
-
-void view_culling(level_t &level, Camera3D camera) {
-
-}
-
-void level_rendering(level_t &level, Camera3D camera) {
-	view_culling(level, camera);
-}
-
-void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
-	float camera_pos[3] = {engine.camera.position.x, engine.camera.position.y, engine.camera.position.z};
-	SetShaderValue(engine.deffered_shader, engine.deffered_shader.locs[SHADER_LOC_VECTOR_VIEW], camera_pos, SHADER_UNIFORM_VEC3);
+void	render(engine_t *engine) {
+	float camera_pos[3] = {engine->camera.position.x, engine->camera.position.y, engine->camera.position.z};
+	SetShaderValue(engine->deffered_shader, engine->deffered_shader.locs[SHADER_LOC_VECTOR_VIEW], camera_pos, SHADER_UNIFORM_VEC3);
 
 	int screen_height = GetScreenHeight(), screen_width = GetScreenWidth();
 	for (int i = 0; i < MAX_LIGHTS; i++) {
-		engine.lights[i].position = Vector3RotateByAxisAngle(engine.lights[i].position, {0, 1, 0}, PI / 360);
-		UpdateLightValues(engine.deffered_shader, engine.lights[i]);
+		engine->lights[i].position = Vector3RotateByAxisAngle(engine->lights[i].position, (Vector3){0, 1, 0}, PI / 360);
+		UpdateLightValues(engine->deffered_shader, engine->lights[i]);
 	}
 
 	BeginDrawing();
 	ClearBackground(BLACK);
-	rlEnableFramebuffer(engine.gbuffer.framebuffer);
+	rlEnableFramebuffer(engine->gbuffer.framebuffer);
 	rlClearScreenBuffers();
 	rlDisableColorBlend();
-	BeginMode3D(engine.camera);
-	rlEnableShader(engine.gbuffer_shader.id);
+	BeginMode3D(engine->camera);
+	rlEnableShader(engine->gbuffer_shader.id);
 
-		DrawModel(level.terrain.model, level.terrain.pos, level.terrain.scale, WHITE);
-		for (auto span : level.objs) {
-			DrawModel(engine.models[span.type], span.pos, span.scale, WHITE);
-		}
 
 	rlDisableShader();
 	EndMode3D();
@@ -114,38 +71,34 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 	rlDisableFramebuffer();
 	rlClearScreenBuffers();
 
-	switch(engine.mode) {
+	switch(engine->mode) {
 		case (DEFERRED_SHADING): {
-			BeginMode3D(engine.camera);
+			BeginMode3D(engine->camera);
 			rlDisableColorBlend();
-			rlEnableShader(engine.deffered_shader.id);
+			rlEnableShader(engine->deffered_shader.id);
 			rlActiveTextureSlot(0);
-			rlEnableTexture(engine.gbuffer.positionTexture);
+			rlEnableTexture(engine->gbuffer.positionTexture);
 			rlActiveTextureSlot(1);
-			rlEnableTexture(engine.gbuffer.normalTexture);
+			rlEnableTexture(engine->gbuffer.normalTexture);
 			rlActiveTextureSlot(2);
-			rlEnableTexture(engine.gbuffer.albedoSpecTexture);
+			rlEnableTexture(engine->gbuffer.albedoSpecTexture);
 			rlActiveTextureSlot(3);
-			rlEnableTexture(engine.gbuffer.zTexture);
+			rlEnableTexture(engine->gbuffer.zTexture);
 			rlLoadDrawQuad();
 			rlDisableShader();
 			rlEnableColorBlend();
 			EndMode3D();
 
-			glBindFramebuffer(RL_READ_FRAMEBUFFER, engine.gbuffer.framebuffer);
+			glBindFramebuffer(RL_READ_FRAMEBUFFER, engine->gbuffer.framebuffer);
 			glBindFramebuffer(RL_DRAW_FRAMEBUFFER, 0);
 			rlBlitFramebuffer(0, 0, screen_width, screen_height, 0, 0, screen_width, screen_height, GL_DEPTH_BUFFER_BIT);
 			rlDisableFramebuffer();
 
-			BeginMode3D(engine.camera);
+			BeginMode3D(engine->camera);
 			rlEnableShader(rlGetShaderIdDefault());
 
 
-			for (auto span: engine.lights) {
-				DrawSphere(span.position, 1, span.color);
-			}
-			DrawBoundingBox(level.terrain.bound, BLUE);
-			DrawBoundingBox(engine.player.bound, RED);
+			DrawBoundingBox(engine->player.bound, RED);
 
 
 			rlDisableShader();
@@ -156,7 +109,7 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 		}
 		case (DEFERRED_POSITION): {
 			DrawTextureRec((Texture2D){
-			.id = engine.gbuffer.positionTexture,
+			.id = engine->gbuffer.positionTexture,
 			.width = screen_width,
 			.height = screen_height,
 			}, (Rectangle) { 0, 0, (float)screen_width, (float)-screen_height }, Vector2Zero(), WHITE);
@@ -166,7 +119,7 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 		}
 		case (DEFERRED_NORMAL): {
 			DrawTextureRec((Texture2D){
-			.id = engine.gbuffer.normalTexture,
+			.id = engine->gbuffer.normalTexture,
 			.width = screen_width,
 			.height = screen_height,
 			}, (Rectangle) { 0, 0, (float)screen_width, (float)-screen_height }, Vector2Zero(), WHITE);
@@ -176,7 +129,7 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 		}
 		case (DEFERRED_ALBEDO): {
 			DrawTextureRec((Texture2D){
-			.id = engine.gbuffer.albedoSpecTexture,
+			.id = engine->gbuffer.albedoSpecTexture,
 			.width = screen_width,
 			.height = screen_height,
 			}, (Rectangle) { 0, 0, (float)screen_width, (float)-screen_height }, Vector2Zero(), WHITE);
@@ -186,7 +139,7 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 		}
 		case (DEFERRED_Z): {
 			DrawTextureRec((Texture2D){
-			.id = engine.gbuffer.zTexture,
+			.id = engine->gbuffer.zTexture,
 			.width = screen_width,
 			.height = screen_height,
 			}, (Rectangle) { 0, 0, (float)screen_width, (float)-screen_height }, Vector2Zero(), WHITE);
@@ -196,6 +149,6 @@ void render(level_t level, engine_t &engine, void (*render_ui)(void)) {
 		}
 		default:break;
 	};
-	draw_ui(engine.textures, 0, engine.player);
+	draw_ui(engine->player);
 	EndDrawing();
 }

@@ -76,6 +76,8 @@
 		"semaphore": "cpp",
 		"stop_token": "cpp",
 		"thread": "cpp",
-		"set": "cpp"
+		"set": "cpp",
+		"raygui.h": "c",
+		"engine.h": "c"
 	}
 }
