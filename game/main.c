@@ -17,6 +17,11 @@ int main(void) {
 
 	HideCursor();
 
+	Model terrain;
+	
+	engine.dummy = LoadModelFromMesh(GenMeshHeightmap(LoadImage("assets/heightmap/snowdon.png"), (Vector3){100, 10, 100}));
+	engine.dummy.materials[0].shader = engine.gbuffer_shader;
+
 	engine.player.stats.max_health = 150;
 	engine.player.stats.health = 100;
 	engine.player.bound = (BoundingBox){

@@ -269,6 +269,7 @@ typedef struct s_engine {
 	deferred_mode mode;
 	Model cube;
 	Model Sphere;
+	Model dummy;
 	light_t lights[MAX_LIGHTS];
 	sv_player_t player;
 }	engine_t;
