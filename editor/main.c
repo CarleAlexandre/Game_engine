@@ -64,6 +64,22 @@ void	ui_editor() {
 
 }
 
+void	drop_down_terminal() {
+
+}
+
+void	update_terminal_input(bool *term_open) {
+	if (IsKeyPressed(KEY_TAB)) {
+		*term_open = !*term_open;
+	}
+}
+
+void	update_editor_input(bool *term_open) {
+	if (IsKeyPressed(KEY_TAB)) {
+		*term_open = !*term_open;
+	}
+}
+
 //
 
 int	main(void) {
@@ -73,10 +89,17 @@ int	main(void) {
 	RenderTexture2D fbo;
 	GuiLoadStyle("include/style_terminal.rgs");
 	fbo = LoadRenderTexture(GetScreenWidth() - 400, GetScreenHeight() - 30);
+	bool show_term = false;
 
 	SetTargetFPS(30);
 	// EnableEventWaiting();
 	while (!WindowShouldClose()) {
+
+		if (show_term) {
+			update_terminal_input(&show_term);
+		} else {
+			update_editor_input(&show_term);
+		}
 
 		BeginTextureMode(fbo);
 		switch (editor_mode) {
@@ -142,6 +165,9 @@ int	main(void) {
 			}
 
 			top_bar();
+			if (show_term) {
+				drop_down_terminal();
+			}
 
 		EndDrawing();
 	}

@@ -1,6 +1,6 @@
 #include <engine.h>
 
-void update_input(engine_t *engine) {
+void	update_input(engine_t *engine) {
 	Vector2 delta = GetMouseDelta();
 	SetMousePosition(GetScreenWidth() * 0.5, GetScreenHeight() * 0.5); 
 	Vector3 step = {0};

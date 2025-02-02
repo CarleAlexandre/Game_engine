@@ -78,6 +78,7 @@
 		"thread": "cpp",
 		"set": "cpp",
 		"raygui.h": "c",
-		"engine.h": "c"
+		"engine.h": "c",
+		"fastnoiselite.h": "c"
 	}
 }

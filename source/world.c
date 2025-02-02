@@ -51,14 +51,22 @@ void generate_terrain() {
 	// Gather noise data
 	float* noiseData = malloc(128 * 128 * sizeof(float));
 	int index = 0;
+	float min = 100,max = 0;
 
 	for (int y = 0; y < 128; y++) {
 		for (int x = 0; x < 128; x++) {
-			noiseData[index++] = fnlGetNoise2D(&noise, x, y);
+			noiseData[index] = fnlGetNoise2D(&noise, x, y);
+			if (noiseData[index] < min) {
+				min = noiseData[index];
+			}
+			if (noiseData[index] > max) {
+				max = noiseData[index];
+			}
+			index++;
 		}
 	}
-
 	// use data;
+	
 
 	free(noiseData);
 }
