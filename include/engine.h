@@ -250,6 +250,18 @@ typedef struct s_chunk {
 }	chunk_t;
 //chunk is only used for dungeon generation
 
+typedef struct s_vox_vert {
+	int data;
+};
+
+typedef enum {
+	vert_pos_x_e =  0,
+	vert_pos_y_e = 1 << 6,
+	vert_pos_z_e = 1 << 12,
+	vert_face_e = 1 << 18,
+	vert_text_id_e = 1 << 21,
+}	vox_vert_shift_e;
+
 typedef struct s_gbuffer{
 	unsigned int framebuffer;
 	unsigned int positionTexture;

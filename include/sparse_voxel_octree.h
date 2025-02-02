@@ -30,7 +30,7 @@ svo_t	*init_svo(int size_, int max_depth_) {
 }
 
 void	delete_svo() {
-
+	
 }
 
 void	svo_insert_impl(svo_t *svo, svo_node_t **node, float point[3], void *data, int position[3], int depth) {
@@ -66,5 +66,7 @@ void	svo_insert_impl(svo_t *svo, svo_node_t **node, float point[3], void *data, 
 void	svo_insert(float point[3], void *data, svo_t *svo) {
 	svo_insert_impl(svo, &svo->root, point, data, (float [3]){0, 0, 0}, 0);
 }
+
+// for chunk of 32x32x32 use depth of 5 and size of 32
 
 #endif
