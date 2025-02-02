@@ -36,6 +36,7 @@ static gbuffer_t loadGbuffer(int width, int height, Shader deffered_shader) {
 	rlDisableShader();
 
 	rlEnableDepthTest();
+	rlEnableBackfaceCulling();
 	return (buffer);
 }
 

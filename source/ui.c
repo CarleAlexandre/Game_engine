@@ -77,4 +77,5 @@ void draw_ui(sv_player_t player) {
 	if (player.show_inventory) {
 		draw_inventory(player.inventory);
 	}
+	DrawFPS(10, 10);
 }

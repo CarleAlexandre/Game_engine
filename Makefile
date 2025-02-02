@@ -71,11 +71,11 @@ all: lib game editor server
 
 lib: $(BUILDDIR)${LIB}
 
-game: $(BUILDDIR)$(GAME)
+game: $(BUILDDIR)$(GAME) $(BUILDDIR)${LIB}
 
-editor: $(BUILDDIR)$(EDITOR)
+editor: $(BUILDDIR)$(EDITOR) $(BUILDDIR)${LIB}
 
-server: $(BUILDDIR)$(SERVER)
+server: $(BUILDDIR)$(SERVER) $(BUILDDIR)${LIB}
 
 clean:
 	rm -rf $(OBJ)

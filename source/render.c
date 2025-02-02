@@ -52,7 +52,7 @@ void	render(engine_t *engine) {
 
 	int screen_height = GetScreenHeight(), screen_width = GetScreenWidth();
 	for (int i = 0; i < MAX_LIGHTS; i++) {
-		engine->lights[i].position = Vector3RotateByAxisAngle(engine->lights[i].position, (Vector3){0, 1, 0}, PI / 360);
+		engine->lights[i].position = Vector3RotateByAxisAngle(engine->lights[i].position, (Vector3){0, 1, 0}, DEG2RAD * GetFrameTime());
 		UpdateLightValues(engine->deffered_shader, engine->lights[i]);
 	}
 
