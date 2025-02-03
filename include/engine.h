@@ -253,7 +253,7 @@ typedef struct s_chunk {
 typedef struct s_vox_vert {
 	int data;
 	int dfa;
-};
+}	vox_vert_t;
 
 typedef enum {
 	vert_pos_x_e =  0,

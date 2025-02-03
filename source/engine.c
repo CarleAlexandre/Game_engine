@@ -51,9 +51,6 @@ engine_t init_engine(void) {
 	camera.up = (Vector3){0, 1, 0};
 	engine.camera = camera;
 
-	engine.cube = LoadModelFromMesh(GenMeshCube(10, 10, 10));
-	engine.Sphere = LoadModelFromMesh(GenMeshSphere(5, 10, 10));
-
 	engine.posprocess = LoadShader(0, "shader/postprocess.fs");
 	engine.deffered_shader = LoadShader("shader/defered.vs", "shader/defered.fs");
 	engine.gbuffer_shader = LoadShader("shader/gbuffer.vs", "shader/gbuffer.fs");
@@ -62,14 +59,6 @@ engine_t init_engine(void) {
 	engine.gbuffer = loadGbuffer(width, height, engine.deffered_shader) ;
 
 	engine.mode = DEFERRED_SHADING;
-
-	engine.cube.materials[0].shader = engine.gbuffer_shader;
-	engine.Sphere.materials[0].shader = engine.gbuffer_shader;
-
-	engine.lights[0] = CreateLight(LIGHT_POINT, (Vector3){ -0, 40, -100 }, Vector3Zero(), YELLOW, engine.deffered_shader);
-	engine.lights[1] = CreateLight(LIGHT_POINT, (Vector3){ 0, 40, 100 }, Vector3Zero(), RED, engine.deffered_shader);
-	engine.lights[2] = CreateLight(LIGHT_POINT, (Vector3){ -100, 40, 0 }, Vector3Zero(), GREEN, engine.deffered_shader);
-	engine.lights[3] = CreateLight(LIGHT_POINT, (Vector3){ 100, 40, -0 }, Vector3Zero(), BLUE, engine.deffered_shader);
 	return (engine);
 }
 
