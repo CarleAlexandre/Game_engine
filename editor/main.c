@@ -19,17 +19,17 @@ void	startscreen() {
 // ui
 
 void	top_bar() {
-	GuiStatusBar((Rectangle){0, 0, (float)GetScreenWidth(), 30}, "");
+	GuiStatusBar((Rectangle){0, 0, GetScreenWidth(), 30}, "");
 	if (GuiDropdownBox((Rectangle){0, 0, 120, 30}, "map;item;obj;ui", &editor_mode, mode_enable))
 		mode_enable = !mode_enable;
 }
 
 void	left_bar() {
-	GuiDummyRec((Rectangle){0, 30, 200, (float)GetScreenHeight() - 30}, "Debug");
+	GuiDummyRec((Rectangle){0, 30, 200, GetScreenHeight() - 30}, "Debug");
 }
 
 void	right_bar() {
-	GuiDummyRec((Rectangle){(float)GetScreenWidth() - 200, 30, 200, (float)GetScreenHeight() - 30}, "setting");
+	GuiDummyRec((Rectangle){GetScreenWidth() - 200, 30, 200, GetScreenHeight() - 30}, "setting");
 }
 
 //editor mode
@@ -64,8 +64,29 @@ void	ui_editor() {
 
 }
 
-void	drop_down_terminal() {
+void	drop_down_terminal(bool show_term) {
+	Rectangle rec = {200, -200, GetScreenWidth() - 400, 200};
+	static int height = 0;
+	static Vector2 scroll;
+	static Rectangle view;
+	static bool enter_pressed = false;
+	static char text_buffer[100] = {0};
 
+	if (show_term) {
+		if (height < 230) {
+			height += 10;
+		}
+	} else if (height > 0) {
+		height -= 10;
+	}
+	if (height > 0) {
+		GuiScrollPanel((Rectangle){rec.x, rec.y + height, rec.width, rec.height},
+			"", (Rectangle){rec.x, rec.y + height, rec.width - 20, rec.height}, &scroll, &view);
+		BeginScissorMode(rec.x, rec.y + height, rec.width - 10, rec.height);
+		EndScissorMode();
+		if (GuiTextBox((Rectangle){200, rec.y + 200 + height, rec.width, 20}, &text_buffer[0], 99, show_term && height == 230))
+			enter_pressed = true;
+	}
 }
 
 void	update_terminal_input(bool *term_open) {
@@ -164,10 +185,8 @@ int	main(void) {
 				default:break;
 			}
 
+			drop_down_terminal(show_term);
 			top_bar();
-			if (show_term) {
-				drop_down_terminal();
-			}
 
 		EndDrawing();
 	}
