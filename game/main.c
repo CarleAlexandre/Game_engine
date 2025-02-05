@@ -42,6 +42,7 @@ int main(void) {
 	SetTargetFPS(120);
 	while (!WindowShouldClose()) {
 		update_input(&engine);
+		// update(&input);
 		engine.player.pos = engine.camera.position;
 		render(&engine);
 	}

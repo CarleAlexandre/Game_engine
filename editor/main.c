@@ -69,8 +69,8 @@ void	drop_down_terminal(bool show_term) {
 	static int height = 0;
 	static Vector2 scroll;
 	static Rectangle view;
-	static bool enter_pressed = false;
-	static char text_buffer[100] = {0};
+	static bool enter_pressed;
+	static char text_buffer[100];
 
 	if (show_term) {
 		if (height < 230) {

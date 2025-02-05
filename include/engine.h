@@ -26,6 +26,15 @@
 */
 
 typedef enum {
+	top_face,
+	bot_face,
+	left_face,
+	right_face,
+	front_face,
+	back_face,
+}	face_orientation_e;
+
+typedef enum {
     LIGHT_DIRECTIONAL = 0,
     LIGHT_POINT
 } LightType;
@@ -246,7 +255,7 @@ typedef struct s_terrain {
 }	terrain_t;
 
 typedef struct s_chunk {
-	int *blocks;// 16 * 16 * 16;
+	bool	blocks[32][32][32];
 }	chunk_t;
 //chunk is only used for dungeon generation
 

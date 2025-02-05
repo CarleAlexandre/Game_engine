@@ -22,5 +22,5 @@ void main() {
 
 	vec3 vertex_pos = vec3(pos_x, pos_y, pos_z);
 
-	vec3 finalPos = vertex_pos + world_pos; 
+	vec3 finalPos = vertex_pos + world_pos;
 }

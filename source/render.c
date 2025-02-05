@@ -64,7 +64,7 @@ void	render(engine_t *engine) {
 	BeginMode3D(engine->camera);
 	rlEnableShader(engine->gbuffer_shader.id);
 
-	DrawModel(engine->dummy, (Vector3){0, -10, 0}, 1, WHITE);
+	// DrawModel(engine->dummy, (Vector3){0, -10, 0}, 1, WHITE);
 
 	rlDisableShader();
 	EndMode3D();
