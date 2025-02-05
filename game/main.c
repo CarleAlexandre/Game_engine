@@ -17,12 +17,19 @@ int main(void) {
 
 	HideCursor();
 
+	chunk_t *world[5][5];
+	for (int x = 0; x < 5; x++) {
+		for (int z = 0; z < 5; z++) {
+			world[x][z] = generate_terrain((Vector2){x, z});
+		}
+	}
+
 	engine.lights[0] = CreateLight(LIGHT_POINT, (Vector3){ -0, 40, -100 }, Vector3Zero(), YELLOW, engine.deffered_shader);
 	engine.lights[1] = CreateLight(LIGHT_POINT, (Vector3){ 0, 40, 100 }, Vector3Zero(), RED, engine.deffered_shader);
 	engine.lights[2] = CreateLight(LIGHT_POINT, (Vector3){ -100, 40, 0 }, Vector3Zero(), GREEN, engine.deffered_shader);
 	engine.lights[3] = CreateLight(LIGHT_POINT, (Vector3){ 100, 40, -0 }, Vector3Zero(), BLUE, engine.deffered_shader);
 
-	engine.cube = LoadModelFromMesh(GenMeshCube(10, 10, 10));
+	engine.cube = LoadModelFromMesh(GenMeshCube(1, 1, 1));
 	engine.Sphere = LoadModelFromMesh(GenMeshSphere(5, 10, 10));
 	engine.dummy = LoadModelFromMesh(GenMeshHeightmap(LoadImage("assets/heightmap/snowdon.png"), (Vector3){100, 10, 100}));
 	engine.cube.materials[0].shader = engine.gbuffer_shader;
@@ -44,7 +51,7 @@ int main(void) {
 		update_input(&engine);
 		// update(&input);
 		engine.player.pos = engine.camera.position;
-		render(&engine);
+		render(&engine, world);
 	}
 	ShowCursor();
 	close_engine(&engine);

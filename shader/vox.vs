@@ -20,6 +20,8 @@ void main() {
 	int face =	(data >> 18)	&7;
 	int text_id =	(data >> 21)	&63;
 
+	vec3 normal = NORMALS[face];
+
 	vec3 vertex_pos = vec3(pos_x, pos_y, pos_z);
 
 	vec3 finalPos = vertex_pos + world_pos;

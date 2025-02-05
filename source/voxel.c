@@ -35,24 +35,26 @@
 // 	// return (chunk);
 // }
 
-void add_map_obj() {
+void	add_map_obj() {
 
 }
 
-void add_block() {
+void	add_block() {
 
 }
 
-chunk_t *generate_terrain() {
+chunk_t *generate_terrain(Vector2 chunk_pos) {
 	// Create and configure noise state
 	fnl_state noise = fnlCreateState();
-	noise.noise_type = FNL_NOISE_OPENSIMPLEX2;
+	noise.noise_type = FNL_NOISE_OPENSIMPLEX2S;
 
 	chunk_t *chunk = malloc(sizeof(chunk_t));
+	memset(chunk, 0, sizeof(chunk_t));
 
 	for (int x = 0; x < 32; x++) {
 		for (int z = 0; z < 32; z++) {
-			for (int y = 0; y < fnlGetNoise2D(&noise, x, z); y++) {
+			float noise_data = fnlGetNoise2D(&noise, x + chunk_pos.x *32 , z + chunk_pos.y * 32) * 2;
+			for (int y = 0; y < noise_data; y++) {
 				chunk->blocks[x][z][y] = true;
 			}
 		}
@@ -60,7 +62,7 @@ chunk_t *generate_terrain() {
 	return (chunk);
 }
 
-void generate_dungeon() {
+void	generate_dungeon() {
 	
 }
 
@@ -98,47 +100,53 @@ Mesh	add_face(face_orientation_e face, Vector3 pos) {
 	}
 }
 
-void	generate_chunk_mesh(chunk_t *chunk) {
-	for (int x = 0; x < 32; x++) {
-		for (int z = 0; z < 32; z++) {
-			for (int y = 0; y < 32; y++) {
-				chunk->blocks[x][z][y];
-				//if empty don't add face;
+void	generate_chunk_mesh(engine_t *engine, chunk_t *chunk[5][5]) {
+	for (int h = 0; h < 5; h++) {
+		for (int l = 0; l < 5; l++) {
+			for (int x = 0; x < 32; x++) {
+				for (int z = 0; z < 32; z++) {
+					for (int y = 0; y < 32; y++) {
+						if (chunk[h][l]->blocks[x][z][y]) {
+							//if empty don't add face;
+							DrawModel(engine->cube, (Vector3){x + h * 32, y, z + l * 32}, 1, WHITE);
 
-				// if no vox above
-				if (y < 31 && !chunk->blocks[x][z][y + 1]) {
+						// // if no vox above
+						// if (y < 31 && !chunk->blocks[x][z][y + 1]) {
+						// }
+						// //add_top_face();
+						
+						// // if no vox below
+						// if (y > 0 && !chunk->blocks[x][z][y - 1]) {
+
+						// }
+						// //add_bottom_face();
+
+						// // if no vox on left
+						// if (z < 31 && !chunk->blocks[x + 1][z][y]) {
+
+						// }
+						// //add_left_face();
+						
+						// // if no vox on right
+						// if (z > 0 && !chunk->blocks[x - 1][z][y]) {
+
+						// }
+						// //add_right_face();
+						
+						// // if no vox behind
+						// if (x < 31 && !chunk->blocks[x + 1][z][y]) {
+
+						// }
+						// //add_back_face();
+						
+						// // if no vox in front
+						// if (x > 0 && !chunk->blocks[x - 1][z][y]) {
+
+						// }
+						// //add_front_face();
+						}
+					}
 				}
-				//add_top_face();
-				
-				// if no vox below
-				if (y > 0 && !chunk->blocks[x][z][y - 1]) {
-
-				}
-				//add_bottom_face();
-
-				// if no vox on left
-				if (z < 31 && !chunk->blocks[x + 1][z][y]) {
-
-				}
-				//add_left_face();
-				
-				// if no vox on right
-				if (z > 0 && !chunk->blocks[x - 1][z][y]) {
-
-				}
-				//add_right_face();
-				
-				// if no vox behind
-				if (x < 31 && !chunk->blocks[x + 1][z][y]) {
-
-				}
-				//add_back_face();
-				
-				// if no vox in front
-				if (x > 0 && !chunk->blocks[x - 1][z][y]) {
-
-				}
-				//add_front_face();
 			}
 		}
 	}

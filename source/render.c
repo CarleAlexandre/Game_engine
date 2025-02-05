@@ -46,7 +46,7 @@ void UpdateLightValues(Shader shader, light_t light) {
     SetShaderValue(shader, light.colorLoc, color, SHADER_UNIFORM_VEC4);
 }
 
-void	render(engine_t *engine) {
+void	render(engine_t *engine, chunk_t *world[5][5]) {
 	float camera_pos[3] = {engine->camera.position.x, engine->camera.position.y, engine->camera.position.z};
 	SetShaderValue(engine->deffered_shader, engine->deffered_shader.locs[SHADER_LOC_VECTOR_VIEW], camera_pos, SHADER_UNIFORM_VEC3);
 
@@ -65,6 +65,7 @@ void	render(engine_t *engine) {
 	rlEnableShader(engine->gbuffer_shader.id);
 
 	// DrawModel(engine->dummy, (Vector3){0, -10, 0}, 1, WHITE);
+	generate_chunk_mesh(engine, world);
 
 	rlDisableShader();
 	EndMode3D();
@@ -98,6 +99,7 @@ void	render(engine_t *engine) {
 			BeginMode3D(engine->camera);
 			rlEnableShader(rlGetShaderIdDefault());
 
+			DrawGrid(50, 0.5);
 
 			DrawBoundingBox(engine->player.bound, RED);
 
