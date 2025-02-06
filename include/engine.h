@@ -19,7 +19,16 @@
 
 #define GRAY_VALUE(c) ((float)(c.r + c.g + c.b)/3.0f)
 
-#define ITEM_MAGIC 
+#define ITEM_MAGIC
+
+#define MAX_VERTICES 100000
+
+#define FACE_TOP    0
+#define FACE_BOTTOM 1
+#define FACE_LEFT   2
+#define FACE_RIGHT  3
+#define FACE_FRONT  4
+#define FACE_BACK   5
 
 /* 
 	TYPEDEF
@@ -144,6 +153,18 @@ typedef enum {
 /* 
 	DATA STRUCT
 */
+
+/*
+| 31 - 27 | 26 - 22 | 21 - 17 | 16 - 14 | 13 - 0 |
+|   x     |   y     |   z     |  face   |  extra |
+*/
+
+typedef	struct {
+    int	vertices[MAX_VERTICES]; // Array to store packed vertex data
+    unsigned int indices[MAX_VERTICES]; // Array to store indices
+    int vertex_count; // Current number of vertices
+    int index_count; // Current number of indices
+}	mesh_t;
 
 typedef struct s_token {
 	int id;

@@ -4,26 +4,15 @@
 #define FNL_IMPL
 #include <FastNoiseLite.h>
 
-#define MAX_VERTICES 100000
 
-#define FACE_TOP    0
-#define FACE_BOTTOM 1
-#define FACE_LEFT   2
-#define FACE_RIGHT  3
-#define FACE_FRONT  4
-#define FACE_BACK   5
+// #define MAX_COMBINED_VERTICES 1000000
 
-/*
-| 31 - 27 | 26 - 22 | 21 - 17 | 16 - 14 | 13 - 0 |
-|   x     |   y     |   z     |  face   |  extra |
-*/
-
-typedef	struct {
-    int	vertices[MAX_VERTICES]; // Array to store packed vertex data
-    unsigned int indices[MAX_VERTICES]; // Array to store indices
-    int vertex_count; // Current number of vertices
-    int index_count; // Current number of indices
-}	mesh_t;
+// typedef struct {
+//     int vertices[MAX_COMBINED_VERTICES];       // Combined vertex data for all chunks
+//     unsigned int indices[MAX_COMBINED_VERTICES]; // Combined index data for all chunks
+//     int vertex_count;                 // Total number of vertices
+//     int index_count;                  // Total number of indices
+// } combined_mesh_t;
 
 void	generate_dungeon() {
 	
@@ -40,6 +29,27 @@ void	unload_chunk_data() {
 void	add_block() {
 
 }
+
+// void append_chunk_to_combined_mesh(combined_mesh_t *combined_mesh, mesh_t *chunk_mesh) {
+// 	// Append vertex data
+// 	for (int i = 0; i < chunk_mesh->vertex_count; i++) {
+// 	    combined_mesh->vertices[combined_mesh->vertex_count++] = chunk_mesh->vertices[i];
+// 	}
+    
+// 	// Append index data with offset
+// 	unsigned int vertex_offset = combined_mesh->vertex_count - chunk_mesh->vertex_count;
+// 	for (int i = 0; i < chunk_mesh->index_count; i++) {
+// 	    combined_mesh->indices[combined_mesh->index_count++] = chunk_mesh->indices[i] + vertex_offset;
+// 	}
+// }
+
+// void generate_combined_mesh(engine_t *engine, chunk_t *chunks, int chunk_num, combined_mesh_t *combined_mesh) {
+// 	for (int i = 0; i < chunk_num; i++) {
+// 	    mesh_t chunk_mesh = {0}; // Initialize chunk mesh
+// 	    generate_chunk_mesh(engine, &chunks[i], &chunk_mesh); // Generate mesh for the chunk
+// 	    append_chunk_to_combined_mesh(combined_mesh, &chunk_mesh); // Append to combined mesh
+// 	}
+// }
 
 int	pack_vertex_data(int x, int y, int z, int face, int extra) {
 	return (x << 27) | (y << 22) | (z << 17) | (face << 14) | extra;
@@ -74,33 +84,6 @@ void	add_face_to_mesh(mesh_t *mesh, int x, int y, int z, int face) {
 	mesh->indices[mesh->index_count++] = base_index;
 	mesh->indices[mesh->index_count++] = base_index + 2;
 	mesh->indices[mesh->index_count++] = base_index + 3;
-}
-
-void	init_mesh_buffer(mesh_t *mesh) {
-	unsigned int vbo, vao, ebo;
-
-	// Generate buffers
-	glGenVertexArrays(1, &vao);
-	glGenBuffers(1, &vbo);
-	glGenBuffers(1, &ebo);
-
-	// Bind the VAO
-	glBindVertexArray(vao);
-
-	// Upload vertex data
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, mesh->vertex_count * sizeof(int), mesh->vertices, GL_STATIC_DRAW);
-
-	// Upload index data
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->index_count * sizeof(unsigned int), mesh->indices, GL_STATIC_DRAW);
-
-	// Set up vertex attribute pointer
-	glVertexAttribIPointer(0, 1, GL_INT, sizeof(int), (void*)0); // Packed data is an integer
-	glEnableVertexAttribArray(0);
-
-	// Unbind the VAO
-	glBindVertexArray(0);
 }
 
 chunk_t *generate_terrain(Vector2 chunk_pos) {
@@ -190,7 +173,7 @@ void	combine_chunk_data(){
 }
 
 void render_mesh(chunk_t *chunk) {
-	glBindVertexArray(&chunk->vao);
+	glBindVertexArray(chunk->vao);
 	glDrawElements(GL_TRIANGLES, chunk->mesh.index_count, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 }

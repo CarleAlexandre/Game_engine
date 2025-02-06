@@ -65,7 +65,12 @@ void	render(engine_t *engine, chunk_t *world[5][5]) {
 	rlEnableShader(engine->gbuffer_shader.id);
 
 	// DrawModel(engine->dummy, (Vector3){0, -10, 0}, 1, WHITE);
-	generate_chunk_mesh(engine, world);
+	// generate_chunk_mesh(engine, world);
+	for (int x = 0; x < 5; x++){
+		for (int z = 0; z < 5; z++){
+			render_mesh(world[x][z]);
+		}
+	}
 
 	rlDisableShader();
 	EndMode3D();
@@ -99,10 +104,7 @@ void	render(engine_t *engine, chunk_t *world[5][5]) {
 			BeginMode3D(engine->camera);
 			rlEnableShader(rlGetShaderIdDefault());
 
-			DrawGrid(50, 0.5);
-
 			DrawBoundingBox(engine->player.bound, RED);
-
 
 			rlDisableShader();
 			EndMode3D();

@@ -21,6 +21,7 @@ int main(void) {
 	for (int x = 0; x < 5; x++) {
 		for (int z = 0; z < 5; z++) {
 			world[x][z] = generate_terrain((Vector2){x, z});
+			generate_chunk_mesh(&engine, world[x][z]);
 		}
 	}
 
