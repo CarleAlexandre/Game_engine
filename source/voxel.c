@@ -4,43 +4,103 @@
 #define FNL_IMPL
 #include <FastNoiseLite.h>
 
-// x = index / (size * size)
-// y = (index / size) % size
-// z = index % size
+#define MAX_VERTICES 100000
 
-// void heightmap_voxel(Image heightmap) {
-// 	const int mapX = heightmap.width;
-// 	const int mapZ = heightmap.height;
+#define FACE_TOP    0
+#define FACE_BOTTOM 1
+#define FACE_LEFT   2
+#define FACE_RIGHT  3
+#define FACE_FRONT  4
+#define FACE_BACK   5
 
-// 	Color *pixels = LoadImageColors(heightmap);
-// 	chunk_t *chunk;
+/*
+| 31 - 27 | 26 - 22 | 21 - 17 | 16 - 14 | 13 - 0 |
+|   x     |   y     |   z     |  face   |  extra |
+*/
 
-// 	int size = (heightmap.width - (heightmap.width % 16)) * (heightmap.height - (heightmap.height % 16));
+typedef	struct {
+    int	vertices[MAX_VERTICES]; // Array to store packed vertex data
+    unsigned int indices[MAX_VERTICES]; // Array to store indices
+    int vertex_count; // Current number of vertices
+    int index_count; // Current number of indices
+}	mesh_t;
 
-// 	int alloc_size = 16 * 16 * 16 * sizeof(int);
-// 	printf("%ix%i : %i :: %i\n", heightmap.height, heightmap.width, size, (alloc_size * size * size));
+void	generate_dungeon() {
+	
+}
 
-// 	for (int i = 0; i < size; i++) {
-// 		chunk[i].blocks = (int *)malloc(alloc_size * size * size);
-// 		memset(chunk[i].blocks, 0, alloc_size);
-// 		for (int z = 0; z < 16; z++) {
-// 			for (int x = 0; x < 16; x++) {
-// 				for (int y = 0;y < GRAY_VALUE(pixels[x + (z + 1)*mapX]) && y < 16; y++) {
-// 					chunk[i].blocks[z * 16 * 16 + x * 16 + y] = 1;
-// 				}
-// 			}
-// 		}
-// 	}
+void	load_chunk_data() {
 
-// 	// return (chunk);
-// }
+}
 
-void	add_map_obj() {
+void	unload_chunk_data() {
 
 }
 
 void	add_block() {
 
+}
+
+int	pack_vertex_data(int x, int y, int z, int face, int extra) {
+	return (x << 27) | (y << 22) | (z << 17) | (face << 14) | extra;
+}
+
+void	unpack_vertex_data(int packed, int *x, int *y, int *z, int *face, int *extra) {
+	*x = (packed >> 27) & 0x1F;    // Extract x (5 bits)
+	*y = (packed >> 22) & 0x1F;    // Extract y (5 bits)
+	*z = (packed >> 17) & 0x1F;    // Extract z (5 bits)
+	*face = (packed >> 14) & 0x07; // Extract face (3 bits)
+	*extra = packed & 0x3FFF;      // Extract extra data (14 bits)
+}
+
+void	add_face_to_mesh(mesh_t *mesh, int x, int y, int z, int face) {
+	// Pack vertex data for the 4 vertices of the face
+	int vertex1 = pack_vertex_data(x, y, z, face, 0); // Example: extra data = 0
+	int vertex2 = pack_vertex_data(x + 1, y, z, face, 0);
+	int vertex3 = pack_vertex_data(x + 1, y, z + 1, face, 0);
+	int vertex4 = pack_vertex_data(x, y, z + 1, face, 0);
+    
+	// Add vertices to the mesh
+	mesh->vertices[mesh->vertex_count++] = vertex1;
+	mesh->vertices[mesh->vertex_count++] = vertex2;
+	mesh->vertices[mesh->vertex_count++] = vertex3;
+	mesh->vertices[mesh->vertex_count++] = vertex4;
+    
+	// Add indices to the mesh (two triangles to form a quad)
+	unsigned int base_index = mesh->vertex_count - 4;
+	mesh->indices[mesh->index_count++] = base_index;
+	mesh->indices[mesh->index_count++] = base_index + 1;
+	mesh->indices[mesh->index_count++] = base_index + 2;
+	mesh->indices[mesh->index_count++] = base_index;
+	mesh->indices[mesh->index_count++] = base_index + 2;
+	mesh->indices[mesh->index_count++] = base_index + 3;
+}
+
+void	init_mesh_buffer(mesh_t *mesh) {
+	unsigned int vbo, vao, ebo;
+
+	// Generate buffers
+	glGenVertexArrays(1, &vao);
+	glGenBuffers(1, &vbo);
+	glGenBuffers(1, &ebo);
+
+	// Bind the VAO
+	glBindVertexArray(vao);
+
+	// Upload vertex data
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, mesh->vertex_count * sizeof(int), mesh->vertices, GL_STATIC_DRAW);
+
+	// Upload index data
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->index_count * sizeof(unsigned int), mesh->indices, GL_STATIC_DRAW);
+
+	// Set up vertex attribute pointer
+	glVertexAttribIPointer(0, 1, GL_INT, sizeof(int), (void*)0); // Packed data is an integer
+	glEnableVertexAttribArray(0);
+
+	// Unbind the VAO
+	glBindVertexArray(0);
 }
 
 chunk_t *generate_terrain(Vector2 chunk_pos) {
@@ -62,100 +122,75 @@ chunk_t *generate_terrain(Vector2 chunk_pos) {
 	return (chunk);
 }
 
-void	generate_dungeon() {
-	
-}
+void	generate_chunk_mesh(engine_t *engine, chunk_t *chunk) {
+	for (int x = 0; x < 32; x++) {
+		for (int z = 0; z < 32; z++) {
+			for (int y = 0; y < 32; y++) {
+				if (chunk->blocks[x][z][y]) {
+					// Top face
+					if (y < 31 && !chunk->blocks[x][z][y + 1]) {
+						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_TOP);
+					}
 
-void	load_chunk_data() {
+					// Bottom face
+					if (y > 0 && !chunk->blocks[x][z][y - 1]) {
+						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_BOTTOM);
+					}
 
-}
+					// Left face
+					if (z < 31 && !chunk->blocks[x][z + 1][y]) {
+						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_LEFT);
+					}
 
-void	unload_chunk_data() {
+					// Right face
+					if (z > 0 && !chunk->blocks[x][z - 1][y]) {
+						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_RIGHT);
+					}
 
-}
+					// Front face
+					if (x < 31 && !chunk->blocks[x + 1][z][y]) {
+						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_FRONT);
+					}
 
-//voxel vertice : 
-
-Mesh	add_face(face_orientation_e face, Vector3 pos) {
-	switch (face){
-		case(top_face): {
-			
-		}
-		case(bot_face): {
-
-		}
-		case(left_face): {
-
-		}
-		case(right_face): {
-
-		}
-		case(front_face): {
-
-		}
-		case(back_face): {
-
-		}
-		default:break;
-	}
-}
-
-void	generate_chunk_mesh(engine_t *engine, chunk_t *chunk[5][5]) {
-	for (int h = 0; h < 5; h++) {
-		for (int l = 0; l < 5; l++) {
-			for (int x = 0; x < 32; x++) {
-				for (int z = 0; z < 32; z++) {
-					for (int y = 0; y < 32; y++) {
-						if (chunk[h][l]->blocks[x][z][y]) {
-							//if empty don't add face;
-							DrawModel(engine->cube, (Vector3){x + h * 32, y, z + l * 32}, 1, WHITE);
-
-						// // if no vox above
-						// if (y < 31 && !chunk->blocks[x][z][y + 1]) {
-						// }
-						// //add_top_face();
-						
-						// // if no vox below
-						// if (y > 0 && !chunk->blocks[x][z][y - 1]) {
-
-						// }
-						// //add_bottom_face();
-
-						// // if no vox on left
-						// if (z < 31 && !chunk->blocks[x + 1][z][y]) {
-
-						// }
-						// //add_left_face();
-						
-						// // if no vox on right
-						// if (z > 0 && !chunk->blocks[x - 1][z][y]) {
-
-						// }
-						// //add_right_face();
-						
-						// // if no vox behind
-						// if (x < 31 && !chunk->blocks[x + 1][z][y]) {
-
-						// }
-						// //add_back_face();
-						
-						// // if no vox in front
-						// if (x > 0 && !chunk->blocks[x - 1][z][y]) {
-
-						// }
-						// //add_front_face();
-						}
+					// Back face
+					if (x > 0 && !chunk->blocks[x - 1][z][y]) {
+						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_BACK);
 					}
 				}
 			}
 		}
 	}
+
+	// Generate buffers
+	glGenVertexArrays(1, &chunk->vao);
+	glGenBuffers(1, &chunk->vbo);
+	glGenBuffers(1, &chunk->ebo);
+
+	// Bind the VAO
+	glBindVertexArray(chunk->vao);
+
+	// Upload vertex data
+	glBindBuffer(GL_ARRAY_BUFFER, chunk->vbo);
+	glBufferData(GL_ARRAY_BUFFER, chunk->mesh.vertex_count * sizeof(int), chunk->mesh.vertices, GL_STATIC_DRAW);
+
+	// Upload index data
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk->ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, chunk->mesh.index_count * sizeof(unsigned int), chunk->mesh.indices, GL_STATIC_DRAW);
+
+	// Set up vertex attribute pointer
+	glVertexAttribIPointer(0, 1, GL_INT, sizeof(int), (void*)0); // Packed data is an integer
+	glEnableVertexAttribArray(0);
+
+	// Unbind the VAO
+	glBindVertexArray(0);
 }
 
 void	combine_chunk_data(){
 
 }
 
-void	draw_chunks() {
-	// glDrawArraysInstancedBaseInstance();
+void render_mesh(chunk_t *chunk) {
+	glBindVertexArray(&chunk->vao);
+	glDrawElements(GL_TRIANGLES, chunk->mesh.index_count, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
 }

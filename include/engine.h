@@ -255,14 +255,10 @@ typedef struct s_terrain {
 }	terrain_t;
 
 typedef struct s_chunk {
-	bool	blocks[32][32][32];
+	bool		blocks[32][32][32];
+	unsigned int	vao, vbo, ebo;
+	mesh_t		mesh;
 }	chunk_t;
-//chunk is only used for dungeon generation
-
-typedef struct s_vox_vert {
-	int data;
-	int dfa;
-}	vox_vert_t;
 
 typedef enum {
 	vert_pos_x_e =  0,
