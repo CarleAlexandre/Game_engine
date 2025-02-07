@@ -223,8 +223,6 @@ void	combine_chunk_data(){
 
 void render_vox_mesh(chunk_t *chunk) {
 
-	glUseProgram(chunk->shader.id);
-
 	Matrix matModel = MatrixIdentity();
 	Matrix matView = rlGetMatrixModelview();
 	Matrix matProjection = rlGetMatrixProjection();
@@ -232,12 +230,6 @@ void render_vox_mesh(chunk_t *chunk) {
 	rlSetUniformMatrix(glGetUniformLocation(chunk->shader.id, "matView"), matView);
 	rlSetUniformMatrix(glGetUniformLocation(chunk->shader.id, "matProjection"), matProjection);
 	rlSetUniformMatrix(glGetUniformLocation(chunk->shader.id, "matModel"), matModel);
-
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glBindVertexArray(chunk->vao);
 	glDrawElements(GL_TRIANGLES, chunk->mesh.index_count, GL_UNSIGNED_INT, 0);

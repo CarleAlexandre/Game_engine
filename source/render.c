@@ -55,6 +55,7 @@ void	voxel_render(engine_t *engine, chunk_t *world[5][5]) {
 	BeginDrawing();
 	ClearBackground(BLACK);
 	BeginMode3D(engine->camera);
+		glUseProgram(engine->vox_shader.id);
 		for (int x = 0; x < 5; x++){
 			for (int z = 0; z < 5; z++){
 				render_vox_mesh(world[x][z]);
