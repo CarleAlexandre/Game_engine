@@ -3,7 +3,6 @@
 out vec4 frag_color;
 
 // in vec3 frag_pos;
-flat in int extra;
 flat in int face;
 
 void main() {

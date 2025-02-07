@@ -67,56 +67,56 @@ void	add_face_to_mesh(mesh_t *mesh, int x, int y, int z, int face) {
 	int vertex1, vertex2, vertex3, vertex4;
 
 	switch (face) {
-	    case FACE_TOP:
-		// Top face (y + 1)
-		vertex1 = pack_vertex_data(x,     y + 1, z,     face, 0);
-		vertex2 = pack_vertex_data(x + 1, y + 1, z,     face, 0);
-		vertex3 = pack_vertex_data(x + 1, y + 1, z + 1, face, 0);
-		vertex4 = pack_vertex_data(x,     y + 1, z + 1, face, 0);
-		break;
-    
-	    case FACE_BOTTOM:
-		// Bottom face (y)
-		vertex1 = pack_vertex_data(x,     y, z,     face, 0);
-		vertex2 = pack_vertex_data(x + 1, y, z,     face, 0);
-		vertex3 = pack_vertex_data(x + 1, y, z + 1, face, 0);
-		vertex4 = pack_vertex_data(x,     y, z + 1, face, 0);
-		break;
-    
-	    case FACE_LEFT:
-		// Left face (z + 1)
-		vertex1 = pack_vertex_data(x,     y,     z + 1, face, 0);
-		vertex2 = pack_vertex_data(x + 1, y,     z + 1, face, 0);
-		vertex3 = pack_vertex_data(x + 1, y + 1, z + 1, face, 0);
-		vertex4 = pack_vertex_data(x,     y + 1, z + 1, face, 0);
-		break;
-    
-	    case FACE_RIGHT:
-		// Right face (z)
-		vertex1 = pack_vertex_data(x,     y,     z, face, 0);
-		vertex2 = pack_vertex_data(x + 1, y,     z, face, 0);
-		vertex3 = pack_vertex_data(x + 1, y + 1, z, face, 0);
-		vertex4 = pack_vertex_data(x,     y + 1, z, face, 0);
-		break;
-    
-	    case FACE_FRONT:
-		// Front face (x + 1)
-		vertex1 = pack_vertex_data(x + 1, y,     z,     face, 0);
-		vertex2 = pack_vertex_data(x + 1, y,     z + 1, face, 0);
-		vertex3 = pack_vertex_data(x + 1, y + 1, z + 1, face, 0);
-		vertex4 = pack_vertex_data(x + 1, y + 1, z,     face, 0);
-		break;
-    
-	    case FACE_BACK:
-		// Back face (x)
-		vertex1 = pack_vertex_data(x, y,     z,     face, 0);
-		vertex2 = pack_vertex_data(x, y,     z + 1, face, 0);
-		vertex3 = pack_vertex_data(x, y + 1, z + 1, face, 0);
-		vertex4 = pack_vertex_data(x, y + 1, z,     face, 0);
-		break;
-    
-	    default:
-		return;
+		case FACE_TOP:  
+			// Top face (y + 1), viewed from above
+			vertex1 = pack_vertex_data(x,     y + 1, z,     face, 0);
+			vertex2 = pack_vertex_data(x,     y + 1, z + 1, face, 0);
+			vertex3 = pack_vertex_data(x + 1, y + 1, z + 1, face, 0);
+			vertex4 = pack_vertex_data(x + 1, y + 1, z,     face, 0);
+			break;
+
+		case FACE_BOTTOM:  
+			// Bottom face (y), viewed from below
+			vertex1 = pack_vertex_data(x,     y, z,     face, 0);
+			vertex2 = pack_vertex_data(x + 1, y, z,     face, 0);
+			vertex3 = pack_vertex_data(x + 1, y, z + 1, face, 0);
+			vertex4 = pack_vertex_data(x,     y, z + 1, face, 0);
+			break;
+
+		case FACE_LEFT:
+			// Left face (x), viewed from negative X direction
+			vertex1 = pack_vertex_data(x, y,     z,     face, 0);
+			vertex2 = pack_vertex_data(x, y,     z + 1, face, 0);
+			vertex3 = pack_vertex_data(x, y + 1, z + 1, face, 0);
+			vertex4 = pack_vertex_data(x, y + 1, z,     face, 0);
+			break;
+
+		case FACE_RIGHT:  
+			// Right face (x + 1), viewed from positive X direction
+			vertex1 = pack_vertex_data(x + 1, y,     z,     face, 0);
+			vertex2 = pack_vertex_data(x + 1, y + 1, z,     face, 0);
+			vertex3 = pack_vertex_data(x + 1, y + 1, z + 1, face, 0);
+			vertex4 = pack_vertex_data(x + 1, y,     z + 1, face, 0);
+			break;
+
+		case FACE_FRONT:  
+			// Front face (z + 1), viewed from positive Z direction
+			vertex1 = pack_vertex_data(x,     y,     z + 1, face, 0);
+			vertex2 = pack_vertex_data(x + 1, y,     z + 1, face, 0);
+			vertex3 = pack_vertex_data(x + 1, y + 1, z + 1, face, 0);
+			vertex4 = pack_vertex_data(x,     y + 1, z + 1, face, 0);
+			break;
+
+		case FACE_BACK:  
+			// Back face (z), viewed from negative Z direction
+			vertex1 = pack_vertex_data(x,     y,     z,     face, 0);
+			vertex2 = pack_vertex_data(x,     y + 1, z,     face, 0);
+			vertex3 = pack_vertex_data(x + 1, y + 1, z,     face, 0);
+			vertex4 = pack_vertex_data(x + 1, y,     z,     face, 0);
+			break;
+
+		default:
+			return;
 	}
     
 	// Add vertices to the mesh
@@ -145,9 +145,13 @@ chunk_t *generate_terrain(Vector2 chunk_pos) {
 
 	for (int x = 0; x < 32; x++) {
 		for (int z = 0; z < 32; z++) {
-			float noise_data = fnlGetNoise2D(&noise, x + chunk_pos.x *32 , z + chunk_pos.y * 32) * 2;
-			for (int y = 0; y < noise_data; y++) {
-				chunk->blocks[x][z][y] = true;
+			float noise_data = fnlGetNoise2D(&noise, x + chunk_pos.x * 31 , z + chunk_pos.y * 31) * 2;
+			for (int y = 0; y < 32; y++) {
+				if (y < noise_data) {
+					chunk->blocks[x][z][y] = true;
+				} else {
+					chunk->blocks[x][z][y] = false;
+				}
 			}
 		}
 	}
@@ -155,37 +159,37 @@ chunk_t *generate_terrain(Vector2 chunk_pos) {
 }
 
 void	generate_chunk_mesh(engine_t *engine, chunk_t *chunk) {
-	for (int x = 0; x < 32; x++) {
-		for (int z = 0; z < 32; z++) {
-			for (int y = 0; y < 32; y++) {
-				if (chunk->blocks[x][z][y]) {
+	for (int x = 0; x < 31; x++) {
+		for (int z = 0; z < 31; z++) {
+			for (int y = 0; y < 31; y++) {
+				if (chunk->blocks[x][z][y] == true) {
 					// Top face
-					if (y < 31 && !chunk->blocks[x][z][y + 1]) {
+					if (y == 30 || !chunk->blocks[x][z][y + 1]) {
 						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_TOP);
 					}
 
 					// Bottom face
-					if (y > 0 && !chunk->blocks[x][z][y - 1]) {
+					if (y == 0 || !chunk->blocks[x][z][y - 1]) {
 						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_BOTTOM);
 					}
 
-					// Left face
-					if (z < 31 && !chunk->blocks[x][z + 1][y]) {
+					// Left face (negative X)
+					if (x == 0 || !chunk->blocks[x - 1][z][y]) {
 						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_LEFT);
 					}
 
-					// Right face
-					if (z > 0 && !chunk->blocks[x][z - 1][y]) {
+					// Right face (positive X)
+					if (x == 30 || !chunk->blocks[x + 1][z][y]) {
 						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_RIGHT);
 					}
 
-					// Front face
-					if (x < 31 && !chunk->blocks[x + 1][z][y]) {
+					// Front face (positive Z)
+					if (z == 30 || !chunk->blocks[x][z + 1][y]) {
 						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_FRONT);
 					}
 
-					// Back face
-					if (x > 0 && !chunk->blocks[x - 1][z][y]) {
+					// Back face (negative Z)
+					if (z == 0 || !chunk->blocks[x][z - 1][y]) {
 						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_BACK);
 					}
 				}

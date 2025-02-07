@@ -61,7 +61,9 @@ void	voxel_render(engine_t *engine, chunk_t *world[5][5]) {
 				render_vox_mesh(world[x][z]);
 			}
 		}
-	DrawGrid(50, 1);
+	DrawLine3D(Vector3Zero(), (Vector3){100, 0, 0}, RED);
+	DrawLine3D(Vector3Zero(), (Vector3){0, 100, 0}, GREEN);
+	DrawLine3D(Vector3Zero(), (Vector3){0, 0, 100}, BLUE);
 	EndMode3D();
 	draw_ui(engine->player);
 	EndDrawing();
