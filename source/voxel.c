@@ -162,37 +162,7 @@ void	generate_chunk_mesh(chunk_t *chunk) {
 		for (int z = 0; z < 31; z++) {
 			for (int y = 0; y < 31; y++) {
 				char id = chunk->blocks[x][z][y];
-				if (id == 2) {
-					// Top face
-					if (y == 30 || !chunk->blocks[x][z][y + 1]) {
-						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_TOP, id);
-					}
-
-					// Bottom face
-					if (y == 0 || !chunk->blocks[x][z][y - 1]) {
-						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_BOTTOM, id);
-					}
-
-					// Left face (negative X)
-					if (x == 0 || !chunk->blocks[x - 1][z][y]) {
-						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_LEFT, id);
-					}
-
-					// Right face (positive X)
-					if (x == 30 || !chunk->blocks[x + 1][z][y]) {
-						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_RIGHT, id);
-					}
-
-					// Front face (positive Z)
-					if (z == 30 || !chunk->blocks[x][z + 1][y]) {
-						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_FRONT, id);
-					}
-
-					// Back face (negative Z)
-					if (z == 0 || !chunk->blocks[x][z - 1][y]) {
-						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_BACK, id);
-					}
-				} else if (id) {
+				if (id) {
 					// Top face
 					if (y == 30 || chunk->blocks[x][z][y + 1] != 1) {
 						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_TOP, id);
