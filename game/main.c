@@ -21,7 +21,7 @@ int main(void) {
 	for (int x = 0; x < 5; x++) {
 		for (int z = 0; z < 5; z++) {
 			world[x][z] = generate_terrain((Vector2){x, z});
-			generate_chunk_mesh(&engine, world[x][z]);
+			generate_chunk_mesh(world[x][z]);
 			setup_chunk_buffers(world[x][z]);
 			world[x][z]->shader = engine.vox_shader;
 			world[x][z]->world_pos = (Vector3){x * 31, 0, z * 31};
@@ -38,7 +38,7 @@ int main(void) {
 
 	double launch_time = GetTime();
 
-	// SetTargetFPS(120);
+	SetTargetFPS(120);
 	while (!WindowShouldClose()) {
 		update_input(&engine);
 		// update(&input);

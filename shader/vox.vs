@@ -8,6 +8,7 @@ uniform mat4 matProjection; // Projection matrix
 
 out vec3 frag_pos;
 out int face;
+out int extra;
 
 void main() {
 	// Unpack the data
@@ -15,6 +16,7 @@ void main() {
 	int y = (packed_data >> 22) & 0x1F;
 	int z = (packed_data >> 17) & 0x1F;
 	face = (packed_data >> 14) & 0x07;
+	extra = (packed_data >> 11) & 0x07;
 
 	// Convert to world coordinates
 	vec3 local_pos = vec3(x, y, z);

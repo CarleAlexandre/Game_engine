@@ -6,22 +6,22 @@ void	update_input(engine_t *engine) {
 	Vector3 step = {0};
 
 	if (IsKeyDown(KEY_W)) {
-		step.x += 10 *GetFrameTime();
+		step.x += 30 *GetFrameTime();
 	}
 	if (IsKeyDown(KEY_S)) {
-		step.x -= 10 *GetFrameTime();
+		step.x -= 30 *GetFrameTime();
 	}
 	if (IsKeyDown(KEY_A)) {
-		step.y -= 10 *GetFrameTime();
+		step.y -= 30 *GetFrameTime();
 	}
 	if (IsKeyDown(KEY_D)) {
-		step.y += 10 *GetFrameTime();
+		step.y += 30 *GetFrameTime();
 	}
 	if (IsKeyDown(KEY_SPACE)) {
-		step.z += 10 *GetFrameTime();
+		step.z += 30 *GetFrameTime();
 	}
 	if (IsKeyDown(KEY_LEFT_SHIFT)) {
-		step.z -= 10 *GetFrameTime();
+		step.z -= 30 *GetFrameTime();
 	}
 	if (IsKeyPressed(KEY_Q)) {
 		int i = engine->mode;

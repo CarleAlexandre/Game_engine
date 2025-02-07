@@ -276,7 +276,7 @@ typedef struct s_terrain {
 }	terrain_t;
 
 typedef struct s_chunk {
-	bool		blocks[32][32][32];
+	char		blocks[32][32][32];
 	unsigned int	vao, vbo, ebo;
 	mesh_t		mesh;
 	Shader		shader;

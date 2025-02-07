@@ -26,6 +26,8 @@
 
 ## voxel building
 
+	need to add micro block/ different shap voxel
+
 ## voxel items
 
 ### Idea
@@ -52,4 +54,3 @@
 ## TODO 
 
 	chunk rendering
-
