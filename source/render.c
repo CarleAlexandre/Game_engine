@@ -46,15 +46,31 @@ void UpdateLightValues(Shader shader, light_t light) {
     SetShaderValue(shader, light.colorLoc, color, SHADER_UNIFORM_VEC4);
 }
 
+void	voxel_render(engine_t *engine, chunk_t *world[5][5]) {
+	float camera_pos[3] = {engine->camera.position.x, engine->camera.position.y, engine->camera.position.z};
+	SetShaderValue(engine->vox_shader, engine->vox_shader.locs[SHADER_LOC_VECTOR_VIEW], camera_pos, SHADER_UNIFORM_VEC3);
+	int screen_height = GetScreenHeight(), screen_width = GetScreenWidth();
+
+	
+	BeginDrawing();
+	ClearBackground(BLACK);
+	BeginMode3D(engine->camera);
+		for (int x = 0; x < 5; x++){
+			for (int z = 0; z < 5; z++){
+				render_vox_mesh(world[x][z]);
+			}
+		}
+	DrawGrid(50, 1);
+	EndMode3D();
+	draw_ui(engine->player);
+	EndDrawing();
+}
+
 void	render(engine_t *engine, chunk_t *world[5][5]) {
 	float camera_pos[3] = {engine->camera.position.x, engine->camera.position.y, engine->camera.position.z};
 	SetShaderValue(engine->deffered_shader, engine->deffered_shader.locs[SHADER_LOC_VECTOR_VIEW], camera_pos, SHADER_UNIFORM_VEC3);
 
 	int screen_height = GetScreenHeight(), screen_width = GetScreenWidth();
-	for (int i = 0; i < MAX_LIGHTS; i++) {
-		engine->lights[i].position = Vector3RotateByAxisAngle(engine->lights[i].position, (Vector3){0, 1, 0}, DEG2RAD * GetFrameTime());
-		UpdateLightValues(engine->deffered_shader, engine->lights[i]);
-	}
 
 	BeginDrawing();
 	ClearBackground(BLACK);
@@ -64,13 +80,7 @@ void	render(engine_t *engine, chunk_t *world[5][5]) {
 	BeginMode3D(engine->camera);
 	rlEnableShader(engine->gbuffer_shader.id);
 
-	// DrawModel(engine->dummy, (Vector3){0, -10, 0}, 1, WHITE);
-	// generate_chunk_mesh(engine, world);
-	for (int x = 0; x < 5; x++){
-		for (int z = 0; z < 5; z++){
-			render_mesh(world[x][z]);
-		}
-	}
+	//draw model here
 
 	rlDisableShader();
 	EndMode3D();

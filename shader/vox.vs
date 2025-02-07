@@ -1,20 +1,17 @@
 #version 330 core
+
 layout(location = 0) in int packed_data; // Packed vertex data
 uniform vec3 world_pos;
 
-out vec3 frag_pos; // Unpacked position
+out vec3 finalPos; // Unpacked position
 out int face;      // Unpacked face
 out int extra;     // Unpacked extra data
 
+uniform mat4 matModel;
+uniform mat4 matView;
+uniform mat4 matProjection;
+
 void main() {
-	vec3 NORMALS[6] = {
-		vec3( 0.0,  1.0,  0.0),
-		vec3( 0.0, -1.0,  0.0),
-		vec3( 1.0,  0.0,  0.0),
-		vec3(-1.0,  1.0,  0.0),
-		vec3( 0.0,  0.0,  1.0),
-		vec3( 0.0,  0.0, -1.0)
-	};
 
 	// Unpack the data
 	int x = (packed_data >> 27) & 0x1F; // Extract x (5 bits)
@@ -23,11 +20,13 @@ void main() {
 	face = (packed_data >> 14) & 0x07;  // Extract face (3 bits)
 	extra = packed_data & 0x3FFF;       // Extract extra data (14 bits)
 
-	// Convert to world coordinates (optional)
-	frag_pos = vec3(x, y, z);
-	vec3 normal = NORMALS[face];
+	vec3 frag_pos = vec3(x, y, z);
 
-	// Transform the position for rendering
-	vec3 finalPos = vertex_pos + world_pos;
-	gl_Position = vec4(frag_pos, 1.0); // Replace with your projection/view/model matrix
+	finalPos = frag_pos + world_pos;
+
+	vec4 worldPosition = matModel * vec4(finalPos, 1.0);
+	vec4 viewPosition = matView * worldPosition;
+	vec4 clipPosition = matProjection * viewPosition;
+
+	gl_Position = clipPosition;
 }

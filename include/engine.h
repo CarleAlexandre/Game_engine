@@ -279,6 +279,8 @@ typedef struct s_chunk {
 	bool		blocks[32][32][32];
 	unsigned int	vao, vbo, ebo;
 	mesh_t		mesh;
+	Shader		shader;
+	Vector3		world_pos;
 }	chunk_t;
 
 typedef enum {
@@ -302,14 +304,11 @@ typedef struct s_engine {
 	Shader posprocess;
 	Shader gbuffer_shader;
 	Shader deffered_shader;
+	Shader vox_shader;
 	gbuffer_t gbuffer;
 	Camera3D camera;
 	RenderTexture2D fbo;
 	deferred_mode mode;
-	Model cube;
-	Model Sphere;
-	Model dummy;
-	light_t lights[MAX_LIGHTS];
 	sv_player_t player;
 }	engine_t;
 

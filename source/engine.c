@@ -54,6 +54,7 @@ engine_t init_engine(void) {
 	engine.posprocess = LoadShader(0, "shader/postprocess.fs");
 	engine.deffered_shader = LoadShader("shader/defered.vs", "shader/defered.fs");
 	engine.gbuffer_shader = LoadShader("shader/gbuffer.vs", "shader/gbuffer.fs");
+	engine.vox_shader = LoadShader("shader/vox.vs", "shader/vox.fs");
 	engine.deffered_shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(engine.deffered_shader, "viewPosition");
 
 	engine.gbuffer = loadGbuffer(width, height, engine.deffered_shader) ;
@@ -66,10 +67,9 @@ void close_engine(engine_t *engine) {
 	UnloadShader(engine->deffered_shader);
 	UnloadShader(engine->gbuffer_shader);
 	UnloadShader(engine->posprocess);
+	UnloadShader(engine->vox_shader);
 	UnloadRenderTexture(engine->fbo);
 	rlUnloadFramebuffer(engine->gbuffer.framebuffer);
-	UnloadModel(engine->cube);
-	UnloadModel(engine->Sphere);
 	rlUnloadTexture(engine->gbuffer.positionTexture);
 	rlUnloadTexture(engine->gbuffer.normalTexture);
 	rlUnloadTexture(engine->gbuffer.albedoSpecTexture);

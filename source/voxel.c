@@ -64,11 +64,60 @@ void	unpack_vertex_data(int packed, int *x, int *y, int *z, int *face, int *extr
 }
 
 void	add_face_to_mesh(mesh_t *mesh, int x, int y, int z, int face) {
-	// Pack vertex data for the 4 vertices of the face
-	int vertex1 = pack_vertex_data(x, y, z, face, 0); // Example: extra data = 0
-	int vertex2 = pack_vertex_data(x + 1, y, z, face, 0);
-	int vertex3 = pack_vertex_data(x + 1, y, z + 1, face, 0);
-	int vertex4 = pack_vertex_data(x, y, z + 1, face, 0);
+	int vertex1, vertex2, vertex3, vertex4;
+
+	switch (face) {
+	    case FACE_TOP:
+		// Top face (y + 1)
+		vertex1 = pack_vertex_data(x,     y + 1, z,     face, 0);
+		vertex2 = pack_vertex_data(x + 1, y + 1, z,     face, 0);
+		vertex3 = pack_vertex_data(x + 1, y + 1, z + 1, face, 0);
+		vertex4 = pack_vertex_data(x,     y + 1, z + 1, face, 0);
+		break;
+    
+	    case FACE_BOTTOM:
+		// Bottom face (y)
+		vertex1 = pack_vertex_data(x,     y, z,     face, 0);
+		vertex2 = pack_vertex_data(x + 1, y, z,     face, 0);
+		vertex3 = pack_vertex_data(x + 1, y, z + 1, face, 0);
+		vertex4 = pack_vertex_data(x,     y, z + 1, face, 0);
+		break;
+    
+	    case FACE_LEFT:
+		// Left face (z + 1)
+		vertex1 = pack_vertex_data(x,     y,     z + 1, face, 0);
+		vertex2 = pack_vertex_data(x + 1, y,     z + 1, face, 0);
+		vertex3 = pack_vertex_data(x + 1, y + 1, z + 1, face, 0);
+		vertex4 = pack_vertex_data(x,     y + 1, z + 1, face, 0);
+		break;
+    
+	    case FACE_RIGHT:
+		// Right face (z)
+		vertex1 = pack_vertex_data(x,     y,     z, face, 0);
+		vertex2 = pack_vertex_data(x + 1, y,     z, face, 0);
+		vertex3 = pack_vertex_data(x + 1, y + 1, z, face, 0);
+		vertex4 = pack_vertex_data(x,     y + 1, z, face, 0);
+		break;
+    
+	    case FACE_FRONT:
+		// Front face (x + 1)
+		vertex1 = pack_vertex_data(x + 1, y,     z,     face, 0);
+		vertex2 = pack_vertex_data(x + 1, y,     z + 1, face, 0);
+		vertex3 = pack_vertex_data(x + 1, y + 1, z + 1, face, 0);
+		vertex4 = pack_vertex_data(x + 1, y + 1, z,     face, 0);
+		break;
+    
+	    case FACE_BACK:
+		// Back face (x)
+		vertex1 = pack_vertex_data(x, y,     z,     face, 0);
+		vertex2 = pack_vertex_data(x, y,     z + 1, face, 0);
+		vertex3 = pack_vertex_data(x, y + 1, z + 1, face, 0);
+		vertex4 = pack_vertex_data(x, y + 1, z,     face, 0);
+		break;
+    
+	    default:
+		return;
+	}
     
 	// Add vertices to the mesh
 	mesh->vertices[mesh->vertex_count++] = vertex1;
@@ -143,27 +192,27 @@ void	generate_chunk_mesh(engine_t *engine, chunk_t *chunk) {
 			}
 		}
 	}
+}
 
-	// Generate buffers
+void setup_chunk_buffers(chunk_t *chunk) {
+	// Generate and bind the VAO
 	glGenVertexArrays(1, &chunk->vao);
-	glGenBuffers(1, &chunk->vbo);
-	glGenBuffers(1, &chunk->ebo);
-
-	// Bind the VAO
 	glBindVertexArray(chunk->vao);
-
-	// Upload vertex data
+    
+	// Generate and bind the VBO
+	glGenBuffers(1, &chunk->vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, chunk->vbo);
 	glBufferData(GL_ARRAY_BUFFER, chunk->mesh.vertex_count * sizeof(int), chunk->mesh.vertices, GL_STATIC_DRAW);
-
-	// Upload index data
+    
+	// Generate and bind the EBO
+	glGenBuffers(1, &chunk->ebo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk->ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, chunk->mesh.index_count * sizeof(unsigned int), chunk->mesh.indices, GL_STATIC_DRAW);
-
+    
 	// Set up vertex attribute pointer
 	glVertexAttribIPointer(0, 1, GL_INT, sizeof(int), (void*)0); // Packed data is an integer
 	glEnableVertexAttribArray(0);
-
+    
 	// Unbind the VAO
 	glBindVertexArray(0);
 }
@@ -172,7 +221,24 @@ void	combine_chunk_data(){
 
 }
 
-void render_mesh(chunk_t *chunk) {
+void render_vox_mesh(chunk_t *chunk) {
+
+	glUseProgram(chunk->shader.id);
+
+	Matrix matModel = MatrixIdentity();
+	Matrix matView = rlGetMatrixModelview();
+	Matrix matProjection = rlGetMatrixProjection();
+	glUniform3f(glGetUniformLocation(chunk->shader.id, "world_pos"), chunk->world_pos.x, chunk->world_pos.y, chunk->world_pos.z);
+	rlSetUniformMatrix(glGetUniformLocation(chunk->shader.id, "matView"), matView);
+	rlSetUniformMatrix(glGetUniformLocation(chunk->shader.id, "matProjection"), matProjection);
+	rlSetUniformMatrix(glGetUniformLocation(chunk->shader.id, "matModel"), matModel);
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	glBindVertexArray(chunk->vao);
 	glDrawElements(GL_TRIANGLES, chunk->mesh.index_count, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);

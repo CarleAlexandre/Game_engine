@@ -22,20 +22,11 @@ int main(void) {
 		for (int z = 0; z < 5; z++) {
 			world[x][z] = generate_terrain((Vector2){x, z});
 			generate_chunk_mesh(&engine, world[x][z]);
+			setup_chunk_buffers(world[x][z]);
+			world[x][z]->shader = engine.vox_shader;
+			world[x][z]->world_pos = (Vector3){x * 32, 0, z * 32};
 		}
 	}
-
-	engine.lights[0] = CreateLight(LIGHT_POINT, (Vector3){ -0, 40, -100 }, Vector3Zero(), YELLOW, engine.deffered_shader);
-	engine.lights[1] = CreateLight(LIGHT_POINT, (Vector3){ 0, 40, 100 }, Vector3Zero(), RED, engine.deffered_shader);
-	engine.lights[2] = CreateLight(LIGHT_POINT, (Vector3){ -100, 40, 0 }, Vector3Zero(), GREEN, engine.deffered_shader);
-	engine.lights[3] = CreateLight(LIGHT_POINT, (Vector3){ 100, 40, -0 }, Vector3Zero(), BLUE, engine.deffered_shader);
-
-	engine.cube = LoadModelFromMesh(GenMeshCube(1, 1, 1));
-	engine.Sphere = LoadModelFromMesh(GenMeshSphere(5, 10, 10));
-	engine.dummy = LoadModelFromMesh(GenMeshHeightmap(LoadImage("assets/heightmap/snowdon.png"), (Vector3){100, 10, 100}));
-	engine.cube.materials[0].shader = engine.gbuffer_shader;
-	engine.Sphere.materials[0].shader = engine.gbuffer_shader;
-	engine.dummy.materials[0].shader = engine.gbuffer_shader;
 
 	engine.player.stats.max_health = 150;
 	engine.player.stats.health = 100;
@@ -51,8 +42,9 @@ int main(void) {
 	while (!WindowShouldClose()) {
 		update_input(&engine);
 		// update(&input);
-		engine.player.pos = engine.camera.position;
-		render(&engine, world);
+		// engine.player.pos = engine.camera.position;
+		// render(&engine, world);
+		voxel_render(&engine, world);
 	}
 	ShowCursor();
 	close_engine(&engine);

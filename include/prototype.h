@@ -20,7 +20,9 @@ void	draw_toolbar(tool_bar_t *tool_bar);
 void	heightmap_voxel(Image heightmap);
 void	generate_chunk_mesh(engine_t *engine, chunk_t *chunk);
 chunk_t	*generate_terrain(Vector2 chunk_pos);
-void render_mesh(chunk_t *chunk);
+void	render_vox_mesh(chunk_t *chunk);
+void	setup_chunk_buffers(chunk_t *chunk);
+void	voxel_render(engine_t *engine, chunk_t *world[5][5]);
 
 void	draw_ui(sv_player_t player);
 
