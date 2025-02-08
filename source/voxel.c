@@ -175,32 +175,37 @@ void	generate_chunk_mesh(chunk_t *chunk) {
 		for (int z = 0; z < 31; z++) {
 			for (int y = 0; y < 31; y++) {
 				char id = chunk->blocks[x][z][y];
-				if (id) {
+				if (!id) continue;
+				if (id == 2) {
+					if (y == 30 || chunk->blocks[x][z][y + 1] != 2) {
+						add_face_to_mesh(&chunk->trans, x, y, z, FACE_TOP, id);
+					}
+				} else {
 					// Top face
 					if (y == 30 || chunk->blocks[x][z][y + 1] != 1) {
 						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_TOP, id);
 					}
-
+					
 					// Bottom face
 					if (y == 0 || chunk->blocks[x][z][y - 1] != 1) {
 						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_BOTTOM, id);
 					}
-
+					
 					// Left face (negative X)
 					if (x == 0 || chunk->blocks[x - 1][z][y] != 1) {
 						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_LEFT, id);
 					}
-
+					
 					// Right face (positive X)
 					if (x == 30 || chunk->blocks[x + 1][z][y] != 1) {
 						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_RIGHT, id);
 					}
-
+					
 					// Front face (positive Z)
 					if (z == 30 || chunk->blocks[x][z + 1][y] != 1) {
 						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_FRONT, id);
 					}
-
+					
 					// Back face (negative Z)
 					if (z == 0 || chunk->blocks[x][z - 1][y] != 1) {
 						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_BACK, id);
@@ -219,7 +224,7 @@ void	generate_chunk_mesh(chunk_t *chunk) {
 // 	}
 // }
 
-void setup_chunk_buffers(chunk_t *chunk) {
+void	setup_chunk_buffers(chunk_t *chunk) {
 	// Generate and bind the VAO
 	glGenVertexArrays(1, &chunk->vao);
 	glBindVertexArray(chunk->vao);
@@ -242,7 +247,7 @@ void setup_chunk_buffers(chunk_t *chunk) {
 	glBindVertexArray(0);
 }
 
-void reload_chunk_buffers(chunk_t *chunk) {
+void	reload_chunk_buffers(chunk_t *chunk) {
 	// Bind the VAO
 	glBindVertexArray(chunk->vao);
     
@@ -262,7 +267,7 @@ void	combine_chunk_data(){
 
 }
 
-void render_vox_mesh(chunk_t *chunk) {
+void	render_vox_mesh(chunk_t *chunk) {
 
 	Matrix matModel = MatrixIdentity();
 	Matrix matView = rlGetMatrixModelview();
@@ -274,5 +279,59 @@ void render_vox_mesh(chunk_t *chunk) {
 
 	glBindVertexArray(chunk->vao);
 	glDrawElements(GL_TRIANGLES, chunk->mesh.index_count, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+}
+
+void setup_chunk_trans(chunk_t *chunk) {
+	// Generate and bind the VAO
+	glGenVertexArrays(1, &chunk->vao_trans);
+	glBindVertexArray(chunk->vao_trans);
+    
+	// Generate and bind the VBO
+	glGenBuffers(1, &chunk->vbo_trans);
+	glBindBuffer(GL_ARRAY_BUFFER, chunk->vbo_trans);
+	glBufferData(GL_ARRAY_BUFFER, chunk->trans.vertex_count * sizeof(int), chunk->trans.vertices, GL_DYNAMIC_DRAW);
+    
+	// Generate and bind the EBO
+	glGenBuffers(1, &chunk->ebo_trans);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk->ebo_trans);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, chunk->trans.index_count * sizeof(unsigned int), chunk->trans.indices, GL_DYNAMIC_DRAW);
+    
+	// Set up vertex attribute pointer
+	glVertexAttribIPointer(0, 1, GL_INT, sizeof(int), (void*)0); // Packed data is an integer
+	glEnableVertexAttribArray(0);
+    
+	// Unbind the VAO
+	glBindVertexArray(0);
+}
+
+void	reload_chunk_trans(chunk_t *chunk) {
+	// Bind the VAO
+	glBindVertexArray(chunk->vao_trans);
+    
+	// Update the VBO with new vertex data
+	glBindBuffer(GL_ARRAY_BUFFER, chunk->vbo_trans);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, chunk->trans.vertex_count * sizeof(int), chunk->trans.vertices);
+    
+	// Update the EBO with new index data
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk->ebo_trans);
+	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, chunk->trans.index_count * sizeof(unsigned int), chunk->trans.indices);
+    
+	// Unbind the VAO
+	glBindVertexArray(0);
+}
+
+void	render_vox_trans(chunk_t *chunk) {
+
+	Matrix matModel = MatrixIdentity();
+	Matrix matView = rlGetMatrixModelview();
+	Matrix matProjection = rlGetMatrixProjection();
+	glUniform3f(glGetUniformLocation(chunk->shader.id, "world_pos"), chunk->world_pos.x, chunk->world_pos.y, chunk->world_pos.z);
+	rlSetUniformMatrix(glGetUniformLocation(chunk->shader.id, "matView"), matView);
+	rlSetUniformMatrix(glGetUniformLocation(chunk->shader.id, "matProjection"), matProjection);
+	rlSetUniformMatrix(glGetUniformLocation(chunk->shader.id, "matModel"), matModel);
+
+	glBindVertexArray(chunk->vao_trans);
+	glDrawElements(GL_TRIANGLES, chunk->trans.index_count, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 }

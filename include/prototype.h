@@ -25,6 +25,10 @@ void	reload_chunk_buffers(chunk_t *chunk);
 void	setup_chunk_buffers(chunk_t *chunk);
 void	voxel_render(engine_t *engine, chunk_t *world[5][5]);
 void	clear_chunk_mesh(chunk_t *chunk);
+void	render_vox_trans(chunk_t *chunk);
+void	setup_chunk_trans(chunk_t *chunk);
+void	reload_chunk_trans(chunk_t *chunk);
+void	render_vox_trans(chunk_t *chunk);
 
 void	draw_ui(sv_player_t player);
 

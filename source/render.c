@@ -51,9 +51,9 @@ void	voxel_render(engine_t *engine, chunk_t *world[5][5]) {
 	SetShaderValue(engine->vox_shader, engine->vox_shader.locs[SHADER_LOC_VECTOR_VIEW], camera_pos, SHADER_UNIFORM_VEC3);
 	int screen_height = GetScreenHeight(), screen_width = GetScreenWidth();
 
-	clear_chunk_mesh(world[0][0]);
-	generate_chunk_mesh(world[0][0]);
-	reload_chunk_buffers(world[0][0]);
+	// clear_chunk_mesh(world[0][0]);
+	// generate_chunk_mesh(world[0][0]);
+	// reload_chunk_buffers(world[0][0]);
 
 	BeginDrawing();
 	ClearBackground(BLACK);
@@ -64,6 +64,13 @@ void	voxel_render(engine_t *engine, chunk_t *world[5][5]) {
 				render_vox_mesh(world[x][z]);
 			}
 		}
+	
+		for (int x = 0; x < 5; x++){
+			for (int z = 0; z < 5; z++){
+				render_vox_trans(world[x][z]);
+			}
+		}
+	
 	DrawLine3D(Vector3Zero(), (Vector3){100, 0, 0}, RED);
 	DrawLine3D(Vector3Zero(), (Vector3){0, 100, 0}, GREEN);
 	DrawLine3D(Vector3Zero(), (Vector3){0, 0, 100}, BLUE);

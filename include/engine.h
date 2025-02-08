@@ -273,8 +273,9 @@ typedef struct s_chunk {
 	char		blocks[31][31][31];
 	// svo_t		blocks;
 	unsigned int	vao, vbo, ebo;
+	unsigned int	vao_trans, vbo_trans, ebo_trans;
 	mesh_t		mesh;
-	mesh_t		transparent;
+	mesh_t		trans;
 	Shader		shader;
 	Vector3		world_pos;
 }	chunk_t;

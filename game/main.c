@@ -25,6 +25,7 @@ int main(void) {
 			world[x][z]->world_pos = (Vector3){x, 0, z};
 			generate_chunk_mesh(world[x][z]);
 			setup_chunk_buffers(world[x][z]);
+			setup_chunk_trans(world[x][z]);
 		}
 	}
 	engine.player.stats.max_health = 150;
