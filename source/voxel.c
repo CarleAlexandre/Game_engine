@@ -138,12 +138,12 @@ chunk_t *generate_terrain(Vector2 chunk_pos) {
 	noise.noise_type = FNL_NOISE_OPENSIMPLEX2S;
 
 	chunk_t *chunk = malloc(sizeof(chunk_t));
-	memset(chunk, 0, sizeof(chunk_t));
+	memset(chunk->blocks, 0, sizeof(char[31][31][31]));
 
-	for (int x = 0; x < 32; x++) {
-		for (int z = 0; z < 32; z++) {
+	for (int x = 0; x < 31; x++) {
+		for (int z = 0; z < 31; z++) {
 			float noise_data = (fnlGetNoise2D(&noise, x + chunk_pos.x * 31 , z + chunk_pos.y * 31) + 1) * 10;
-			for (int y = 0; y < 32; y++) {
+			for (int y = 0; y < 31; y++) {
 				if (y <= noise_data) {
 					chunk->blocks[x][z][y] = 1;
 				} else if (y > noise_data && y < 5) {
@@ -156,6 +156,11 @@ chunk_t *generate_terrain(Vector2 chunk_pos) {
 	}
 	return (chunk);
 }
+
+#define CHECK_NEIGHBOR(axis, edge_cond, neighbor_ptr, neighbor_axis) \
+    (axis edge_cond) ? (current->blocks[x][z][y] != 0) : \
+    (neighbor_ptr ? neighbor_ptr->blocks[neighbor_axis][z][y] != 0 : false)
+    
 
 void	generate_chunk_mesh(chunk_t *chunk) {
 	for (int x = 0; x < 31; x++) {
@@ -198,12 +203,13 @@ void	generate_chunk_mesh(chunk_t *chunk) {
 	}
 }
 
-void	add_block(int pos_x, int pos_y, int pos_z, chunk_t *chunk) {
-	if (chunk->blocks[pos_x][pos_z][pos_y] == 0) {
-		chunk->blocks[pos_x][pos_z][pos_y] = 1;
-		generate_chunk_mesh(chunk);
-	}
-}
+	
+// void	add_block(int pos_x, int pos_y, int pos_z, chunk_t *chunk) {
+// 	if (chunk->blocks[pos_x][pos_z][pos_y] == 0) {
+// 		chunk->blocks[pos_x][pos_z][pos_y] = 1;
+// 		generate_chunk_mesh(chunk);
+// 	}
+// }
 
 void setup_chunk_buffers(chunk_t *chunk) {
 	// Generate and bind the VAO

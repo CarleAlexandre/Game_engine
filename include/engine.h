@@ -8,6 +8,7 @@
 #include <raymath.h>
 #include <rcamera.h>
 #include <stdlib.h>
+// #include <sparse_voxel_octree.h>
 
 /*
 	DEFINE
@@ -21,7 +22,7 @@
 
 #define ITEM_MAGIC
 
-#define MAX_VERTICES 100000
+#define MAX_VERTICES 119164
 
 #define FACE_TOP    0
 #define FACE_BOTTOM 1
@@ -160,15 +161,15 @@ typedef enum {
 */
 
 typedef	struct {
-    int	vertices[MAX_VERTICES]; // Array to store packed vertex data
-    unsigned int indices[MAX_VERTICES]; // Array to store indices
-    int vertex_count; // Current number of vertices
-    int index_count; // Current number of indices
+	int	vertices[MAX_VERTICES]; // Array to store packed vertex data
+	unsigned int	indices[MAX_VERTICES]; // Array to store indices
+	int	vertex_count; // Current number of vertices
+	int	index_count; // Current number of indices
 }	mesh_t;
 
 typedef struct s_token {
-	int id;
-	char *data;
+	int	id;
+	char	*data;
 } t_token;
 
 typedef	struct s_file {
@@ -178,138 +179,125 @@ typedef	struct s_file {
 }	file_t;
 
 typedef struct s_stats {
-	int health;
-	int max_health;
+	int	health;
+	int	max_health;
 }	stats_t;
 
 typedef struct s_player {
-	Vector3 pos;
-	BoundingBox bound;
+	Vector3	pos;
+	BoundingBox	bound;
 }	player_t;
 
 typedef struct s_object {
-	Vector3 pos;
-	float scale;
-	int type;
-	BoundingBox bound;
-	bool render;
-	int model_id;
+	Vector3	pos;
+	float	scale;
+	int	type;
+	BoundingBox	bound;
+	bool	render;
+	int	model_id;
 }	object_t;
 
 typedef struct s_item {
-	bool is_placable;
-	int type;
-	int texture_id;
-	int material;
-	int damage;
-	int durability;
-	int effect;
-	int max_stack;
-	int rarity;
-	int size;
+	bool	is_placable;
+	int	type;
+	int	texture_id;
+	int	material;
+	int	damage;
+	int	durability;
+	int	effect;
+	int	max_stack;
+	int	rarity;
+	int	size;
 }	item_t;
 
 typedef	struct s_inventory {
-	item_t *item;
-	unsigned int size;
+	item_t	*item;
+	unsigned int	size;
 }	inventory_t;
 
 typedef struct s_tool_bar{
-	int current_item;
-	bool gotonext;
-	bool gotoprev;
-	Vector2 pos1;
-	Vector2 pos2;
-	Vector2 topos1;
-	Vector2 topos2;
+	int	current_item;
+	bool	gotonext;
+	bool	gotoprev;
+	Vector2	pos1;
+	Vector2	pos2;
+	Vector2	topos1;
+	Vector2	topos2;
 }	tool_bar_t;
 
 typedef struct s_projectile {
-	Ray shot;
-	float mass;
-	int model_id;
-	int lifespan;
+	Ray	shot;
+	float	mass;
+	int	model_id;
+	int	lifespan;
 }	projectile_t;
 
 typedef struct s_entity {
-	Vector3 pos;
-	int size;
-	int layer;
-	int model_id;
-	BoundingBox bound;
+	Vector3	pos;
+	int	size;
+	int	layer;
+	int	model_id;
+	BoundingBox	bound;
 }	entity_t;
 
 typedef struct sv_player_s {
-	Vector3 pos;
-	BoundingBox bound;
-	stats_t stats;
-	bool show_inventory;
-	tool_bar_t toolbar;
-	inventory_t inventory;
-	unsigned long long uuid;
+	Vector3	pos;
+	BoundingBox	bound;
+	stats_t	stats;
+	bool	show_inventory;
+	tool_bar_t	toolbar;
+	inventory_t	inventory;
+	unsigned long long	uid;
 }	sv_player_t;
 
 //
 
 typedef struct s_light {
-	int type;
-	bool enabled;
-	Vector3 position;
-	Vector3 target;
-	Color color;
-	float attenuation;
+	int	type;
+	bool	enabled;
+	Vector3	position;
+	Vector3	target;
+	Color	color;
+	float	attenuation;
 
 	// Shader locations
-	int enabledLoc;
-	int typeLoc;
-	int positionLoc;
-	int targetLoc;
-	int colorLoc;
-	int attenuationLoc;
+	int	enabledLoc;
+	int	typeLoc;
+	int	positionLoc;
+	int	targetLoc;
+	int	colorLoc;
+	int	attenuationLoc;
 }	light_t;
 
-typedef struct s_terrain {
-	Model model;
-	Vector3 pos;
-	float scale;
-	BoundingBox bound;
-}	terrain_t;
-
 typedef struct s_chunk {
-	char		blocks[32][32][32];
+	char		blocks[31][31][31];
+	// svo_t		blocks;
 	unsigned int	vao, vbo, ebo;
 	mesh_t		mesh;
+	mesh_t		transparent;
 	Shader		shader;
 	Vector3		world_pos;
 }	chunk_t;
 
-typedef enum {
-	vert_pos_x_e =  0,
-	vert_pos_y_e = 1 << 6,
-	vert_pos_z_e = 1 << 12,
-	vert_face_e = 1 << 18,
-	vert_text_id_e = 1 << 21,
-}	vox_vert_shift_e;
-
 typedef struct s_gbuffer{
-	unsigned int framebuffer;
-	unsigned int positionTexture;
-	unsigned int normalTexture;
-	unsigned int albedoSpecTexture;
-	unsigned int depthRenderbuffer;
-	unsigned int zTexture;
+	unsigned int	framebuffer;
+	unsigned int	positionTexture;
+	unsigned int	normalTexture;
+	unsigned int	albedoSpecTexture;
+	unsigned int	depthRenderbuffer;
+	unsigned int	zTexture;
 }	gbuffer_t;
 
 typedef struct s_engine {
-	Shader posprocess;
-	Shader gbuffer_shader;
-	Shader deffered_shader;
-	Shader vox_shader;
-	gbuffer_t gbuffer;
-	Camera3D camera;
-	RenderTexture2D fbo;
-	deferred_mode mode;
-	sv_player_t player;
+	Shader	posprocess;
+	Shader	gbuffer_shader;
+	Shader	deffered_shader;
+	Shader	vox_shader;
+	gbuffer_t	gbuffer;
+	Camera3D	camera;
+	RenderTexture2D	fbo;
+	deferred_mode	mode;
+	sv_player_t	player;
 }	engine_t;
 
 #endif

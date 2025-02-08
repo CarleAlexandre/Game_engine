@@ -21,13 +21,12 @@ int main(void) {
 	for (int x = 0; x < 5; x++) {
 		for (int z = 0; z < 5; z++) {
 			world[x][z] = generate_terrain((Vector2){x, z});
+			world[x][z]->shader = engine.vox_shader;
+			world[x][z]->world_pos = (Vector3){x, 0, z};
 			generate_chunk_mesh(world[x][z]);
 			setup_chunk_buffers(world[x][z]);
-			world[x][z]->shader = engine.vox_shader;
-			world[x][z]->world_pos = (Vector3){x * 31, 0, z * 31};
 		}
 	}
-
 	engine.player.stats.max_health = 150;
 	engine.player.stats.health = 100;
 	engine.player.bound = (BoundingBox){

@@ -1,5 +1,9 @@
 # F_ENGINE
 
+## World of Haven : Chaos dungeons
+
+Je suis en train de développer un moteur de jeu écrit en c99, ayant pour but de créer un jeu rogue-like dans un univers Voxel.
+
 ## networking
 
 ## input
