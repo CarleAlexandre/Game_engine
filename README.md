@@ -32,6 +32,10 @@ Je suis en train de développer un moteur de jeu écrit en c99, ayant pour but d
 
 	need to add micro block/ different shap voxel
 
+	add raytracing algorithme and raycasting too
+
+	transparency got a simple solution but could cost me much need to optimize it in the future
+
 ## voxel items
 
 ### Idea
