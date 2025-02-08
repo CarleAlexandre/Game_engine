@@ -161,6 +161,14 @@ chunk_t *generate_terrain(Vector2 chunk_pos) {
     (axis edge_cond) ? (current->blocks[x][z][y] != 0) : \
     (neighbor_ptr ? neighbor_ptr->blocks[neighbor_axis][z][y] != 0 : false)
     
+void	clear_chunk_mesh(chunk_t *chunk) {
+	if (chunk->mesh.index_count) {
+		memset(chunk->mesh.indices, 9, sizeof(int) * chunk->mesh.index_count);
+		memset(chunk->mesh.vertices, 9, sizeof(int) * chunk->mesh.vertex_count);
+		chunk->mesh.index_count = 0;
+		chunk->mesh.vertex_count = 0;
+	}
+}
 
 void	generate_chunk_mesh(chunk_t *chunk) {
 	for (int x = 0; x < 31; x++) {
@@ -219,16 +227,32 @@ void setup_chunk_buffers(chunk_t *chunk) {
 	// Generate and bind the VBO
 	glGenBuffers(1, &chunk->vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, chunk->vbo);
-	glBufferData(GL_ARRAY_BUFFER, chunk->mesh.vertex_count * sizeof(int), chunk->mesh.vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, chunk->mesh.vertex_count * sizeof(int), chunk->mesh.vertices, GL_DYNAMIC_DRAW);
     
 	// Generate and bind the EBO
 	glGenBuffers(1, &chunk->ebo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk->ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, chunk->mesh.index_count * sizeof(unsigned int), chunk->mesh.indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, chunk->mesh.index_count * sizeof(unsigned int), chunk->mesh.indices, GL_DYNAMIC_DRAW);
     
 	// Set up vertex attribute pointer
 	glVertexAttribIPointer(0, 1, GL_INT, sizeof(int), (void*)0); // Packed data is an integer
 	glEnableVertexAttribArray(0);
+    
+	// Unbind the VAO
+	glBindVertexArray(0);
+}
+
+void reload_chunk_buffers(chunk_t *chunk) {
+	// Bind the VAO
+	glBindVertexArray(chunk->vao);
+    
+	// Update the VBO with new vertex data
+	glBindBuffer(GL_ARRAY_BUFFER, chunk->vbo);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, chunk->mesh.vertex_count * sizeof(int), chunk->mesh.vertices);
+    
+	// Update the EBO with new index data
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk->ebo);
+	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, chunk->mesh.index_count * sizeof(unsigned int), chunk->mesh.indices);
     
 	// Unbind the VAO
 	glBindVertexArray(0);

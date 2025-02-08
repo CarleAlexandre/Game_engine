@@ -51,7 +51,10 @@ void	voxel_render(engine_t *engine, chunk_t *world[5][5]) {
 	SetShaderValue(engine->vox_shader, engine->vox_shader.locs[SHADER_LOC_VECTOR_VIEW], camera_pos, SHADER_UNIFORM_VEC3);
 	int screen_height = GetScreenHeight(), screen_width = GetScreenWidth();
 
-	
+	clear_chunk_mesh(world[0][0]);
+	generate_chunk_mesh(world[0][0]);
+	reload_chunk_buffers(world[0][0]);
+
 	BeginDrawing();
 	ClearBackground(BLACK);
 	BeginMode3D(engine->camera);
