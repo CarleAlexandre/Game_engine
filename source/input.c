@@ -1,6 +1,6 @@
-#include <engine.h>
+#include <prototype.h>
 
-void	update_input(engine_t *engine) {
+void	update_input(engine_t *engine, chunk_t **chunk) {
 	Vector2 delta = GetMouseDelta();
 	SetMousePosition(GetScreenWidth() * 0.5, GetScreenHeight() * 0.5); 
 	Vector3 step = {0};
@@ -27,10 +27,10 @@ void	update_input(engine_t *engine) {
 		int i = engine->mode;
 		i++;
 		i%= 5;
-		engine->mode = (deferred_mode)i; 
+		engine->mode = (deferred_mode)i;
 	}
 	if (IsKeyPressed(KEY_E)) {
-
+		add_block(0, 28, 0, chunk);
 	}
 	if (IsKeyPressed(KEY_TAB)) {
 		engine->player.show_inventory = !engine->player.show_inventory;

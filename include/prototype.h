@@ -10,8 +10,7 @@ void	UpdateLightValues(Shader shader, light_t light);
 light_t	CreateLight(int type, Vector3 position, Vector3 target, Color color, Shader shader);
 void	render(engine_t *engine, chunk_t *world[5][5]);
 
-void	update_input(engine_t *engine);
-
+void	update_input(engine_t *engine, chunk_t **chunk);
 
 void	draw_inventory(inventory_t inventory);
 void	init_toolbar(tool_bar_t *tool_bar);
@@ -29,6 +28,8 @@ void	render_vox_trans(chunk_t *chunk);
 void	setup_chunk_trans(chunk_t *chunk);
 void	reload_chunk_trans(chunk_t *chunk);
 void	render_vox_trans(chunk_t *chunk);
+void	add_block(int pos_x, int pos_y, int pos_z, chunk_t **chunk);
+
 
 void	draw_ui(sv_player_t player);
 

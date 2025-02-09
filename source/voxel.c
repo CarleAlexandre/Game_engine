@@ -4,16 +4,6 @@
 #define FNL_IMPL
 #include <FastNoiseLite.h>
 
-
-// #define MAX_COMBINED_VERTICES 1000000
-
-// typedef struct {
-//     int vertices[MAX_COMBINED_VERTICES];       // Combined vertex data for all chunks
-//     unsigned int indices[MAX_COMBINED_VERTICES]; // Combined index data for all chunks
-//     int vertex_count;                 // Total number of vertices
-//     int index_count;                  // Total number of indices
-// } combined_mesh_t;
-
 void	generate_dungeon() {
 	
 }
@@ -64,7 +54,7 @@ void	add_face_to_mesh(mesh_t *mesh, int x, int y, int z, int face, char id) {
 	int vertex1, vertex2, vertex3, vertex4;
 
 	switch (face) {
-		case FACE_TOP:  
+		case FACE_TOP:
 			// Top face (y + 1), viewed from above
 			vertex1 = pack_vertex_data(x,     y + 1, z,     face, id, 0);
 			vertex2 = pack_vertex_data(x,     y + 1, z + 1, face, id, 0);
@@ -72,7 +62,7 @@ void	add_face_to_mesh(mesh_t *mesh, int x, int y, int z, int face, char id) {
 			vertex4 = pack_vertex_data(x + 1, y + 1, z,     face, id, 0);
 			break;
 
-		case FACE_BOTTOM:  
+		case FACE_BOTTOM:
 			// Bottom face (y), viewed from below
 			vertex1 = pack_vertex_data(x,     y, z,     face, id, 0);
 			vertex2 = pack_vertex_data(x + 1, y, z,     face, id, 0);
@@ -88,7 +78,7 @@ void	add_face_to_mesh(mesh_t *mesh, int x, int y, int z, int face, char id) {
 			vertex4 = pack_vertex_data(x, y + 1, z,     face, id, 0);
 			break;
 
-		case FACE_RIGHT:  
+		case FACE_RIGHT:
 			// Right face (x + 1), viewed from positive X direction
 			vertex1 = pack_vertex_data(x + 1, y,     z,     face, id, 0);
 			vertex2 = pack_vertex_data(x + 1, y + 1, z,     face, id, 0);
@@ -96,7 +86,7 @@ void	add_face_to_mesh(mesh_t *mesh, int x, int y, int z, int face, char id) {
 			vertex4 = pack_vertex_data(x + 1, y,     z + 1, face, id, 0);
 			break;
 
-		case FACE_FRONT:  
+		case FACE_FRONT:
 			// Front face (z + 1), viewed from positive Z direction
 			vertex1 = pack_vertex_data(x,     y,     z + 1, face, id, 0);
 			vertex2 = pack_vertex_data(x + 1, y,     z + 1, face, id, 0);
@@ -104,7 +94,7 @@ void	add_face_to_mesh(mesh_t *mesh, int x, int y, int z, int face, char id) {
 			vertex4 = pack_vertex_data(x,     y + 1, z + 1, face, id, 0);
 			break;
 
-		case FACE_BACK:  
+		case FACE_BACK:
 			// Back face (z), viewed from negative Z direction
 			vertex1 = pack_vertex_data(x,     y,     z,     face, id, 0);
 			vertex2 = pack_vertex_data(x,     y + 1, z,     face, id, 0);
@@ -146,10 +136,9 @@ chunk_t *generate_terrain(Vector2 chunk_pos) {
 			for (int y = 0; y < 31; y++) {
 				if (y <= noise_data) {
 					chunk->blocks[x][z][y] = 1;
-				} else if (y > noise_data && y < 5) {
+				}
+				if (y > noise_data && y < 5) {
 					chunk->blocks[x][z][y] = 2;
-				} else {
-					chunk->blocks[x][z][y] = 0;
 				}
 			}
 		}
@@ -216,14 +205,6 @@ void	generate_chunk_mesh(chunk_t *chunk) {
 	}
 }
 
-	
-// void	add_block(int pos_x, int pos_y, int pos_z, chunk_t *chunk) {
-// 	if (chunk->blocks[pos_x][pos_z][pos_y] == 0) {
-// 		chunk->blocks[pos_x][pos_z][pos_y] = 1;
-// 		generate_chunk_mesh(chunk);
-// 	}
-// }
-
 void	setup_chunk_buffers(chunk_t *chunk) {
 	// Generate and bind the VAO
 	glGenVertexArrays(1, &chunk->vao);
@@ -261,10 +242,6 @@ void	reload_chunk_buffers(chunk_t *chunk) {
     
 	// Unbind the VAO
 	glBindVertexArray(0);
-}
-
-void	combine_chunk_data(){
-
 }
 
 void	render_vox_mesh(chunk_t *chunk) {
@@ -334,4 +311,14 @@ void	render_vox_trans(chunk_t *chunk) {
 	glBindVertexArray(chunk->vao_trans);
 	glDrawElements(GL_TRIANGLES, chunk->trans.index_count, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
+}
+	
+void	add_block(int pos_x, int pos_y, int pos_z, chunk_t **chunk) {
+	for (int y = 0; y < 31; y++) {
+		(*chunk)->blocks[y][y][y] = 1;
+	}
+	clear_chunk_mesh(*chunk);
+	generate_chunk_mesh(*chunk);
+	reload_chunk_buffers(*chunk);
+	reload_chunk_trans(*chunk);
 }
