@@ -1,9 +1,9 @@
 #ifndef ENGINE_HPP
 # define ENGINE_HPP
 
+#include <glad.h>
 #define GLSL_VERSION 430
 #include <raylib.h>
-#include <glad.h>
 #include <rlgl.h>
 #include <raymath.h>
 #include <rcamera.h>
@@ -181,9 +181,16 @@ typedef struct s_item {
 	item_stats_t	*stats;
 }	item_t;
 
+typedef struct s_voxel {
+	unsigned short	block_id;
+	float		height;
+	float		pressure;
+	short		stats;
+}	voxel_t;
+
 typedef	struct s_inventory {
-	item_t	*item;
-	int	money;
+	int		money;
+	item_t		*item;
 	unsigned int	size;
 }	inventory_t;
 
@@ -213,12 +220,12 @@ typedef struct s_entity {
 }	entity_t;
 
 typedef struct sv_player_s {
-	bool	show_inventory;
-	stats_t	stats;
-	Vector3	pos;
-	tool_bar_t	toolbar;
-	BoundingBox	bound;
-	inventory_t	inventory;
+	bool			show_inventory;
+	stats_t			stats;
+	Vector3			pos;
+	tool_bar_t		toolbar;
+	BoundingBox		bound;
+	inventory_t		inventory;
 	unsigned long long	uid;
 }	sv_player_t;
 
@@ -239,8 +246,7 @@ typedef struct s_vex_mesh {
 typedef struct	s_world {
 	unsigned int	vao, vbo, ebo, ssbo;
 	vex_mesh_t	mesh;
-
-	chunk_t *chunk;
+	chunk_t 	*chunk;
 }	world_t;
 
 //

@@ -2,9 +2,7 @@
 layout(location = 0) in int packed_data; // Packed vertex data
 uniform vec3 world_pos;                  // World position of the chunk
 
-uniform mat4 matModel;      // Model matrix
-uniform mat4 matView;       // View matrix
-uniform mat4 matProjection; // Projection matrix
+uniform mat4 MVP;
 
 out vec3 frag_pos;
 out int face;
@@ -27,5 +25,5 @@ void main() {
 	if (face == 0 && extra == 2) {
 		world_offset.y -= 0.1;
 	}
-	gl_Position = matProjection * matView * matModel * vec4(world_offset, 1.0);
+	gl_Position = MVP * vec4(world_offset, 1.0);
 }

@@ -21,8 +21,6 @@ void	unload_chunk_data() {
 
 }
 
-
-
 void	add_face_to_mesh(mesh_t *mesh, int x, int y, int z, int face, char id) {
 	int vertex1, vertex2, vertex3, vertex4;
 

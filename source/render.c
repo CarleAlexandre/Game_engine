@@ -7,14 +7,22 @@ void	voxel_render(engine_t *engine, world_t *world) {
 	SetShaderValue(engine->shader[shader_voxel_solid], engine->shader[shader_voxel_solid].locs[SHADER_LOC_VECTOR_VIEW], camera_pos, SHADER_UNIFORM_VEC3);
 	int screen_height = GetScreenHeight(), screen_width = GetScreenWidth();
 
+	glBindFramebuffer(GL_FRAMEBUFFER, engine->gbuffer.framebuffer);
+	glClearColor(0.0, 0.0, 0.0, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glUseProgram(engine->shader[shader_gbuffer].id);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+
 	BeginDrawing();
 	ClearBackground(BLACK);
 	BeginMode3D(engine->camera);
 		glUseProgram(engine->shader[shader_voxel_solid].id);
 
-		rlSetUniformMatrix(glGetUniformLocation(engine->shader[shader_voxel_solid].id, "matView"), rlGetMatrixModelview());
-		rlSetUniformMatrix(glGetUniformLocation(engine->shader[shader_voxel_solid].id, "matProjection"), rlGetMatrixProjection());
-		rlSetUniformMatrix(glGetUniformLocation(engine->shader[shader_voxel_solid].id, "matModel"), MatrixIdentity());
+		rlSetUniformMatrix(glGetUniformLocation(engine->shader[shader_voxel_solid].id, "MVP"), 
+			MatrixMultiply(MatrixMultiply(rlGetMatrixModelview(), rlGetMatrixProjection()),MatrixIdentity()));
 
 		glBindVertexArray(world->vao);
 		
