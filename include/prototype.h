@@ -6,9 +6,7 @@
 engine_t	init_engine(void);
 void	close_engine(engine_t *engine);
 
-void	UpdateLightValues(Shader shader, light_t light);
-light_t	CreateLight(int type, Vector3 position, Vector3 target, Color color, Shader shader);
-void	render(engine_t *engine, chunk_t *world[5][5]);
+void	voxel_render(engine_t *engine, world_t *world);
 
 void	update_input(engine_t *engine);
 
@@ -16,18 +14,9 @@ void	draw_inventory(inventory_t inventory);
 void	init_toolbar(tool_bar_t *tool_bar);
 void	draw_toolbar(tool_bar_t *tool_bar);
 
-void	heightmap_voxel(Image heightmap);
-void	generate_chunk_mesh(chunk_t *chunk);
-chunk_t	*generate_terrain(Vector2 chunk_pos);
-void	render_vox_mesh(chunk_t *chunk);
-void	reload_chunk_buffers(chunk_t *chunk);
-void	setup_chunk_buffers(chunk_t *chunk);
-void	voxel_render(engine_t *engine, chunk_t *world[5][5]);
-void	clear_chunk_mesh(chunk_t *chunk);
-void	render_vox_trans(chunk_t *chunk);
-void	setup_chunk_trans(chunk_t *chunk);
-void	reload_chunk_trans(chunk_t *chunk);
-void	render_vox_trans(chunk_t *chunk);
+void	setup_world_vao(world_t *world);
+void	reload_world_vao(world_t *world);
+
 void	set_block(chunk_t *chunk, int x, int y, int z, int id);
 
 void	draw_ui(sv_player_t player);

@@ -80,6 +80,7 @@
 		"raygui.h": "c",
 		"engine.h": "c",
 		"fastnoiselite.h": "c",
-		"prototype.h": "c"
+		"prototype.h": "c",
+		"stdlib.h": "c"
 	}
 }

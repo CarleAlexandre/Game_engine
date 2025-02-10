@@ -1,4 +1,42 @@
-#include <prototype.h>
+#include <engine.h>
+
+void	setup_world_vao(world_t *world) {
+	glGenVertexArrays(1, &world->vao);
+	glBindVertexArray(world->vao);
+
+	glGenBuffers(1, &world->vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, world->vbo);
+	glBufferData(GL_ARRAY_BUFFER, world->mesh.data_count * sizeof(int), world->mesh.data, GL_DYNAMIC_DRAW);
+    
+	glGenBuffers(1, &world->ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, world->ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, world->mesh.index_count * sizeof(unsigned int), world->mesh.indices, GL_DYNAMIC_DRAW);
+
+	glGenBuffers(1, &world->ssbo);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, world->ssbo);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, world->mesh.chunk_count * sizeof(unsigned int *), world->mesh.chunk_pos, GL_DYNAMIC_STORAGE_BIT);
+
+	glVertexAttribIPointer(0, 1, GL_INT, sizeof(int), (void*)0); // Packed data is an integer
+	glEnableVertexAttribArray(0);
+
+	glBindVertexArray(0);
+
+}
+
+void	reload_world_vao(world_t *world) {
+	glBindVertexArray(world->vao);
+
+	glBindBuffer(GL_ARRAY_BUFFER, world->vbo);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, world->mesh.data_count * sizeof(uint64_t), world->mesh.data);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, world->ebo);
+	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, world->mesh.index_count * sizeof(unsigned int),  world->mesh.indices);
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, world->ssbo);
+	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, world->mesh.chunk_count * sizeof(unsigned int *), world->mesh.chunk_pos);
+
+	glBindVertexArray(0);
+}
 
 static gbuffer_t loadGbuffer(int width, int height, Shader deffered_shader) {
 	gbuffer_t buffer = {0};
@@ -51,24 +89,23 @@ engine_t init_engine(void) {
 	camera.up = (Vector3){0, 1, 0};
 	engine.camera = camera;
 
-	engine.posprocess = LoadShader(0, "shader/postprocess.fs");
-	engine.deffered_shader = LoadShader("shader/defered.vs", "shader/defered.fs");
-	engine.gbuffer_shader = LoadShader("shader/gbuffer.vs", "shader/gbuffer.fs");
-	engine.vox_shader = LoadShader("shader/vox.vs", "shader/vox.fs");
-	engine.deffered_shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(engine.deffered_shader, "viewPosition");
+	engine.shader[shader_sobel] = LoadShader(0, "shader/sobel.fs");
+	engine.shader[shader_deffered] = LoadShader("shader/defered.vs", "shader/defered.fs");
+	engine.shader[shader_gbuffer] = LoadShader("shader/gbuffer.vs", "shader/gbuffer.fs");
+	engine.shader[shader_voxel_solid] = LoadShader("shader/vox_solid.vs", "shader/vox_solid.fs");
+	engine.shader[shader_deffered].locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(engine.shader[shader_deffered], "viewPosition");
 
-	engine.gbuffer = loadGbuffer(width, height, engine.deffered_shader) ;
+	engine.gbuffer = loadGbuffer(width, height, engine.shader[shader_deffered]) ;
 
-	engine.mode = DEFERRED_SHADING;
 	return (engine);
 }
 
 void close_engine(engine_t *engine) {
-	UnloadShader(engine->deffered_shader);
-	UnloadShader(engine->gbuffer_shader);
-	UnloadShader(engine->posprocess);
-	UnloadShader(engine->vox_shader);
-	UnloadRenderTexture(engine->fbo);
+	for (int i = 0; i < 8; i++) {
+		if (engine->shader[i].id) {
+			UnloadShader(engine->shader[i]);
+		}
+	}
 	rlUnloadFramebuffer(engine->gbuffer.framebuffer);
 	rlUnloadTexture(engine->gbuffer.positionTexture);
 	rlUnloadTexture(engine->gbuffer.normalTexture);

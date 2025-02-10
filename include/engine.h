@@ -1,14 +1,14 @@
 #ifndef ENGINE_HPP
 # define ENGINE_HPP
 
-#define GLSL_VERSION 330
+#define GLSL_VERSION 430
 #include <raylib.h>
 #include <glad.h>
 #include <rlgl.h>
 #include <raymath.h>
 #include <rcamera.h>
 #include <stdlib.h>
-// #include <sparse_voxel_octree.h>
+#include "sparse_voxel_octree.h"
 
 /*
 	DEFINE
@@ -35,32 +35,13 @@
 	TYPEDEF
 */
 
-typedef enum {
-	top_face,
-	bot_face,
-	left_face,
-	right_face,
-	front_face,
-	back_face,
-}	face_orientation_e;
-
-typedef enum {
-    LIGHT_DIRECTIONAL = 0,
-    LIGHT_POINT
-} LightType;
-
-typedef enum {
-	DEFERRED_POSITION,
-	DEFERRED_NORMAL,
-	DEFERRED_ALBEDO,
-	DEFERRED_SHADING,
-	DEFERRED_Z,
-} deferred_mode;
- 
-typedef enum {
-	GLOBAL_LIGHT,
-	DIRECTIONNAL_LIGHT,
-}	light_type;
+// typedef enum {
+// 	DEFERRED_POSITION,
+// 	DEFERRED_NORMAL,
+// 	DEFERRED_ALBEDO,
+// 	DEFERRED_SHADING,
+// 	DEFERRED_Z,
+// } deferred_mode;
 
 typedef enum {
 	item_est,
@@ -78,16 +59,13 @@ typedef enum {
 	item_type_consumable,
 }item_type_e;
 
-enum tool{
+typedef enum item{
 	tool_shovel,
 	tool_axe,
 	tool_hoe,
 	tool_sprinkler,
 	tool_wrench,
 	tool_lockpick,
-};
-
-enum weapon{
 	weapon_battle_axe,
 	weapon_lance,
 	weapon_bow,
@@ -96,9 +74,6 @@ enum weapon{
 	weapon_lost_knowledge,
 	weapon_fist,
 	weapon_magic_staff,
-};
-
-enum consumable {
 	consumable_bandage,
 	consumable_kit,
 	consumable_food,
@@ -108,17 +83,6 @@ enum consumable {
 	consumable_trap,
 	consumable_bomb,
 	consumable_scroll,
-};
-
-enum structure {
-	machine_pc,
-	machine_door,
-	structure_wall,
-	structure_brick,
-	structure_fence,
-};
-
-enum material {
 	material_wood,
 	material_sand,
 	material_stone,
@@ -128,13 +92,24 @@ enum material {
 	material_mithril,
 	material_orichalc,
 	material_malachit,
-};
+}	item_enum;
+
+typedef enum {
+	shader_voxel_solid,
+	shader_voxel_liquid,
+	shader_voxel_transparent,
+	shader_pbr,
+	shader_light,
+	shader_gbuffer,
+	shader_deffered,
+	shader_sobel,
+}	shader_enum;
 
 typedef enum {
 	item_id,
 	item_type,
 	item_stats,
-} token_type_e;
+}	token_type_enum;
 
 typedef enum {
 	error_dummy = 0,
@@ -142,30 +117,18 @@ typedef enum {
 	error_file_empty = 2,
 	error_file_exist = 3,
 	error_file_corrupted = 4,
-} error_e;
+}	error_enum;
 
 typedef enum {
 	item_filetype,
 	object_filetype,
 	world_filetype,
 	player_filetype,
-} filetype_e;
+}	filetype_enum;
 
 /* 
 	DATA STRUCT
 */
-
-/*
-| 31 - 27 | 26 - 22 | 21 - 17 | 16 - 14 | 13 - 0 |
-|   x     |   y     |   z     |  face   |  extra |
-*/
-
-typedef	struct {
-	int	vertices[MAX_VERTICES]; // Array to store packed vertex data
-	unsigned int	indices[MAX_VERTICES]; // Array to store indices
-	int	vertex_count; // Current number of vertices
-	int	index_count; // Current number of indices
-}	mesh_t;
 
 typedef struct s_token {
 	int	id;
@@ -175,7 +138,7 @@ typedef struct s_token {
 typedef	struct s_file {
 	unsigned char	*data;
 	int		size;
-	filetype_e	type;
+	filetype_enum	type;
 }	file_t;
 
 typedef struct s_stats {
@@ -197,21 +160,30 @@ typedef struct s_object {
 	int	model_id;
 }	object_t;
 
-typedef struct s_item {
-	bool	is_placable;
-	int	type;
-	int	texture_id;
+typedef struct s_item_stats {
 	int	material;
 	int	damage;
 	int	durability;
 	int	effect;
-	int	max_stack;
 	int	rarity;
+}	item_stats_t;
+
+typedef struct item_data {
+	int	type;
+	int	texture_id;
+	int	max_stack;
 	int	size;
+}	item_data_t;
+
+typedef struct s_item {
+	item_data_t	*data;
+	object_t	*obj;
+	item_stats_t	*stats;
 }	item_t;
 
 typedef	struct s_inventory {
 	item_t	*item;
+	int	money;
 	unsigned int	size;
 }	inventory_t;
 
@@ -241,44 +213,37 @@ typedef struct s_entity {
 }	entity_t;
 
 typedef struct sv_player_s {
-	Vector3	pos;
-	BoundingBox	bound;
-	stats_t	stats;
 	bool	show_inventory;
+	stats_t	stats;
+	Vector3	pos;
 	tool_bar_t	toolbar;
+	BoundingBox	bound;
 	inventory_t	inventory;
 	unsigned long long	uid;
 }	sv_player_t;
 
-//
-
-typedef struct s_light {
-	int	type;
-	bool	enabled;
-	Vector3	position;
-	Vector3	target;
-	Color	color;
-	float	attenuation;
-
-	// Shader locations
-	int	enabledLoc;
-	int	typeLoc;
-	int	positionLoc;
-	int	targetLoc;
-	int	colorLoc;
-	int	attenuationLoc;
-}	light_t;
-
 typedef struct s_chunk {
-	char		blocks[31][31][31];
-	// svo_t		blocks;
-	unsigned int	vao, vbo, ebo;
-	unsigned int	vao_trans, vbo_trans, ebo_trans;
-	mesh_t		mesh;
-	mesh_t		trans;
-	Shader		shader;
+	svo_t		blocks;
 	Vector3		world_pos;
 }	chunk_t;
+
+typedef struct s_vex_mesh {
+	uint64_t	*data;
+	uint32_t	data_count;
+	uint32_t	*indices;
+	uint32_t	index_count;
+	uint32_t	*chunk_pos;
+	uint16_t	chunk_count;
+}	vex_mesh_t;
+
+typedef struct	s_world {
+	unsigned int	vao, vbo, ebo, ssbo;
+	vex_mesh_t	mesh;
+
+	chunk_t *chunk;
+}	world_t;
+
+//
 
 typedef struct s_gbuffer{
 	unsigned int	framebuffer;
@@ -290,14 +255,9 @@ typedef struct s_gbuffer{
 }	gbuffer_t;
 
 typedef struct s_engine {
-	Shader	posprocess;
-	Shader	gbuffer_shader;
-	Shader	deffered_shader;
-	Shader	vox_shader;
+	Shader		shader[8];
 	gbuffer_t	gbuffer;
 	Camera3D	camera;
-	RenderTexture2D	fbo;
-	deferred_mode	mode;
 	sv_player_t	player;
 }	engine_t;
 

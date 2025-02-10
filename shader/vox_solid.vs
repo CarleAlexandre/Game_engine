@@ -1,4 +1,4 @@
-#version 330 core
+#version 430 core
 layout(location = 0) in int packed_data; // Packed vertex data
 uniform vec3 world_pos;                  // World position of the chunk
 

@@ -24,10 +24,6 @@ void	update_input(engine_t *engine) {
 		step.z -= 30 *GetFrameTime();
 	}
 	if (IsKeyPressed(KEY_Q)) {
-		int i = engine->mode;
-		i++;
-		i%= 5;
-		engine->mode = (deferred_mode)i;
 	}
 	if (IsKeyPressed(KEY_E)) {
 	}

@@ -1,17 +1,14 @@
-#version 330
+#version 430 core
 
-// Input vertex attributes (from vertex shader)
+out vec4 frag_color;
+
+flat in int extra;
+flat in int face;
 in vec2 fragTexCoord;
-in vec4 fragColor;
 
-// Input uniform values
 uniform sampler2D texture0;
 uniform vec4 colDiffuse;
 
-// Output fragment color
-out vec4 finalColor;
-
-// NOTE: Add here your custom variables
 uniform vec2 resolution = vec2(800, 450);
 
 vec4 sobel_filter(void) {
@@ -39,6 +36,29 @@ vec4 sobel_filter(void) {
 	return (vec4(edge, texture2D(texture0, fragTexCoord).a));
 }
 
-void main(void) {
-	finalColor = fragColor - sobel_filter();
+
+void main() {
+	// vec3 NORMALS[6] = {
+	// 	vec3( 0.0,  1.0,  0.0),
+	// 	vec3( 0.0, -1.0,  0.0),
+	// 	vec3( 1.0,  0.0,  0.0),
+	// 	vec3(-1.0,  1.0,  0.0),
+	// 	vec3( 0.0,  0.0,  1.0),
+	// 	vec3( 0.0,  0.0, -1.0)
+	// };
+	// vec3 normal = NORMALS[face];
+
+	if (extra == 1) {
+		vec3 color = vec3(0.0);
+		if (face == 0) color = vec3(0.5, 0.0, 0.0); // Top face (red)
+		else if (face == 1) color = vec3(0.0, 0.5, 0.0); // Bottom face (green)
+		else if (face == 2) color = vec3(0.2, 0.2, 0.5); // Left face (blue)
+		else if (face == 3) color = vec3(0.5, 0.5, 0.0); // Right face (yellow)
+		else if (face == 4) color = vec3(0.5, 0.0, 0.5); // Front face (magenta)
+		else if (face == 5) color = vec3(0.0, 0.5, 0.5); // Back face (cyan)
+		frag_color = vec4(color, 1.0);
+	}
+	if (extra == 2) {
+		frag_color = vec4(0.0, 0.0, 0.5, 0.5);
+	}
 }

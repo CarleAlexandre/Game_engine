@@ -4,6 +4,11 @@
 #define FNL_IMPL
 #include <FastNoiseLite.h>
 
+int64_t	pack_face_data(char pos[3], char face, char id, char height, char width, short extra) {
+	//0000 xxxx xxxx xxxx xxxx hhhh hwww wwii iiii iiff fyyy yyzz zzzx xxxx
+	return ( extra << 35 | height << 30| width << 25 |  id << 18 | face << 15 | pos[2] << 10 | pos[1] << 5| pos[0]);
+}
+
 void	generate_dungeon() {
 	
 }
@@ -16,39 +21,7 @@ void	unload_chunk_data() {
 
 }
 
-// void append_chunk_to_combined_mesh(combined_mesh_t *combined_mesh, mesh_t *chunk_mesh) {
-// 	// Append vertex data
-// 	for (int i = 0; i < chunk_mesh->vertex_count; i++) {
-// 	    combined_mesh->vertices[combined_mesh->vertex_count++] = chunk_mesh->vertices[i];
-// 	}
-    
-// 	// Append index data with offset
-// 	unsigned int vertex_offset = combined_mesh->vertex_count - chunk_mesh->vertex_count;
-// 	for (int i = 0; i < chunk_mesh->index_count; i++) {
-// 	    combined_mesh->indices[combined_mesh->index_count++] = chunk_mesh->indices[i] + vertex_offset;
-// 	}
-// }
 
-// void generate_combined_mesh(engine_t *engine, chunk_t *chunks, int chunk_num, combined_mesh_t *combined_mesh) {
-// 	for (int i = 0; i < chunk_num; i++) {
-// 	    mesh_t chunk_mesh = {0}; // Initialize chunk mesh
-// 	    generate_chunk_mesh(engine, &chunks[i], &chunk_mesh); // Generate mesh for the chunk
-// 	    append_chunk_to_combined_mesh(combined_mesh, &chunk_mesh); // Append to combined mesh
-// 	}
-// }
-
-int	pack_vertex_data(int x, int y, int z, int face, char id, int extra) {
-	return (x << 27) | (y << 22) | (z << 17) | (face << 14) | (id << 11) | extra;
-}
-
-void	unpack_vertex_data(int packed, int *x, int *y, int *z, int *face, char *id, int *extra) {
-	*x = (packed >> 27) & 0x1F;    // Extract x (5 bits)
-	*y = (packed >> 22) & 0x1F;    // Extract y (5 bits)
-	*z = (packed >> 17) & 0x1F;    // Extract z (5 bits)
-	*face = (packed >> 14) & 0x07; // Extract face (3 bits)
-	*id = (packed >> 11) & 0x07; // block id (3 bits)
-	*extra = packed & 0x7FF;      // Extract extra data (11 bits)
-}
 
 void	add_face_to_mesh(mesh_t *mesh, int x, int y, int z, int face, char id) {
 	int vertex1, vertex2, vertex3, vertex4;
@@ -146,19 +119,6 @@ chunk_t *generate_terrain(Vector2 chunk_pos) {
 	return (chunk);
 }
 
-#define CHECK_NEIGHBOR(axis, edge_cond, neighbor_ptr, neighbor_axis) \
-    (axis edge_cond) ? (current->blocks[x][z][y] != 0) : \
-    (neighbor_ptr ? neighbor_ptr->blocks[neighbor_axis][z][y] != 0 : false)
-    
-void	clear_chunk_mesh(chunk_t *chunk) {
-	if (chunk->mesh.index_count) {
-		memset(chunk->mesh.indices, 9, sizeof(int) * chunk->mesh.index_count);
-		memset(chunk->mesh.vertices, 9, sizeof(int) * chunk->mesh.vertex_count);
-		chunk->mesh.index_count = 0;
-		chunk->mesh.vertex_count = 0;
-	}
-}
-
 void	generate_chunk_mesh(chunk_t *chunk) {
 	for (int x = 0; x < 31; x++) {
 		for (int z = 0; z < 31; z++) {
@@ -205,116 +165,8 @@ void	generate_chunk_mesh(chunk_t *chunk) {
 	}
 }
 
-void	setup_chunk_buffers(chunk_t *chunk) {
-	// Generate and bind the VAO
-	glGenVertexArrays(1, &chunk->vao);
-	glBindVertexArray(chunk->vao);
-    
-	// Generate and bind the VBO
-	glGenBuffers(1, &chunk->vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, chunk->vbo);
-	glBufferData(GL_ARRAY_BUFFER, chunk->mesh.vertex_count * sizeof(int), chunk->mesh.vertices, GL_DYNAMIC_DRAW);
-    
-	// Generate and bind the EBO
-	glGenBuffers(1, &chunk->ebo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk->ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, chunk->mesh.index_count * sizeof(unsigned int), chunk->mesh.indices, GL_DYNAMIC_DRAW);
-    
-	// Set up vertex attribute pointer
-	glVertexAttribIPointer(0, 1, GL_INT, sizeof(int), (void*)0); // Packed data is an integer
-	glEnableVertexAttribArray(0);
-    
-	// Unbind the VAO
-	glBindVertexArray(0);
-}
-
-void	reload_chunk_buffers(chunk_t *chunk) {
-	// Bind the VAO
-	glBindVertexArray(chunk->vao);
-    
-	// Update the VBO with new vertex data
-	glBindBuffer(GL_ARRAY_BUFFER, chunk->vbo);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, chunk->mesh.vertex_count * sizeof(int), chunk->mesh.vertices);
-    
-	// Update the EBO with new index data
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk->ebo);
-	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, chunk->mesh.index_count * sizeof(unsigned int), chunk->mesh.indices);
-    
-	// Unbind the VAO
-	glBindVertexArray(0);
-}
-
-void	render_vox_mesh(chunk_t *chunk) {
-
-	Matrix matModel = MatrixIdentity();
-	Matrix matView = rlGetMatrixModelview();
-	Matrix matProjection = rlGetMatrixProjection();
-	glUniform3f(glGetUniformLocation(chunk->shader.id, "world_pos"), chunk->world_pos.x, chunk->world_pos.y, chunk->world_pos.z);
-	rlSetUniformMatrix(glGetUniformLocation(chunk->shader.id, "matView"), matView);
-	rlSetUniformMatrix(glGetUniformLocation(chunk->shader.id, "matProjection"), matProjection);
-	rlSetUniformMatrix(glGetUniformLocation(chunk->shader.id, "matModel"), matModel);
-
-	glBindVertexArray(chunk->vao);
-	glDrawElements(GL_TRIANGLES, chunk->mesh.index_count, GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
-}
-
-void setup_chunk_trans(chunk_t *chunk) {
-	// Generate and bind the VAO
-	glGenVertexArrays(1, &chunk->vao_trans);
-	glBindVertexArray(chunk->vao_trans);
-    
-	// Generate and bind the VBO
-	glGenBuffers(1, &chunk->vbo_trans);
-	glBindBuffer(GL_ARRAY_BUFFER, chunk->vbo_trans);
-	glBufferData(GL_ARRAY_BUFFER, chunk->trans.vertex_count * sizeof(int), chunk->trans.vertices, GL_DYNAMIC_DRAW);
-    
-	// Generate and bind the EBO
-	glGenBuffers(1, &chunk->ebo_trans);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk->ebo_trans);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, chunk->trans.index_count * sizeof(unsigned int), chunk->trans.indices, GL_DYNAMIC_DRAW);
-    
-	// Set up vertex attribute pointer
-	glVertexAttribIPointer(0, 1, GL_INT, sizeof(int), (void*)0); // Packed data is an integer
-	glEnableVertexAttribArray(0);
-    
-	// Unbind the VAO
-	glBindVertexArray(0);
-}
-
-void	reload_chunk_trans(chunk_t *chunk) {
-	// Bind the VAO
-	glBindVertexArray(chunk->vao_trans);
-    
-	// Update the VBO with new vertex data
-	glBindBuffer(GL_ARRAY_BUFFER, chunk->vbo_trans);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, chunk->trans.vertex_count * sizeof(int), chunk->trans.vertices);
-    
-	// Update the EBO with new index data
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk->ebo_trans);
-	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, chunk->trans.index_count * sizeof(unsigned int), chunk->trans.indices);
-    
-	// Unbind the VAO
-	glBindVertexArray(0);
-}
-
-void	render_vox_trans(chunk_t *chunk) {
-
-	Matrix matModel = MatrixIdentity();
-	Matrix matView = rlGetMatrixModelview();
-	Matrix matProjection = rlGetMatrixProjection();
-	glUniform3f(glGetUniformLocation(chunk->shader.id, "world_pos"), chunk->world_pos.x, chunk->world_pos.y, chunk->world_pos.z);
-	rlSetUniformMatrix(glGetUniformLocation(chunk->shader.id, "matView"), matView);
-	rlSetUniformMatrix(glGetUniformLocation(chunk->shader.id, "matProjection"), matProjection);
-	rlSetUniformMatrix(glGetUniformLocation(chunk->shader.id, "matModel"), matModel);
-
-	glBindVertexArray(chunk->vao_trans);
-	glDrawElements(GL_TRIANGLES, chunk->trans.index_count, GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
-}
-
 void	set_block(chunk_t *chunk, int x, int y, int z, int id) {
-	chunk->blocks[x][z][y] = id;
+	// chunk->blocks[x][z][y] = id;
 	clear_chunk_mesh(chunk);
 	generate_chunk_mesh(chunk);
 	reload_chunk_buffers(chunk);
