@@ -312,13 +312,10 @@ void	render_vox_trans(chunk_t *chunk) {
 	glDrawElements(GL_TRIANGLES, chunk->trans.index_count, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 }
-	
-void	add_block(int pos_x, int pos_y, int pos_z, chunk_t **chunk) {
-	for (int y = 0; y < 31; y++) {
-		(*chunk)->blocks[y][y][y] = 1;
-	}
-	clear_chunk_mesh(*chunk);
-	generate_chunk_mesh(*chunk);
-	reload_chunk_buffers(*chunk);
-	reload_chunk_trans(*chunk);
+
+void	set_block(chunk_t *chunk, int x, int y, int z, int id) {
+	chunk->blocks[x][z][y] = id;
+	clear_chunk_mesh(chunk);
+	generate_chunk_mesh(chunk);
+	reload_chunk_buffers(chunk);
 }

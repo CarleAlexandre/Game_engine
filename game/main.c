@@ -37,10 +37,11 @@ int main(void) {
 	init_toolbar(&engine.player.toolbar);
 
 	double launch_time = GetTime();
-
+	
 	SetTargetFPS(120);
 	while (!WindowShouldClose()) {
-		update_input(&engine, &world[0][0]);
+		update_input(&engine);
+		
 		// update(&input);
 		// engine.player.pos = engine.camera.position;
 		// render(&engine, world);
