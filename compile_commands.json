@@ -1,0 +1,20 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-std=c99",
+      "-fsanitize=address",
+      "-I",
+      "include",
+      "-I",
+      "include",
+      "-c",
+      "-o",
+      "source/engine.o",
+      "source/engine.c"
+    ],
+    "directory": "/home/uwublaster/engine",
+    "file": "/home/uwublaster/engine/source/engine.c",
+    "output": "/home/uwublaster/engine/source/engine.o"
+  }
+]

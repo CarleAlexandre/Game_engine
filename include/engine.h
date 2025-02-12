@@ -1,7 +1,6 @@
 #ifndef ENGINE_HPP
 # define ENGINE_HPP
 
-#include <glad.h>
 #define GLSL_VERSION 430
 #include <raylib.h>
 #include <rlgl.h>

@@ -1,7 +1,7 @@
 #ifndef PROTOTYPE_HPP
 # define PROTOTYPE_HPP
 
-#include <engine.h>
+#include "engine.h"
 
 engine_t	init_engine(void);
 void	close_engine(engine_t *engine);

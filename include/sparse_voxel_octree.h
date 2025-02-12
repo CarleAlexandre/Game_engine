@@ -10,7 +10,7 @@
 typedef struct	s_svo_node {
 	bool		isleaf;
 	void		*data;
-	svo_node_t	*children[8];
+	s_svo_node	*children[8];
 }	svo_node_t;
 
 typedef	struct s_sparse_voxel_octree {
@@ -103,7 +103,7 @@ static svo_node_t	*svo_get_node_impl(float point[3], svo_t *svo) {
 	return (current && depth == svo->max_depth) ? current : NULL;
 }
 
-svo_t	*init_svo(int size_, int max_depth_) {
+static svo_t	*init_svo(int size_, int max_depth_) {
 	svo_t	*svo = (svo_t *)malloc(sizeof(svo_t));
 
 	svo->size = size_;
@@ -113,20 +113,20 @@ svo_t	*init_svo(int size_, int max_depth_) {
 	return (svo);
 }
 
-void delete_svo(svo_t *svo) {
+static void delete_svo(svo_t *svo) {
 	if (svo) {
 	    delete_node(svo->root);
 	    free(svo);
 	}
 }
 
-bool	svo_insert(float point[3], void *data, svo_t *svo) {
+static bool	svo_insert(float point[3], void *data, svo_t *svo) {
 	if (!is_point_valid(point, svo)) return (false);
 	svo_insert_impl(svo, &svo->root, point, data, (int [3]){0, 0, 0}, 0);
 	return (true);
 }
 
-svo_node_t *svo_get_node(float point[3], svo_t *svo) {
+static svo_node_t *svo_get_node(float point[3], svo_t *svo) {
 	if (!is_point_valid(point, svo)) return (NULL);
 	return (svo_get_node_impl(point, svo));
 }
