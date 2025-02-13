@@ -1,12 +1,11 @@
 #ifndef ENGINE_HPP
 # define ENGINE_HPP
 
+#include <glad/glad.h>
 #define GLSL_VERSION 430
 #include <raylib.h>
 #include <rlgl.h>
 #include <raymath.h>
-#include <rcamera.h>
-#include <stdlib.h>
 #include "sparse_voxel_octree.h"
 
 /*

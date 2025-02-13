@@ -5,12 +5,11 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include <math.h>
 
 typedef struct	s_svo_node {
 	bool		isleaf;
 	void		*data;
-	s_svo_node	*children[8];
+	struct s_svo_node	*children[8];
 }	svo_node_t;
 
 typedef	struct s_sparse_voxel_octree {

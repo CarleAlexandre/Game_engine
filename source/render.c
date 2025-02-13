@@ -6,7 +6,7 @@ void	voxel_render(engine_t *engine, world_t *world) {
 	float camera_pos[3] = {engine->camera.position.x, engine->camera.position.y, engine->camera.position.z};
 	SetShaderValue(engine->shader[shader_voxel_solid], engine->shader[shader_voxel_solid].locs[SHADER_LOC_VECTOR_VIEW], camera_pos, SHADER_UNIFORM_VEC3);
 	int screen_height = GetScreenHeight(), screen_width = GetScreenWidth();
-
+/*
 	glBindFramebuffer(GL_FRAMEBUFFER, engine->gbuffer.framebuffer);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -14,7 +14,7 @@ void	voxel_render(engine_t *engine, world_t *world) {
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-
+*/
 
 	BeginDrawing();
 	ClearBackground(BLACK);

@@ -10,11 +10,11 @@
       "include",
       "-c",
       "-o",
-      "source/engine.o",
-      "source/engine.c"
+      "server/main.o",
+      "server/main.c"
     ],
     "directory": "/home/uwublaster/engine",
-    "file": "/home/uwublaster/engine/source/engine.c",
-    "output": "/home/uwublaster/engine/source/engine.o"
+    "file": "/home/uwublaster/engine/server/main.c",
+    "output": "/home/uwublaster/engine/server/main.o"
   }
 ]

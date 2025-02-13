@@ -14,7 +14,7 @@ void	setup_world_vao(world_t *world) {
 
 	glGenBuffers(1, &world->ssbo);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, world->ssbo);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, world->mesh.chunk_count * sizeof(unsigned int *), world->mesh.chunk_pos, GL_DYNAMIC_STORAGE_BIT);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, world->mesh.chunk_count * sizeof(unsigned int *), world->mesh.chunk_pos, GL_DYNAMIC_DRAW);
 
 	glVertexAttribIPointer(0, 1, GL_INT, sizeof(int), (void*)0); // Packed data is an integer
 	glEnableVertexAttribArray(0);

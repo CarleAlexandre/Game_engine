@@ -66,10 +66,10 @@ void check_chunk_for_collisions(sv_player_t *player, chunk_t *chunk) {
 	    for (int z = block_min_z; z <= block_max_z; z++) {
 		for (int y = block_min_y; y <= block_max_y; y++) {
 		    // Check if the block is solid
-		    if (is_block_solid(chunk, x, y, z)) {
+			// if (is_block_solid(chunk, x, y, z)) {
 			// Handle collision
-			collider(player, (Vector3){});
-		    }
+			//collider(player, (Vector3){});
+		    //}
 		}
 	    }
 	}

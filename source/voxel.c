@@ -1,14 +1,14 @@
 #include <engine.h>
-#include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 #define FNL_IMPL
 #include <FastNoiseLite.h>
 
-int64_t	pack_face_data(char pos[3], char face, char id, char height, char width, short extra) {
-	//0000 xxxx xxxx xxxx xxxx hhhh hwww wwii iiii iiff fyyy yyzz zzzx xxxx
-	return ( extra << 35 | height << 30| width << 25 |  id << 18 | face << 15 | pos[2] << 10 | pos[1] << 5| pos[0]);
+uint64_t	pack_face_data(char pos[3], char face, char id, char height, char width, char extra) {
+	//0000 0000 0000 0000 0000 hhhh hwww wwii iiii iiff fyyy yyzz zzzx xxxx
+	return ((uint64_t)extra << 35 | height << 30 | width << 25 |  id << 18 | face << 15 | pos[2] << 10 | pos[1] << 5| pos[0]);
 }
-
+/*
 void	generate_dungeon() {
 	
 }
@@ -169,3 +169,5 @@ void	set_block(chunk_t *chunk, int x, int y, int z, int id) {
 	generate_chunk_mesh(chunk);
 	reload_chunk_buffers(chunk);
 }
+*/
+

@@ -32,11 +32,11 @@ CFLAGS = -std=c99
 
 ifeq ($(OS), Windows_NT)
 CFLAGS += -I C:/mingw64/include -I include
-LIBS += -lraylib -lopengl32 -lgdi32 -lwinmm -lstdc++ -latomic
+LIBS += -lraylib -lopengl32 -lgdi32 -lwinmm -latomic
 endif
 ifeq ($(shell uname -s), Linux)
 CFLAGS += -fsanitize=address -I include
-LIBS += -lasan -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -lstdc++
+LIBS += -lasan -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 endif
 
 $(BUILDDIR)$(LIB) : $(OBJ)
