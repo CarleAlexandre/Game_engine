@@ -15,18 +15,21 @@ void	voxel_render(engine_t *engine, world_t *world) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 */
-
 	BeginDrawing();
 	ClearBackground(BLACK);
 	BeginMode3D(engine->camera);
 		glUseProgram(engine->shader[shader_voxel_solid].id);
 
-		rlSetUniformMatrix(glGetUniformLocation(engine->shader[shader_voxel_solid].id, "MVP"), 
+		rlSetUniformMatrix(glGetUniformLocation(engine->shader[shader_voxel_solid].id, "MVP"),
 			MatrixMultiply(MatrixMultiply(rlGetMatrixModelview(), rlGetMatrixProjection()),MatrixIdentity()));
+
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, world->ssbo);
+
+		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, engine->render.indirect_buffer);
 
 		glBindVertexArray(world->vao);
 		
-		glMultiDrawArraysIndirect(GL_TRIANGLE_STRIP, 0x00, 4, sizeof(int64_t));
+		glMultiDrawElementsIndirect(GL_TRIANGLE_STRIP, GL_UNSIGNED_INT, 0, world->chunk_count, 0);
 
 		glBindVertexArray(0);
 

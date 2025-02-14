@@ -8,6 +8,7 @@ uint64_t	pack_face_data(char pos[3], char face, char id, char height, char width
 	//0000 0000 0000 0000 0000 hhhh hwww wwii iiii iiff fyyy yyzz zzzx xxxx
 	return ((uint64_t)extra << 35 | height << 30 | width << 25 |  id << 18 | face << 15 | pos[2] << 10 | pos[1] << 5| pos[0]);
 }
+
 /*
 void	generate_dungeon() {
 	
@@ -116,46 +117,47 @@ chunk_t *generate_terrain(Vector2 chunk_pos) {
 	}
 	return (chunk);
 }
+*/
 
-void	generate_chunk_mesh(chunk_t *chunk) {
+void	generate_chunk_mesh(chunk_t *chunk, vox_mesh_t mesh) {
 	for (int x = 0; x < 31; x++) {
 		for (int z = 0; z < 31; z++) {
 			for (int y = 0; y < 31; y++) {
-				char id = chunk->blocks[x][z][y];
+				int id = chunk->blocks[x][z][y].block_id;
 				if (!id) continue;
 				if (id == 2) {
-					if (y == 30 || chunk->blocks[x][z][y + 1] != 2) {
-						add_face_to_mesh(&chunk->trans, x, y, z, FACE_TOP, id);
+					if (y == 30 || chunk->blocks[x][z][y + 1].block_id != 2) {
+						add_face_to_mesh(&mesh, x, y, z, FACE_TOP, id);
 					}
 				} else {
 					// Top face
 					if (y == 30 || chunk->blocks[x][z][y + 1] != 1) {
-						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_TOP, id);
+						add_face_to_mesh(&mesh, x, y, z, FACE_TOP, id);
 					}
 					
 					// Bottom face
-					if (y == 0 || chunk->blocks[x][z][y - 1] != 1) {
-						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_BOTTOM, id);
+					if (y == 0 || chunk->blocks[x][z][y - 1].block_id != 1) {
+						add_face_to_mesh(&mesh, x, y, z, FACE_BOTTOM, id);
 					}
 					
 					// Left face (negative X)
-					if (x == 0 || chunk->blocks[x - 1][z][y] != 1) {
-						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_LEFT, id);
+					if (x == 0 || chunk->blocks[x - 1][z][y].block_id != 1) {
+						add_face_to_mesh(&mesh, x, y, z, FACE_LEFT, id);
 					}
 					
 					// Right face (positive X)
-					if (x == 30 || chunk->blocks[x + 1][z][y] != 1) {
-						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_RIGHT, id);
+					if (x == 30 || chunk->blocks[x + 1][z][y].block_id != 1) {
+						add_face_to_mesh(&mesh, x, y, z, FACE_RIGHT, id);
 					}
 					
 					// Front face (positive Z)
-					if (z == 30 || chunk->blocks[x][z + 1][y] != 1) {
-						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_FRONT, id);
+					if (z == 30 || chunk->blocks[x][z + 1][y].block_id != 1) {
+						add_face_to_mesh(&mesh, x, y, z, FACE_FRONT, id);
 					}
 					
 					// Back face (negative Z)
-					if (z == 0 || chunk->blocks[x][z - 1][y] != 1) {
-						add_face_to_mesh(&chunk->mesh, x, y, z, FACE_BACK, id);
+					if (z == 0 || chunk->blocks[x][z - 1][y].block_id != 1) {
+						add_face_to_mesh(&mesh, x, y, z, FACE_BACK, id);
 					}
 				}
 			}
@@ -169,5 +171,3 @@ void	set_block(chunk_t *chunk, int x, int y, int z, int id) {
 	generate_chunk_mesh(chunk);
 	reload_chunk_buffers(chunk);
 }
-*/
-

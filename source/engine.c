@@ -7,20 +7,47 @@ void	setup_world_vao(world_t *world) {
 	glGenBuffers(1, &world->vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, world->vbo);
 	glBufferData(GL_ARRAY_BUFFER, world->mesh.data_count * sizeof(int), world->mesh.data, GL_DYNAMIC_DRAW);
-    
+	// glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 	glGenBuffers(1, &world->ebo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, world->ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, world->mesh.index_count * sizeof(unsigned int), world->mesh.indices, GL_DYNAMIC_DRAW);
-
-	glGenBuffers(1, &world->ssbo);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, world->ssbo);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, world->mesh.chunk_count * sizeof(unsigned int *), world->mesh.chunk_pos, GL_DYNAMIC_DRAW);
-
+	// glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	
 	glVertexAttribIPointer(0, 1, GL_INT, sizeof(int), (void*)0); // Packed data is an integer
 	glEnableVertexAttribArray(0);
-
+	
 	glBindVertexArray(0);
+	
+}
 
+void	setup_world_ssbo(world_t *world) {	
+	glGenBuffers(1, &world->ssbo);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, world->ssbo);
+	int *buffer = malloc(sizeof(int) * 3 * world->chunk_count);
+	for (int i = 0; i < world->chunk_count; i++) {
+		buffer[i * 3] = world->chunk[i].x;
+		buffer[i * 3 + 1] = world->chunk[i].z;
+		buffer[i * 3 + 2] = world->chunk[i].y;
+	}
+	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, world->chunk_count * 3 * sizeof(int), buffer);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, world->ssbo);
+	free (buffer);
+}
+
+void	setup_indirect_buffer(rend_pip_t *render, world_t *world, int chunk) {
+	indirect_cmd_t cmd[chunk];
+	for (int i = 0; i < chunk; i++) {
+		cmd[i].count = world->chunk[i].index_count;
+		cmd[i].instanceCount = 0;
+		cmd[i].firstIndex = i * world->chunk[i].index_offset;
+		cmd[i].baseVertex = i * world->chunk[i].vertex_offset;
+		cmd[i].baseInstance = i;
+	}
+
+	glGenBuffers(1, &render->indirect_buffer);
+	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, render->indirect_buffer);
+	glBufferData(GL_DRAW_INDIRECT_BUFFER, sizeof(cmd), cmd, GL_DYNAMIC_DRAW);
 }
 
 void	reload_world_vao(world_t *world) {
@@ -32,10 +59,33 @@ void	reload_world_vao(world_t *world) {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, world->ebo);
 	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, world->mesh.index_count * sizeof(unsigned int),  world->mesh.indices);
 
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, world->ssbo);
-	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, world->mesh.chunk_count * sizeof(unsigned int *), world->mesh.chunk_pos);
-
 	glBindVertexArray(0);
+}
+
+void	reload_world_ssbo(world_t *world) {
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, world->ssbo);
+	int *buffer = malloc(sizeof(int) * 3 * world->chunk_count);
+	for (int i = 0; i < world->chunk_count; i++) {
+		buffer[i * 3] = world->chunk[i].x;
+		buffer[i * 3 + 1] = world->chunk[i].z;
+		buffer[i * 3 + 2] = world->chunk[i].y;
+	}
+	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, world->chunk_count * 3 * sizeof(int), buffer);
+	free (buffer);
+}
+
+void	reload_indirect_buffer(rend_pip_t *render, world_t *world, int chunk) {
+	indirect_cmd_t cmd[chunk];
+	for (int i = 0; i < chunk; i++) {
+		cmd[i].count = world->chunk[i].index_count;
+		cmd[i].instanceCount = 0;
+		cmd[i].firstIndex = i * world->chunk[i].index_offset;
+		cmd[i].baseVertex = i * world->chunk[i].vertex_offset;
+		cmd[i].baseInstance = i;
+	}
+
+	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, render->indirect_buffer);
+	glBufferSubData(GL_DRAW_INDIRECT_BUFFER, 0, sizeof(cmd), cmd);
 }
 
 static gbuffer_t loadGbuffer(int width, int height, Shader deffered_shader) {
@@ -95,7 +145,7 @@ engine_t init_engine(void) {
 	engine.shader[shader_voxel_solid] = LoadShader("shader/vox_solid.vs", "shader/vox_solid.fs");
 	engine.shader[shader_deffered].locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(engine.shader[shader_deffered], "viewPosition");
 
-	engine.gbuffer = loadGbuffer(width, height, engine.shader[shader_deffered]) ;
+	engine.render.gbuffer = loadGbuffer(width, height, engine.shader[shader_deffered]) ;
 
 	return (engine);
 }
@@ -106,11 +156,11 @@ void close_engine(engine_t *engine) {
 			UnloadShader(engine->shader[i]);
 		}
 	}
-	rlUnloadFramebuffer(engine->gbuffer.framebuffer);
-	rlUnloadTexture(engine->gbuffer.positionTexture);
-	rlUnloadTexture(engine->gbuffer.normalTexture);
-	rlUnloadTexture(engine->gbuffer.albedoSpecTexture);
-	rlUnloadTexture(engine->gbuffer.zTexture);
-	rlUnloadTexture(engine->gbuffer.depthRenderbuffer);
+	rlUnloadFramebuffer(engine->render.gbuffer.framebuffer);
+	rlUnloadTexture(engine->render.gbuffer.positionTexture);
+	rlUnloadTexture(engine->render.gbuffer.normalTexture);
+	rlUnloadTexture(engine->render.gbuffer.albedoSpecTexture);
+	rlUnloadTexture(engine->render.gbuffer.zTexture);
+	rlUnloadTexture(engine->render.gbuffer.depthRenderbuffer);
 	CloseWindow();
 }

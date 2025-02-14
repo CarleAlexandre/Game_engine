@@ -2,7 +2,6 @@
 # define ENGINE_HPP
 
 #include <glad/glad.h>
-#define GLSL_VERSION 430
 #include <raylib.h>
 #include <rlgl.h>
 #include <raymath.h>
@@ -228,26 +227,35 @@ typedef struct sv_player_s {
 }	sv_player_t;
 
 typedef struct s_chunk {
-	svo_t		blocks;
-	Vector3		world_pos;
+	int		x,y,z;
+	voxel_t		blocks[32][32][32];
+	uint32_t	index_offset;
+	uint32_t	index_count;
+	uint32_t	vertex_offset;
 }	chunk_t;
 
-typedef struct s_vex_mesh {
+typedef struct s_vox_mesh {
 	uint64_t	*data;
 	uint32_t	data_count;
 	uint32_t	*indices;
 	uint32_t	index_count;
-	uint32_t	*chunk_pos;
-	uint16_t	chunk_count;
-}	vex_mesh_t;
+}	vox_mesh_t;
 
 typedef struct	s_world {
 	unsigned int	vao, vbo, ebo, ssbo;
-	vex_mesh_t	mesh;
+	vox_mesh_t	mesh;
 	chunk_t 	*chunk;
+	unsigned int	chunk_count;
 }	world_t;
 
 //
+typedef struct s_draw_elements_indirect_command{
+	uint32_t	count;// Number of indices to draw
+	uint32_t	instanceCount;// Number of instances to draw
+	uint32_t	firstIndex;// Offset into the EBO (in indices)
+	uint32_t	baseVertex;// Offset into the VBO (in vertices)
+	uint32_t	baseInstance;// Offset for instanced data (e.g., SSBO)
+}	indirect_cmd_t;
 
 typedef struct s_gbuffer{
 	unsigned int	framebuffer;
@@ -258,10 +266,16 @@ typedef struct s_gbuffer{
 	unsigned int	zTexture;
 }	gbuffer_t;
 
+typedef struct s_render_pipeline {
+	gbuffer_t	gbuffer;
+	GLuint		indirect_buffer;
+}	rend_pip_t;
+
 typedef struct s_engine {
 	Shader		shader[8];
-	gbuffer_t	gbuffer;
 	Camera3D	camera;
+	rend_pip_t	render;
+
 	sv_player_t	player;
 }	engine_t;
 
