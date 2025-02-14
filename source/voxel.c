@@ -131,7 +131,7 @@ void	generate_chunk_mesh(chunk_t *chunk, vox_mesh_t mesh) {
 					}
 				} else {
 					// Top face
-					if (y == 30 || chunk->blocks[x][z][y + 1] != 1) {
+					if (y == 30 || chunk->blocks[x][z][y + 1].block_id != 1) {
 						add_face_to_mesh(&mesh, x, y, z, FACE_TOP, id);
 					}
 					
@@ -167,7 +167,7 @@ void	generate_chunk_mesh(chunk_t *chunk, vox_mesh_t mesh) {
 
 void	set_block(chunk_t *chunk, int x, int y, int z, int id) {
 	// chunk->blocks[x][z][y] = id;
-	clear_chunk_mesh(chunk);
-	generate_chunk_mesh(chunk);
-	reload_chunk_buffers(chunk);
+	// clear_chunk_mesh(chunk);
+	// generate_chunk_mesh(chunk);
+	// reload_chunk_buffers(chunk);
 }
