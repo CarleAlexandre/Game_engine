@@ -4,7 +4,7 @@ int64_t *buffer;
 
 void	voxel_render(engine_t *engine, world_t *world) {
 	float camera_pos[3] = {engine->camera.position.x, engine->camera.position.y, engine->camera.position.z};
-	SetShaderValue(engine->shader[shader_voxel_solid], engine->shader[shader_voxel_solid].locs[SHADER_LOC_VECTOR_VIEW], camera_pos, SHADER_UNIFORM_VEC3);
+	// SetShaderValue(engine->shader[shader_voxel_solid], engine->shader[shader_voxel_solid].locs[SHADER_LOC_VECTOR_VIEW], camera_pos, SHADER_UNIFORM_VEC3);
 	int screen_height = GetScreenHeight(), screen_width = GetScreenWidth();
 /*
 	glBindFramebuffer(GL_FRAMEBUFFER, engine->gbuffer.framebuffer);
@@ -18,21 +18,28 @@ void	voxel_render(engine_t *engine, world_t *world) {
 	BeginDrawing();
 	ClearBackground(BLACK);
 	BeginMode3D(engine->camera);
-		glUseProgram(engine->shader[shader_voxel_solid].id);
 
-		rlSetUniformMatrix(glGetUniformLocation(engine->shader[shader_voxel_solid].id, "MVP"),
-			MatrixMultiply(MatrixMultiply(rlGetMatrixModelview(), rlGetMatrixProjection()),MatrixIdentity()));
+		// //opaque material render
+		// glUseProgram(engine->shader[shader_voxel_solid].id);
+		// rlSetUniformMatrix(glGetUniformLocation(engine->shader[shader_voxel_solid].id, "MVP"),
+		// 	MatrixMultiply(MatrixMultiply(rlGetMatrixModelview(), rlGetMatrixProjection()),MatrixIdentity()));
+		// glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, world->ssbo);
+		// glBindBuffer(GL_DRAW_INDIRECT_BUFFER, engine->render.indirect_buffer);
+		// glBindVertexArray(world->vao);
+		// glMultiDrawElementsIndirect(GL_TRIANGLE_STRIP, GL_UNSIGNED_INT, 0, world->chunk_count, 0);
+		// glBindVertexArray(0);
 
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, world->ssbo);
+		// //transparent material render
+		// glUseProgram(engine->shader[shader_voxel_solid].id);
+		// rlSetUniformMatrix(glGetUniformLocation(engine->shader[shader_voxel_solid].id, "MVP"),
+		// 	MatrixMultiply(MatrixMultiply(rlGetMatrixModelview(), rlGetMatrixProjection()),MatrixIdentity()));
+		// glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, world->ssbo);
+		// glBindBuffer(GL_DRAW_INDIRECT_BUFFER, engine->render.indirect_buffer);
+		// glBindVertexArray(world->vao);
+		// glMultiDrawElementsIndirect(GL_TRIANGLE_STRIP, GL_UNSIGNED_INT, 0, world->chunk_count, 0);
+		// glBindVertexArray(0);
 
-		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, engine->render.indirect_buffer);
-
-		glBindVertexArray(world->vao);
-		
-		glMultiDrawElementsIndirect(GL_TRIANGLE_STRIP, GL_UNSIGNED_INT, 0, world->chunk_count, 0);
-
-		glBindVertexArray(0);
-
+		//debug render
 		DrawBoundingBox(engine->player.bound, RED);
 		DrawLine3D((Vector3){-100, 0, 0}, (Vector3){100, 0, 0}, RED);
 		DrawLine3D((Vector3){0, -100, 0}, (Vector3){0, 100, 0}, GREEN);
