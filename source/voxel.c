@@ -93,13 +93,23 @@ void	unload_chunk_data() {
 // 	mesh->indices[mesh->index_count++] = base_index + 3;
 // }
 
+
+/*
+	first generate terrain
+	then change block type
+	then generate caves
+	then add minerals
+	then generate hydrometrie
+	then add erosion and water material displacement
+	then add structures
+*/
+
 // world_t *generate_terrain(Vector2 chunk_pos) {
 // 	// Create and configure noise state
 // 	fnl_state noise = fnlCreateState();
 // 	noise.noise_type = FNL_NOISE_OPENSIMPLEX2S;
 
-// 	chunk_t *chunk = malloc(sizeof(chunk_t));
-// 	memset(chunk->blocks, 0, sizeof(voxel_t[32][32][32]));
+// 	world_t *world = malloc(sizeof(world_t));
 
 // 	for (int x = 0; x < 31; x++) {
 // 		for (int z = 0; z < 31; z++) {
@@ -111,7 +121,8 @@ void	unload_chunk_data() {
 // 			}
 // 		}
 // 	}
-// 	return (chunk);
+
+// 	return (world);
 // }
 
 // void	generate_chunk_mesh(chunk_t *chunk, vox_mesh_t mesh) {
