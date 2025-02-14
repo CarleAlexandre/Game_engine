@@ -216,6 +216,13 @@ typedef struct s_entity {
 	BoundingBox	bound;
 }	entity_t;
 
+typedef struct s_mesh {
+	uint64_t	vertices[100000];
+	uint64_t	indices[100000];
+	uint32_t	vertex_count;
+	uint32_t	index_count;
+}	mesh_t;
+
 typedef struct sv_player_s {
 	bool			show_inventory;
 	stats_t			stats;
@@ -228,10 +235,11 @@ typedef struct sv_player_s {
 
 typedef struct s_chunk {
 	int		x,y,z;
-	voxel_t		blocks[32][32][32];
+	voxel_t		*blocks[32][32][32];
 	uint32_t	index_offset;
 	uint32_t	index_count;
 	uint32_t	vertex_offset;
+	mesh_t		mesh;
 }	chunk_t;
 
 typedef struct s_vox_mesh {
@@ -244,7 +252,8 @@ typedef struct s_vox_mesh {
 typedef struct	s_world {
 	unsigned int	vao, vbo, ebo, ssbo;
 	vox_mesh_t	mesh;
-	chunk_t 	*chunk;
+	svo_t		*chunk;
+	chunk_t		*render_chunk[27];
 	unsigned int	chunk_count;
 }	world_t;
 
