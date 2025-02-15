@@ -6,6 +6,7 @@
 #include <rlgl.h>
 #include <raymath.h>
 #include "sparse_voxel_octree.h"
+#include <rcamera.h>
 
 /*
 	DEFINE
@@ -127,6 +128,11 @@ typedef enum {
 	DATA STRUCT
 */
 
+typedef struct s_plane {
+	Vector3	normal;
+	float	distance;
+}	plane_t;
+
 typedef struct s_token {
 	int	id;
 	char	*data;
@@ -209,11 +215,11 @@ typedef struct s_projectile {
 }	projectile_t;
 
 typedef struct s_entity {
-	Vector3	pos;
-	int	size;
-	int	layer;
-	int	model_id;
-	BoundingBox	bound;
+	Vector3		pos;
+	int		size;
+	int		layer;
+	int		model_id;
+	BoundingBox	bounding_box;
 }	entity_t;
 
 typedef struct s_mesh {
@@ -239,7 +245,8 @@ typedef struct s_chunk {
 	uint32_t	index_offset;
 	uint32_t	index_count;
 	uint32_t	vertex_offset;
-	mesh_t		mesh;
+	// mesh_t		mesh;
+	BoundingBox	bounding_box;
 }	chunk_t;
 
 typedef struct s_vox_mesh {

@@ -7,7 +7,7 @@
       "-I",
       "include",
       "-I",
-      "include",
+      "source",
       "-c",
       "-o",
       "server/main.o",

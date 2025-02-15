@@ -22,7 +22,7 @@ EDITOR_OBJ = $(EDITOR_SRC:%.c=%.o)
 
 SERVER_OBJ = $(SERVER_SRC:%.c=%.o)
 
-INCLUDE += -I include
+INCLUDE += -I include -I source
 
 BUILDDIR = build/
 
@@ -31,11 +31,11 @@ CC = gcc
 CFLAGS = -std=c99
 
 ifeq ($(OS), Windows_NT)
-CFLAGS += -I C:/mingw64/include -I include
+CFLAGS += -I C:/mingw64/include
 LIBS += -lraylib -lopengl32 -lgdi32 -lwinmm -latomic
 endif
 ifeq ($(shell uname -s), Linux)
-CFLAGS += -fsanitize=address -I include
+CFLAGS += -fsanitize=address
 LIBS += -lasan -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 endif
 

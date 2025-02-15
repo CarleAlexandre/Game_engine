@@ -1,12 +1,12 @@
-#include <engine.h>
+#include "engine.h"
 #include <stdint.h>
 #include <string.h>
 #define FNL_IMPL
 #include <FastNoiseLite.h>
 
-uint64_t	pack_face_data(char pos[3], char face, char id, char height, char width, char extra) {
-	//0000 0000 0000 0000 0000 hhhh hwww wwii iiii iiff fyyy yyzz zzzx xxxx
-	return ((uint64_t)extra << 35 | height << 30 | width << 25 |  id << 18 | face << 15 | pos[2] << 10 | pos[1] << 5| pos[0]);
+int	pack_face_data(char pos[3], char face, char height, char width) {
+	// hhhh hwww wwff fyyy yyzz zzzx xxxx
+	return (height << 23 | width << 18 | face << 15 | pos[2] << 10 | pos[1] << 5| pos[0]);
 }
 
 void	generate_dungeon() {
@@ -171,45 +171,69 @@ void	unload_chunk_data() {
 // 	}
 // }
 
-void	gen_render_chunk(world_t *world, Vector3 player_pos) {
-	float cx = player_pos.x / 32;
-	float cy = player_pos.y / 32;
-	float cz = player_pos.z / 32;
 
-	world->render_chunk[0] = svo_get_node((float[3]){cx, cy, cz}, world->chunk)->data;
+bool	is_chunk_visible(BoundingBox *bbox, const plane_t frustum[6]) {
+	for (int i = 0; i < 6; i++) {
+		Vector3	positive_corner = bbox->min;
+		if (frustum[i].normal.x >= 0) {
+			positive_corner.x = bbox->max.x;
+		}
+		if (frustum[i].normal.y >= 0) {
+			positive_corner.y = bbox->max.y;
+		}
+		if (frustum[i].normal.z >= 0) {
+			positive_corner.z = bbox->max.z;
+		}
+    
+		float distance = Vector3DotProduct(frustum[i].normal, positive_corner) + frustum[i].distance;
+		if (distance < 0) {
+		    return(false);
+		}
+	}
+	return(true);
+}
 
-	world->render_chunk[1] = svo_get_node((float[3]){cx, cy + 1, cz}, world->chunk)->data;
-	world->render_chunk[2] = svo_get_node((float[3]){cx, cy - 1, cz}, world->chunk)->data;
-	world->render_chunk[3] = svo_get_node((float[3]){cx + 1, cy, cz}, world->chunk)->data;
-	world->render_chunk[4] = svo_get_node((float[3]){cx - 1, cy, cz}, world->chunk)->data;
-	world->render_chunk[5] = svo_get_node((float[3]){cx, cy, cz + 1}, world->chunk)->data;
-	world->render_chunk[6] = svo_get_node((float[3]){cx, cy, cz - 1}, world->chunk)->data;
+bool	raycast(Ray ray, svo_t *octree) {
+	// Implement a voxel traversal algorithm to check for intersections
+	// Return true if the ray hits a solid voxel before reaching the chunk
+}
 
-	world->render_chunk[7] = svo_get_node((float[3]){cx, cy + 1, cz + 1}, world->chunk)->data;
-	world->render_chunk[8] = svo_get_node((float[3]){cx, cy + 1, cz - 1}, world->chunk)->data;
-	world->render_chunk[9] = svo_get_node((float[3]){cx + 1, cy + 1, cz}, world->chunk)->data;
-	world->render_chunk[10] = svo_get_node((float[3]){cx - 1, cy + 1, cz}, world->chunk)->data;
+bool	is_chunk_occluded(chunk_t *chunk, Vector3 camera_position, svo_t *svo) {
+	Ray ray;
+	Vector3 chunk_center;
+	chunk_center = Vector3Add(chunk->bounding_box.min, chunk->bounding_box.max);
+	chunk_center.x *= 0.5;
+	chunk_center.y *= 0.5;
+	chunk_center.z *= 0.5;
+	
+	ray.direction = Vector3Normalize(Vector3Subtract(chunk_center, camera_position));
+	ray.position = camera_position;
+	
+	return (raycast(ray, svo));
+}
 
-	world->render_chunk[11] = svo_get_node((float[3]){cx + 1, cy + 1, cz + 1}, world->chunk)->data;
-	world->render_chunk[12] = svo_get_node((float[3]){cx + 1, cy + 1, cz - 1}, world->chunk)->data;
-	world->render_chunk[13] = svo_get_node((float[3]){cx - 1, cy + 1, cz + 1}, world->chunk)->data;
-	world->render_chunk[14] = svo_get_node((float[3]){cx - 1, cy + 1, cz - 1}, world->chunk)->data;
+void	extract_frustum_planes(const Matrix view_proj, plane_t *frustum) {
+	
+}
 
-	world->render_chunk[15] = svo_get_node((float[3]){cx, cy - 1, cz + 1}, world->chunk)->data;
-	world->render_chunk[16] = svo_get_node((float[3]){cx, cy - 1, cz - 1}, world->chunk)->data;
-	world->render_chunk[17] = svo_get_node((float[3]){cx + 1, cy - 1, cz}, world->chunk)->data;
-	world->render_chunk[18] = svo_get_node((float[3]){cx - 1, cy - 1, cz}, world->chunk)->data;
+void	gen_render_chunk(world_t *world, Camera3D *camera) {
+	float cx = camera->position.x / 32;
+	float cy = camera->position.y / 32;
+	float cz = camera->position.z / 32;
 
-	world->render_chunk[19] = svo_get_node((float[3]){cx + 1, cy - 1, cz + 1}, world->chunk)->data;
-	world->render_chunk[20] = svo_get_node((float[3]){cx + 1, cy - 1, cz - 1}, world->chunk)->data;
-	world->render_chunk[21] = svo_get_node((float[3]){cx - 1, cy - 1, cz + 1}, world->chunk)->data;
-	world->render_chunk[22] = svo_get_node((float[3]){cx - 1, cy - 1, cz - 1}, world->chunk)->data;
+	Vector3 forward = GetCameraForward(camera);
 
-	world->render_chunk[23] = svo_get_node((float[3]){cx + 1, cy, cz + 1}, world->chunk)->data;
-	world->render_chunk[24] = svo_get_node((float[3]){cx - 1, cy, cz + 1}, world->chunk)->data;
-	world->render_chunk[25] = svo_get_node((float[3]){cx + 1, cy, cz - 1}, world->chunk)->data;
-	world->render_chunk[26] = svo_get_node((float[3]){cx + 1, cy, cz - 1}, world->chunk)->data;
+	Matrix view_proj = GetCameraProjectionMatrix(camera, GetRenderHeight()/ GetRenderWidth());
 
+	plane_t frustum[6];
+	extract_frustum_planes(view_proj, &frustum[0]);
+
+	for (int i = 0; i <  world->chunk_count; i++) {
+		chunk_t *chunk;
+		if (is_chunk_visible(chunk, frustum) && !is_chunk_occluded(chunk, camera->position, world->chunk)) {
+			add_chunk_to_render_list();
+		}
+	}
 }
 
 void	set_block(chunk_t *chunk, int x, int y, int z, int id) {
