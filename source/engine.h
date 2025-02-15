@@ -222,14 +222,14 @@ typedef struct s_entity {
 	BoundingBox	bounding_box;
 }	entity_t;
 
-typedef struct s_mesh {
+typedef struct	s_mesh {
 	uint64_t	vertices[100000];
 	uint64_t	indices[100000];
 	uint32_t	vertex_count;
 	uint32_t	index_count;
 }	mesh_t;
 
-typedef struct sv_player_s {
+typedef struct	sv_player_s {
 	bool			show_inventory;
 	stats_t			stats;
 	Vector3			pos;
@@ -239,7 +239,7 @@ typedef struct sv_player_s {
 	unsigned long long	uid;
 }	sv_player_t;
 
-typedef struct s_chunk {
+typedef struct	s_chunk {
 	int		x,y,z;
 	voxel_t		*blocks[32][32][32];
 	uint32_t	index_offset;
@@ -249,12 +249,17 @@ typedef struct s_chunk {
 	BoundingBox	bounding_box;
 }	chunk_t;
 
-typedef struct s_vox_mesh {
+typedef struct	s_vox_mesh {
 	uint64_t	*data;
 	uint32_t	data_count;
 	uint32_t	*indices;
 	uint32_t	index_count;
 }	vox_mesh_t;
+
+typedef struct	s_face_data {
+	int		block_id;
+	int		face_data;
+}	face_data_t;
 
 typedef struct	s_world {
 	unsigned int	vao, vbo, ebo, ssbo;

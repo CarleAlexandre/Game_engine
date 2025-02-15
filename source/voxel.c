@@ -171,7 +171,6 @@ void	unload_chunk_data() {
 // 	}
 // }
 
-
 bool	is_chunk_visible(BoundingBox *bbox, const plane_t frustum[6]) {
 	for (int i = 0; i < 6; i++) {
 		Vector3	positive_corner = bbox->min;
@@ -193,19 +192,25 @@ bool	is_chunk_visible(BoundingBox *bbox, const plane_t frustum[6]) {
 	return(true);
 }
 
+void	svo_traversal(svo_t *svo, Ray ray) {
+
+}
+
+void	chunk_traversal(chunk_t *chunk, Ray ray) {
+
+}
+
 bool	raycast(Ray ray, svo_t *octree) {
 	// Implement a voxel traversal algorithm to check for intersections
 	// Return true if the ray hits a solid voxel before reaching the chunk
 }
 
 bool	is_chunk_occluded(chunk_t *chunk, Vector3 camera_position, svo_t *svo) {
-	Ray ray;
-	Vector3 chunk_center;
+	Vector3	chunk_center;
+	Ray	ray;
+
 	chunk_center = Vector3Add(chunk->bounding_box.min, chunk->bounding_box.max);
-	chunk_center.x *= 0.5;
-	chunk_center.y *= 0.5;
-	chunk_center.z *= 0.5;
-	
+	chunk_center = Vector3Divide(chunk_center, (Vector3){0.5, 0.5, 0.5});	
 	ray.direction = Vector3Normalize(Vector3Subtract(chunk_center, camera_position));
 	ray.position = camera_position;
 	
