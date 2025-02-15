@@ -2,7 +2,7 @@
 
 ## World of Haven : Chaos dungeons
 
-Je suis en train de développer un moteur de jeu écrit en c99, ayant pour but de créer un jeu rogue-like dans un univers Voxel.
+	Je suis en train de développer un moteur de jeu écrit en c99, ayant pour but de créer un jeu rogue-like dans un univers Voxel.
 
 ## networking
 
@@ -37,6 +37,18 @@ Je suis en train de développer un moteur de jeu écrit en c99, ayant pour but d
 	transparency got a simple solution but could cost me much need to optimize it in the future
 
 ## voxel items
+
+## terrain gen ::
+
+/*
+	first generate terrain
+	then change block type
+	then generate caves
+	then add minerals
+	then generate hydrometrie
+	then add erosion and water material displacement
+	then add structures
+*/
 
 ### Idea
 

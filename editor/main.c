@@ -50,7 +50,7 @@ void	right_bar() {
 			}
 			
 			//general
-			GuiSlider((Rectangle){GetScreenWidth() - 180 + scroll.x, 150 + scroll.y, 100, 30}, "", "Freq", &noise.frequency, 0.001, 0.1);
+			GuiSlider((Rectangle){GetScreenWidth() - 180 + scroll.x, 150 + scroll.y, 100, 30}, "", "freq", &noise.frequency, 0.001, 0.1);
 
 			if (GuiDropdownBox((Rectangle){GetScreenWidth() - 180 + scroll.x, 100 + scroll.y, 100, 30}, "0;1;2;3;4;5;6", (int *)&noise.noise_type, noise_type)) {
 				noise_type = !noise_type;
