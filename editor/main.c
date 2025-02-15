@@ -1,5 +1,3 @@
-
-#include <engine.h>
 #include <prototype.h>
 #define RAYGUI_IMPLEMENTATION
 #include <raygui.h>
@@ -10,6 +8,10 @@ int	editor_mode = 0;
 bool	mode_enable = false;
 int	error = 0;
 Rectangle error_bound = (Rectangle){};
+Texture2D terrain;
+bool	update_noise = false;
+
+fnl_state noise;
 
 void	startscreen() {
 	BeginDrawing();
@@ -29,21 +31,50 @@ void	left_bar() {
 }
 
 void	right_bar() {
-	GuiDummyRec((Rectangle){GetScreenWidth() - 200, 30, 200, GetScreenHeight() - 30}, "setting");
+	static bool fract = false;
+	static bool noise_type = false;
+	static Vector2 scroll;
+	static Rectangle view;
+	GuiScrollPanel((Rectangle){GetScreenWidth() - 200, 30, 200, GetScreenHeight() - 30}, "Setting", (Rectangle){0, 0, 180, GetScreenHeight() - 60}, &scroll, &view);
+	BeginScissorMode(view.x, view.y, view.width, view.height);
+		if (editor_mode == 0) {
+			//DomainWarp Fractal
+			//DomainWarp
+			
+			//cellular
+			//fractal
+			GuiSlider((Rectangle){GetScreenWidth() - 180 + scroll.x, 250 + scroll.y, 100, 30}, "", "gain", &noise.gain, 0, 1);
+			
+			if (GuiDropdownBox((Rectangle){GetScreenWidth() - 180 + scroll.x, 200 + scroll.y, 100, 30}, "NONE;FBM;RIDGED;PINGPONG", (int *)&noise.fractal_type, fract)) {
+				fract = !fract;
+			}
+			
+			//general
+			GuiSlider((Rectangle){GetScreenWidth() - 180 + scroll.x, 150 + scroll.y, 100, 30}, "", "Freq", &noise.frequency, 0.001, 0.1);
+
+			if (GuiDropdownBox((Rectangle){GetScreenWidth() - 180 + scroll.x, 100 + scroll.y, 100, 30}, "0;1;2;3;4;5;6", (int *)&noise.noise_type, noise_type)) {
+				noise_type = !noise_type;
+			}
+			if (GuiButton((Rectangle){GetScreenWidth() - 180 + scroll.x, 60 + scroll.y, 100, 30}, "Update")) {
+				update_noise = true;
+			}
+		}
+	EndScissorMode();
 }
 
 //editor mode
 
 void	map_editor() {
-	static Camera2D cam = (Camera2D){
-		.offset = {0, 0},
-		.target = {0, 0},
-		.rotation = 0,
-		.zoom = 0.8,
-	};
+	// static Camera2D cam = (Camera2D){
+	// 	.offset = {0, 0},
+	// 	.target = {0, 0},
+	// 	.rotation = 0,
+	// 	.zoom = 0.8,
+	// };
 
-	BeginMode2D(cam);
-	EndMode2D();
+	// BeginMode2D(cam);
+	// EndMode2D();
+	DrawTexture(terrain, 0, 0, WHITE);
 }
 
 void	item_editor() {
@@ -110,7 +141,13 @@ int	main(void) {
 	RenderTexture2D fbo;
 	GuiLoadStyle("include/style_terminal.rgs");
 	fbo = LoadRenderTexture(GetScreenWidth() - 400, GetScreenHeight() - 30);
+
+	noise = fnlCreateState();
 	bool show_term = false;
+
+	noise.fractal_type = FNL_FRACTAL_FBM;
+
+	terrain = gen_texture_noise(&noise);
 
 	SetTargetFPS(30);
 	// EnableEventWaiting();
@@ -125,6 +162,11 @@ int	main(void) {
 		BeginTextureMode(fbo);
 		switch (editor_mode) {
 			case (0): {
+				if (update_noise) {
+					UnloadTexture(terrain);
+					terrain = gen_texture_noise(&noise);
+					update_noise = false;
+				}
 				map_editor();
 				break;
 			}

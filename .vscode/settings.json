@@ -81,6 +81,8 @@
 		"engine.h": "c",
 		"fastnoiselite.h": "c",
 		"prototype.h": "c",
-		"stdlib.h": "c"
+		"stdlib.h": "c",
+		"raymath.h": "c",
+		"sparse_voxel_octree.h": "c"
 	}
 }

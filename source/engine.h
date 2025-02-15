@@ -7,6 +7,12 @@
 #include <raymath.h>
 #include "sparse_voxel_octree.h"
 #include <rcamera.h>
+#include <FastNoiseLite.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
 
 /*
 	DEFINE
@@ -239,6 +245,8 @@ typedef struct	sv_player_s {
 	unsigned long long	uid;
 }	sv_player_t;
 
+
+// voxel are an height of a 1m2 block
 typedef struct	s_chunk {
 	int		x,y,z;
 	voxel_t		*blocks[32][32][32];
@@ -265,7 +273,7 @@ typedef struct	s_world {
 	unsigned int	vao, vbo, ebo, ssbo;
 	vox_mesh_t	mesh;
 	svo_t		*chunk;
-	chunk_t		*render_chunk[27];
+	chunk_t		*render_chunk;
 	unsigned int	chunk_count;
 }	world_t;
 

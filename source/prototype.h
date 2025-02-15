@@ -21,4 +21,6 @@ void	set_block(chunk_t *chunk, int x, int y, int z, int id);
 
 void	draw_ui(sv_player_t player);
 
+Texture2D	gen_texture_noise(fnl_state *noise);
+
 #endif
