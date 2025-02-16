@@ -1,5 +1,8 @@
 #version 460 core
-layout(location = 0) in int	packed_data;
+layout(location = 0) in input {
+	int packed_data;
+	int block_id;
+};
 
 layout(std430, binding = 0) buffer ChunkData {
 	int	chunk_positions[];
@@ -8,8 +11,8 @@ layout(std430, binding = 0) buffer ChunkData {
 uniform mat4	MVP;
 
 out vec3	frag_pos;
+out int		block_id;
 out int		face;
-out int		extra;
 
 const vec3	NORMALS[6] = {
 	vec3( 0.0, 1.0,  0.0),  // Y+
@@ -22,35 +25,23 @@ const vec3	NORMALS[6] = {
 
 const vec3	QUAD_VERTICES[4] = {
 	vec3(-0.5, -0.5, 0.0), // Bottom-left
-	vec3( 0.5, -0.5, 0.0), // Bottom-right
-	vec3(-0.5,  0.5, 0.0), // Top-left
-	vec3( 0.5,  0.5, 0.0)  // Top-right
+	vec3( 0.0, -0.5, 0.0), // Bottom-right
+	vec3(-0.5,  0.0, 0.0), // Top-left
+	vec3( 0.0,  0.0, 0.0)  // Top-right
 };
 
 void main() {
 	// Unpack the data
-	int x = (packed_data >> 27) & 0x1F;
-	int y = (packed_data >> 22) & 0x1F;
-	int z = (packed_data >> 17) & 0x1F;
-	face = (packed_data >> 14) & 0x07;
-	extra = (packed_data >> 11) & 0x07;
-
-
-	vec3 face_normal = NORMALS[face];
+	int x = (input) & 0x1F;
+	int y = (input << 5) & 0x1F;
+	int z = (input << 10) & 0x1F;
+	face = (input << 15) & 0x07;
 
 	int chunk_index = gl_DrawID * 3;
+	vec3 world_offset = vec3(chunk_positions[chunk_index] + x, chunk_positions[chunk_index + 1] + y, chunk_positions[chunk_index + 2] + z);
+	vec3 vertex_pos = world_offset + QUAD_VERTICES[gl_VertexID];
 
-	ivec3 chunk_pos = ivec3(chunk_positions[chunk_index], chunk_positions[chunk_index + 1], chunk_positions[chunk_index + 2]);
-	
-	vec3 world_offset = vec3(x, y, z) + chunk_pos;
-
-	vec3 vertex_offset = QUAD_VERTICES[gl_VertexID];
-
-	vec3 vertex_pos = world_offset + vertex_offset;
-
+	face_normal = NORMALS[face];
 	gl_Position = MVP * vec4(vertex_pos, 1.0);
-
 	frag_pos = world_offset;
-	face_normal = face_normal;
-	frag_extra = extra;
 }

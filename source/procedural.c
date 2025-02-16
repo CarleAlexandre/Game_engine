@@ -21,3 +21,5 @@ Texture2D	gen_texture_noise(fnl_state *noise) {
 	UnloadImage(test);
 	return (text);
 }
+
+
