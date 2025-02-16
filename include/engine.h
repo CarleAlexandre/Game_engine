@@ -1,13 +1,16 @@
 #ifndef ENGINE_HPP
 # define ENGINE_HPP
 
-#include <glad/glad.h>
+#include <ext/glad/glad.h>
+#include <ext/FastNoiseLite.h>
+
 #include <raylib.h>
 #include <rlgl.h>
 #include <raymath.h>
-#include "sparse_voxel_octree.h"
 #include <rcamera.h>
-#include <FastNoiseLite.h>
+
+#include "sparse_voxel_octree.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
