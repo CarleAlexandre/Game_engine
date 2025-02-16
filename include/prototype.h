@@ -51,7 +51,7 @@ void	init_toolbar(tool_bar_t *tool_bar);
 void	draw_toolbar(tool_bar_t *tool_bar);
 
 /*
-	TERRAIN AND TEXTURE
+	PROCEDURAL
 */
 
 Texture2D	gen_texture_noise(fnl_state *noise);

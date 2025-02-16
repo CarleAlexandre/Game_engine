@@ -2,17 +2,17 @@ LIB = flib.a
 
 GAME = game
 
-EDITOR = f_engine
+EDITOR = editor
 
 SERVER = server
 
 SRC += $(wildcard source/*.c)
 
-GAME_SRC += game/main.c
+GAME_SRC = main/game.c
 
-EDITOR_SRC += editor/main.c
+EDITOR_SRC = main/editor.c
 
-SERVER_SRC += server/main.c
+SERVER_SRC = main/server.c
 
 OBJ = $(SRC:%.c=%.o)
 

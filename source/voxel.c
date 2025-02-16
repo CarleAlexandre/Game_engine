@@ -1,5 +1,4 @@
-#define FNL_IMPL
-#include "engine.h"
+#include <engine.h>
 
 face_data_t	pack_face_data(char pos[3], char face, char height, char width, int id) {
 	face_data_t data;
@@ -348,33 +347,12 @@ void	gen_render_chunk(world_t *world, Camera3D *camera) {
 		for (int z = 0; z < 128; z++) {
 			for (int y = 0; y < 64; y++) {
 				chunk_t *current_chunk = world->chunk[x][z][y];
-				if (is_chunk_visible(current_chunk, frustum) && !is_chunk_occluded(current_chunk, camera->position, world->chunk)) {
-					add_chunk_to_render_list();
+				if (is_chunk_visible(&current_chunk->bounding_box, frustum) && !is_chunk_occluded(current_chunk, camera->position, world->chunk)) {
+					// add_chunk_to_render_list();
 				}
 			}
 		}
 	}
-}
-
-Texture2D	gen_texture_noise(fnl_state *noise) {
-	Image test = GenImageColor(1024, 1024, BLACK);
-	for (int x = 0; x < 1024; x++) {
-		for (int z = 0; z < 1024; z++) {
-			float noise_data = fnlGetNoise2D(noise, x, z) + 1;
-			char color_data = floorf(noise_data * 255 / 2);
-			Color tmp = {
-				.a = 255,
-				.r = color_data,
-				.g = color_data,
-				.b = color_data,
-			};
-			ImageDrawPixel(&test, x, z, tmp);
-		}
-	}
-
-	Texture2D text =  LoadTextureFromImage(test);
-	UnloadImage(test);
-	return (text);
 }
 
 void	set_block(chunk_t *chunk, int x, int y, int z, voxel_t *vox) {

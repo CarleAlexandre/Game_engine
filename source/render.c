@@ -21,34 +21,34 @@ void	setup_world_vao(world_t *world) {
 	
 }
 
-void	setup_world_ssbo(world_t *world) {	
-	glGenBuffers(1, &world->ssbo);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, world->ssbo);
-	int *buffer = malloc(sizeof(int) * 3 * 27);
-	for (int i = 0; i < 27; i++) {
-		buffer[i * 3] = world->render_chunk[i]->x;
-		buffer[i * 3 + 1] = world->render_chunk[i]->z;
-		buffer[i * 3 + 2] = world->render_chunk[i]->y;
-	}
-	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, 27 * 3 * sizeof(int), buffer);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, world->ssbo);
-	free (buffer);
-}
+// void	setup_world_ssbo(world_t *world) {	
+// 	glGenBuffers(1, &world->ssbo);
+// 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, world->ssbo);
+// 	int *buffer = malloc(sizeof(int) * 3 * 27);
+// 	for (int i = 0; i < 27; i++) {
+// 		buffer[i * 3] = world->render_chunk[i]->x;
+// 		buffer[i * 3 + 1] = world->render_chunk[i]->z;
+// 		buffer[i * 3 + 2] = world->render_chunk[i]->y;
+// 	}
+// 	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, 27 * 3 * sizeof(int), buffer);
+// 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, world->ssbo);
+// 	free (buffer);
+// }
 
-void	setup_indirect_buffer(rend_pip_t *render, world_t *world) {
-	indirect_cmd_t cmd[27];
-	for (int i = 0; i < 27; i++) {
-		cmd[i].count = world->render_chunk[i]->index_count;
-		cmd[i].instanceCount = 0;
-		cmd[i].firstIndex = i * world->render_chunk[i]->index_offset;
-		cmd[i].baseVertex = i * world->render_chunk[i]->vertex_offset;
-		cmd[i].baseInstance = i;
-	}
+// void	setup_indirect_buffer(rend_pip_t *render, world_t *world) {
+// 	indirect_cmd_t cmd[27];
+// 	for (int i = 0; i < 27; i++) {
+// 		cmd[i].count = world->render_chunk[i]->index_count;
+// 		cmd[i].instanceCount = 0;
+// 		cmd[i].firstIndex = i * world->render_chunk[i]->index_offset;
+// 		cmd[i].baseVertex = i * world->render_chunk[i]->vertex_offset;
+// 		cmd[i].baseInstance = i;
+// 	}
 
-	glGenBuffers(1, &render->indirect_buffer);
-	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, render->indirect_buffer);
-	glBufferData(GL_DRAW_INDIRECT_BUFFER, sizeof(cmd), cmd, GL_DYNAMIC_DRAW);
-}
+// 	glGenBuffers(1, &render->indirect_buffer);
+// 	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, render->indirect_buffer);
+// 	glBufferData(GL_DRAW_INDIRECT_BUFFER, sizeof(cmd), cmd, GL_DYNAMIC_DRAW);
+// }
 
 void	reload_world_vao(world_t *world) {
 	glBindVertexArray(world->vao);
@@ -62,31 +62,31 @@ void	reload_world_vao(world_t *world) {
 	glBindVertexArray(0);
 }
 
-void	reload_world_ssbo(world_t *world) {
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, world->ssbo);
-	int *buffer = malloc(sizeof(int) * 3 * world->chunk_count);
-	for (int i = 0; i < 27; i++) {
-		buffer[i * 3] = world->render_chunk[i]->x;
-		buffer[i * 3 + 1] = world->render_chunk[i]->z;
-		buffer[i * 3 + 2] = world->render_chunk[i]->y;
-	}
-	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, 27 * 3 * sizeof(int), buffer);
-	free (buffer);
-}
+// void	reload_world_ssbo(world_t *world) {
+// 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, world->ssbo);
+// 	int *buffer = malloc(sizeof(int) * 3 * world->chunk_count);
+// 	for (int i = 0; i < 27; i++) {
+// 		buffer[i * 3] = world->render_chunk[i]->x;
+// 		buffer[i * 3 + 1] = world->render_chunk[i]->z;
+// 		buffer[i * 3 + 2] = world->render_chunk[i]->y;
+// 	}
+// 	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, 27 * 3 * sizeof(int), buffer);
+// 	free (buffer);
+// }
 
-void	reload_indirect_buffer(rend_pip_t *render, world_t *world, int chunk) {
-	indirect_cmd_t cmd[chunk];
-	for (int i = 0; i < chunk; i++) {
-		cmd[i].count = world->render_chunk[i]->index_count;
-		cmd[i].instanceCount = 0;
-		cmd[i].firstIndex = i * world->render_chunk[i]->index_offset;
-		cmd[i].baseVertex = i * world->render_chunk[i]->vertex_offset;
-		cmd[i].baseInstance = i;
-	}
+// void	reload_indirect_buffer(rend_pip_t *render, world_t *world, int chunk) {
+// 	indirect_cmd_t cmd[chunk];
+// 	for (int i = 0; i < chunk; i++) {
+// 		cmd[i].count = world->render_chunk[i]->index_count;
+// 		cmd[i].instanceCount = 0;
+// 		cmd[i].firstIndex = i * world->render_chunk[i]->index_offset;
+// 		cmd[i].baseVertex = i * world->render_chunk[i]->vertex_offset;
+// 		cmd[i].baseInstance = i;
+// 	}
 
-	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, render->indirect_buffer);
-	glBufferSubData(GL_DRAW_INDIRECT_BUFFER, 0, sizeof(cmd), cmd);
-}
+// 	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, render->indirect_buffer);
+// 	glBufferSubData(GL_DRAW_INDIRECT_BUFFER, 0, sizeof(cmd), cmd);
+// }
 
 gbuffer_t	loadGbuffer(int width, int height, Shader deffered_shader) {
 	gbuffer_t buffer = {0};
