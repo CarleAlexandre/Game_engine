@@ -71,6 +71,56 @@
 
 	Commerce de dofus, et le temps passer sur un craft item /fm augmente ca valeur focus et valeur des auugmentes en fonction des build
 	
+	i could add a system with different faction and aggro level
+
+## CREDIT
+
+	RAYSAN: https://www.raylib.com/
+
 ## TODO 
 
 	chunk rendering
+
+
+need to create a name for Different place
+
+Day 0 is when you start the game.
+
+Tutorial phase
+
+Day 12, the force of the shadow advance and start to build a bridge
+
+First game loop (gather ressources and combat)
+
+Day 20 The bridge is finished
+
+mid game, dungeon and exploring the mainland
+
+Day 50 the force advance through the middle island 
+
+Start introducing the full picture of the story
+player need to reenforce is base
+
+Day 75 The second bridge start building
+
+same gameloop as before
+
+Day 100 the scond bridge is finished and the shadow advance through the mainland
+
+Start to defend Your City (free build) (biger and biger wave).
+
+if player start to explore, he enter the third gameloop
+where
+
+when the player advance to the evil domain (south island), go to the late game where you start your journey to conquer the forgotten land
+
+you can go back but explored and conquered land will be lost
+
+the point of the late game is to use what you aquired trhough the early and mid game to go as far as you can, and when you finish you unlock the good ending,
+bad ending when you lose your base,
+neutral / Unending when cannot go to terme on the 999 days (hidden success).
+
+
+Pendant plus de 10000 ans, les manikins on prospère sous la montagne. Leurs royaumes s'étend à perte de vue sous terre, les gemmes et les minéraux brillent telle des étoiles donnant le sentiment de ne pas etre enterre, sur le plafond, soutenue par d'imposantes statues.
+Les murs sont recouverts d'habitations avec des mécanismes de toutes sortes.
+
