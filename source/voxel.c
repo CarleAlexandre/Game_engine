@@ -356,4 +356,5 @@ void	gen_render_chunk(world_t *world, Camera3D *camera) {
 }
 
 void	set_block(chunk_t *chunk, int x, int y, int z, voxel_t *vox) {
+	
 }

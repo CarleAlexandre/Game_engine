@@ -28,7 +28,7 @@ const vec3	QUAD_VERTICES[4] = {
 	vec3( 0.0, -0.5, 0.0), // Bottom-right
 	vec3(-0.5,  0.0, 0.0), // Top-left
 	vec3( 0.0,  0.0, 0.0)  // Top-right
-};
+};//only half unit in size
 
 void main() {
 	// Unpack the data
