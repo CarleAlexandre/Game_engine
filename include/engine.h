@@ -247,25 +247,23 @@ typedef struct	s_face_data {
 }	face_data_t;
 
 typedef struct	s_vox_mesh {
-	uint64_t	*data;
-	uint32_t	data_count;
+	face_data_t	*faces;
+	uint32_t	face_count;
 	uint32_t	*indices;
 	uint32_t	index_count;
 }	vox_mesh_t;
 
-typedef struct	s_mesh {
-	face_data_t	faces[100000];
-	uint32_t	face_count;
-}	mesh_t;
-
-// voxel are an height of a 1m2 block
-typedef struct	s_chunk {
-	int		x,y,z;
-	voxel_t		*blocks[32][32][32];
+typedef struct	s_chunk_render {
 	uint32_t	index_offset;
 	uint32_t	index_count;
 	uint32_t	vertex_offset;
-	// mesh_t		mesh;
+	int		x, y, z;
+}	chunk_render_t;
+
+// voxel are an height of a 1m2 block
+typedef struct	s_chunk {
+	int		x, y, z;
+	voxel_t		*blocks[32][32][32];
 	BoundingBox	bounding_box;
 }	chunk_t;
 
@@ -273,7 +271,8 @@ typedef struct	s_world {
 	unsigned int	vao, vbo, ebo, ssbo;
 	vox_mesh_t	mesh;
 	chunk_t		*chunk[128][128][64];
-	//add render queue for data
+	chunk_render_t	*rqueue;
+	unsigned int	rqueue_size;
 }	world_t;
 
 //
@@ -303,7 +302,7 @@ typedef struct s_engine {
 	Shader		shader[8];
 	Camera3D	camera;
 	rend_pip_t	render;
-
+	bool		debug;
 	sv_player_t	player;
 }	engine_t;
 

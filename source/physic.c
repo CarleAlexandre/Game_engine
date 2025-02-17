@@ -30,6 +30,11 @@ Vector3 get_vector_intersect(BoundingBox a, BoundingBox b) {
 	return (vec);
 }
 
+bool	gjk_intersect() {
+
+	return (false);
+}
+
 //down collision,
 //up collision
 //forward, backward, left, rigth

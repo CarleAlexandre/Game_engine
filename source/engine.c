@@ -18,6 +18,7 @@ engine_t init_engine(void) {
 	engine.shader[shader_deffered].locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(engine.shader[shader_deffered], "viewPosition");
 
 	engine.render.gbuffer = loadGbuffer(width, height, engine.shader[shader_deffered]) ;
+	engine.debug = true;
 
 	return (engine);
 }
