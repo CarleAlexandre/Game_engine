@@ -193,13 +193,6 @@ typedef struct s_item {
 	item_stats_t	*stats;
 }	item_t;
 
-typedef struct s_voxel {
-	unsigned short	block_id;
-	float		height;
-	float		pressure;
-	short		stats;
-}	voxel_t;
-
 typedef	struct s_inventory {
 	int		money;
 	item_t		*item;
@@ -260,18 +253,26 @@ typedef struct	s_chunk_render {
 	int		x, y, z;
 }	chunk_render_t;
 
+
+typedef struct s_voxel {
+	unsigned short	block_id;
+	float		height;
+	float		pressure;
+	short		stats;
+}	voxel_t;
+
 // voxel are an height of a 1m2 block
 typedef struct	s_chunk {
 	int		x, y, z;
-	voxel_t		*blocks[32][32][32];
+	voxel_t		**blocks;//64x64x64
 	BoundingBox	bounding_box;
 }	chunk_t;
 
 typedef struct	s_world {
 	unsigned int	vao, vbo, ebo, ssbo;
 	vox_mesh_t	mesh;
-	chunk_t		*chunk[128][128][64];
-	chunk_render_t	*rqueue;
+	chunk_t		**chunk;// x*10000
+	chunk_render_t	**rqueue;
 	unsigned int	rqueue_size;
 }	world_t;
 

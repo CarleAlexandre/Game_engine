@@ -8,6 +8,23 @@ face_data_t	pack_face_data(char pos[3], char face, char height, char width, int 
 	return (data);
 }
 
+int	get_vox_idx(int x, int y, int z) {
+	return (x + (z * 64) + (y * 64 * 64));
+}
+
+Vector3	get_vox_pos(int idx) {
+	return ((Vector3){idx % 64, (idx /64) % 64, ((idx / 64)/ 64) % 64});
+}
+
+// int	get_chunk_idx(int x, int y, int z) {
+// 	return (x + (z * 32) + (y * 32 * 32));
+// }
+
+// Vector3	get_chunk_pos(int idx) {
+// 	return ((Vector3){idx % 64, (idx / 64) % 64, ((idx / 64)/ 64) % 64});
+// }
+
+
 //gen chunk mesh
 
 static inline int get_x(int face, int i, int j, int depth) {
@@ -54,7 +71,7 @@ int	get_neighbor_id(chunk_t *chunk, int x, int y, int z, int face) {
 	if(nx < 0 || nx >= 32 || nz < 0 || nz >= 32 || ny < 0 || ny >= 32)
 	    return(0);
 	
-	return(chunk->blocks[nx][nz][ny]->block_id);
+	return(chunk->blocks[get_vox_idx(nx, nz, ny)]->block_id);
 }
 
 void	add_face_to_mesh(mesh_t *mesh, int x, int y, int z, int face, int id, char width, char height) {
@@ -99,7 +116,7 @@ void	add_face_to_mesh(mesh_t *mesh, int x, int y, int z, int face, int id, char 
 	}
 }
 
-void	greedy_mesh_face(chunk_t *chunk, mesh_t *mesh, int face) {
+void	greedy_mesh_face(chunk_t *chunk, chunk_render_t *mesh, int face) {
 	bool mask[32][32] = {0}; // Visibility mask for current layer
 	int primary, secondary, depth;
 
@@ -157,7 +174,7 @@ void	greedy_mesh_face(chunk_t *chunk, mesh_t *mesh, int face) {
 				int x = get_x(face,i,j,depth);
 				int y = get_y(face,i,j,depth);
 				int z = get_z(face,i,j,depth);
-				int id = chunk->blocks[x][z][y]->block_id;
+				int id = chunk->blocks[]->block_id;
 				
 				add_face_to_mesh(mesh, x, y, z, face, id, w, h);
 
@@ -172,7 +189,7 @@ void	greedy_mesh_face(chunk_t *chunk, mesh_t *mesh, int face) {
 	}
 }
 
-void generate_chunk_mesh(chunk_t *chunk, mesh_t *mesh) {
+void generate_chunk_mesh(chunk_t *chunk, chunk_render_t *mesh) {
 	for(int face = 0; face < 6; face++) {
 		greedy_mesh_face(chunk, mesh, face);
 	}
