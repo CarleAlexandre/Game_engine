@@ -251,19 +251,16 @@ typedef struct	s_face_data {
 typedef struct	s_vox_mesh {
 	face_data_t	*faces;
 	uint32_t	face_count;
-	uint32_t	*indices;
-	uint32_t	index_count;
 }	vox_mesh_t;
 
 typedef struct	s_chunk_render {
-	uint32_t	index_offset;
-	uint32_t	index_count;
-	uint32_t	vertex_offset;
+	uint32_t	face_offset;
+	uint32_t	face_count;
 	int		x, y, z;
 }	chunk_render_t;
 
 typedef struct	s_world_render {
-	unsigned int	vao, vbo, ebo, ssbo;
+	unsigned int	vao, vbo, ssbo;
 	vox_mesh_t	mesh;
 	dyn_array_t	*rqueue;//maybe reverse for transparency if order is from chunk distance to player dyn array of chunk_render_t
 }	world_render_t;
@@ -294,12 +291,11 @@ typedef struct	s_world {
 	ENGINE
 */
 
-typedef struct s_draw_elements_indirect_command{
-	uint32_t	count;// Number of indices to draw
+typedef struct s_draw_arrays_indirect_command{
+	uint32_t	count;// Number of faces
 	uint32_t	instanceCount;// Number of instances to draw
-	uint32_t	firstIndex;// Offset into the EBO (in indices)
-	uint32_t	baseVertex;// Offset into the VBO (in vertices)
-	uint32_t	baseInstance;// Offset for instanced data (e.g., SSBO)
+	uint32_t	first;// Offset into the VBO (in face)
+	uint32_t	baseInstance;// Instance id
 }	indirect_cmd_t;
 
 typedef struct s_gbuffer{

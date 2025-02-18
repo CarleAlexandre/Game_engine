@@ -1,15 +1,17 @@
 #version 460 core
 
-in vec3 frag_pos;
-in vec3 frag_normal;
-in int frag_extra;
+flat in vec3	frag_pos;
+flat in vec3	face_normal;
+flat in int	block_id_out;
+flat in int	face;
+flat in int	extra;
 
 out vec4 frag_color;
 
 void main() {
     // Example: Use the normal for shading
     vec3 light_dir = normalize(vec3(1.0, 1.0, 1.0));
-    float diffuse = max(dot(frag_normal, light_dir), 0.0);
+    float diffuse = max(dot(face_normal, light_dir), 0.0);
     frag_color = vec4(vec3(diffuse), 1.0);
 }
 

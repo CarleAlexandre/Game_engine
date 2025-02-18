@@ -1,10 +1,10 @@
-#include <engine.h>
+#include <prototype.h>
 
-face_data_t	pack_face_data(char pos[3], char face, char height, char width, int id) {
+face_data_t	pack_face_data(unsigned char pos[3], unsigned char face, unsigned char height, unsigned char width, unsigned short id) {
 	face_data_t data;
 
-	data.block_id = id;
-	data.face_data = ((height << 23) | (width << 18) | (face << 15) | (pos[2] << 10) | (pos[1] << 5) | (pos[0]));
+	data.block_id = (id << 3 | face);
+	data.face_data = ((height << 24) | (width << 18) | (pos[2] << 12) | (pos[1] << 6) | pos[0]);
 	return (data);
 }
 
@@ -110,16 +110,17 @@ face_data_t	add_face_to_mesh(int x, int y, int z, int face, int id, char width, 
 	return (pack_face_data(pos, face, height, width, id));
 }
 
-/*
-//need to redo this
+//does it even work ???
 void	greedy_mesh_face(chunk_t *chunk, vox_mesh_t *mesh, int face) {
-	bool mask[32][32] = {0}; // Visibility mask for current layer
+	bool mask[64][64] = {0}; // Visibility mask for current layer
+	face_data_t faces[100000] = {0};
+	int current_idx = 0;
 	int primary, secondary, depth;
 	// Axis mapping based on face direction
-	for(depth = 0; depth < 32; depth++) {
+	for(depth = 0; depth < 64; depth++) {
 		// Generate visibility mask for current layer
-		for(primary = 0; primary < 32; primary++) {
-			for(secondary = 0; secondary < 32; secondary++) {
+		for(primary = 0; primary < 64; primary++) {
+			for(secondary = 0; secondary < 64; secondary++) {
 				int x, y, z;
 				switch(face) {
 					case FACE_TOP:    x = primary; z = secondary; y = depth; break;
@@ -130,7 +131,7 @@ void	greedy_mesh_face(chunk_t *chunk, vox_mesh_t *mesh, int face) {
 					case FACE_BACK:  x = primary; y = secondary; z = depth; break;
 				}
 
-				int current_id = chunk->blocks[x][z][y]->block_id;
+				int current_id = chunk->blocks[get_vox_idx(x,y,z)]->block_id;
 				if(current_id == 0) {
 					mask[primary][secondary] = false;
 					continue;
@@ -142,23 +143,23 @@ void	greedy_mesh_face(chunk_t *chunk, vox_mesh_t *mesh, int face) {
 		}
 
 		// Process the mask to find rectangular regions
-		for(int j = 0; j < 32; j++) {
-			for(int i = 0; i < 32; i++) {
+		for(int j = 0; j < 64; j++) {
+			for(int i = 0; i < 64; i++) {
 				if(!mask[i][j]) continue;
 
 				// Find maximum width
 				int w;
-				for(w = 1; i + w < 32 && mask[i + w][j] && 
-				chunk->blocks[get_x(face,i + w,j,depth)][get_z(face,i + w,j,depth)][get_y(face,i + w,j,depth)]->block_id == 
-				chunk->blocks[get_x(face,i,j,depth)][get_z(face,i,j,depth)][get_y(face,i,j,depth)]->block_id; w++);
+				for(w = 1; i + w < 64 && mask[i + w][j] && 
+				chunk->blocks[get_vox_idx(get_x(face,i + w,j,depth), get_y(face,i + w,j,depth), get_z(face,i + w,j,depth))]->block_id == 
+				chunk->blocks[get_vox_idx(get_x(face,i,j,depth), get_y(face,i,j,depth), get_z(face,i,j,depth))]->block_id; w++);
 
 				// Find maximum height
 				int h;
-				for(h = 1; j + h < 32; h++) {
+				for(h = 1; j + h < 64; h++) {
 					for(int k = 0; k < w; k++) {
 						if(!mask[i + k][j + h] || 
-						chunk->blocks[get_x(face,i + k,j + h,depth)][get_z(face,i + k,j + h,depth)][get_y(face,i + k,j + h,depth)]->block_id != 
-						chunk->blocks[get_x(face,i,j,depth)][get_z(face,i,j,depth)][get_y(face,i,j,depth)]->block_id) {
+						chunk->blocks[get_vox_idx(get_x(face,i + k,j + h,depth), get_y(face,i + k,j + h,depth), get_z(face,i + k,j + h,depth))]->block_id != 
+						chunk->blocks[get_vox_idx(get_x(face,i,j,depth), get_y(face,i,j,depth), get_z(face,i,j,depth))]->block_id) {
 							goto done_height;
 						}
 					}
@@ -169,9 +170,9 @@ void	greedy_mesh_face(chunk_t *chunk, vox_mesh_t *mesh, int face) {
 				int x = get_x(face,i,j,depth);
 				int y = get_y(face,i,j,depth);
 				int z = get_z(face,i,j,depth);
-				int id = chunk->blocks[]->block_id;
+				int id = chunk->blocks[get_vox_idx(x, y, z)]->block_id;
 				
-				face_data_t data = add_face_to_mesh(x, y, z, face, id, w, h);
+				faces[current_idx++] = add_face_to_mesh(x, y, z, face, id, w, h);
 
 				// Mark region as processed
 				for(int a = 0; a < w; a++) {
@@ -182,15 +183,61 @@ void	greedy_mesh_face(chunk_t *chunk, vox_mesh_t *mesh, int face) {
 			}
 		}
 	}
-}
-*/
 
-chunk_render_t	*generate_chunk_mesh(chunk_t *chunk, vox_mesh_t *mesh) {
+	face_data_t *new_faces = malloc(sizeof(face_data_t) * (mesh->face_count + current_idx));
+	memset(new_faces, 0, sizeof(face_data_t) * (mesh->face_count + current_idx));
+	if (mesh->faces) {
+		memcpy(new_faces, mesh->faces, sizeof(face_data_t) * mesh->face_count);
+		free (mesh->faces);
+	}
+	mesh->faces = new_faces;
+	for (int i = 0; i < current_idx; i++) {
+		mesh->faces[mesh->face_count + i] = faces[i];
+	}
+}
+
+
+static inline int	num_cmp(int f1, int f2) {
+	if (f1 > f2) {
+		return (1);
+	} else if (f1 < f2) {
+		return (2);
+	}
+	return (0);
+}
+
+chunk_render_t	*generate_chunk_mesh(chunk_t *chunk, vox_mesh_t *mesh, Vector3 pos) {
 	chunk_render_t	*render;
-	//do only on rendered face
-	// for(int face = 0; face < 6; face++) {
-		//greedy_mesh_face(chunk, mesh, face);
-	// }
+
+	char	face[3][2] = {{FACE_LEFT, FACE_TOP}, {FACE_BOTTOM, FACE_TOP}, {FACE_BACK, FACE_FRONT}};
+	int	c_pos[3] = {chunk->x, chunk->y, chunk->z}, p_pos[3];
+	p_pos[0] = pos.x;
+	p_pos[1] = pos.y;
+	p_pos[2] = pos.z;
+
+	render->face_offset = mesh->face_count;
+
+	for (int i = 0; i < 3; i++) {
+		switch(num_cmp(c_pos[i], p_pos[i])) {
+			case (0):
+				greedy_mesh_face(chunk, mesh, face[i][0]);
+				render->face_count++;
+				break;
+			case (1):
+				greedy_mesh_face(chunk, mesh, face[i][1]);
+				render->face_count++;
+				break;
+			case (2):
+				greedy_mesh_face(chunk, mesh, face[i][0]);
+				greedy_mesh_face(chunk, mesh, face[i][1]);
+				render->face_count += 2;
+				break;
+		}
+	}
+	render->x = chunk->x;
+	render->y = chunk->y;
+	render->z = chunk->z;
+	return (render);
 }
 
 //World Render
@@ -217,9 +264,9 @@ bool	is_chunk_visible(BoundingBox *bbox, const plane_t frustum[6]) {
 }
 
 chunk_t* get_chunk_at_position(chunk_t **chunks, Vector3 position) {
-	int chunk_x = (int)(position.x / 32);
-	int chunk_y = (int)(position.y / 32);
-	int chunk_z = (int)(position.z / 32);
+	int chunk_x = (int)(position.x / 16);
+	int chunk_y = (int)(position.y / 16);
+	int chunk_z = (int)(position.z / 16);
     
 	if (chunk_x < 0 || chunk_x >= 128 || chunk_y < 0 || chunk_y >= 128 || chunk_z < 0 || chunk_z >= 64) {
 	    return(NULL);
@@ -317,10 +364,17 @@ void	gen_render_chunk(world_t *world, engine_t *engine) {
 	for (int idx = 0; idx < world; idx++) {
 		chunk_t *current_chunk = world->chunk[idx];
 		if (is_chunk_visible(&current_chunk->bounding_box, frustum) && !is_chunk_occluded(current_chunk, engine->camera.position, world->chunk)) {
-			chunk_render_t *rend = generate_chunk_mesh(current_chunk, &engine->render.world.mesh);
+			chunk_render_t *rend = generate_chunk_mesh(current_chunk, &engine->render.world.mesh, engine->camera.position);
 			dyn_add_elem(engine->render.world.rqueue, rend);
 		}
 	}
+}
+
+void	reload_voxel_world(world_t *world, engine_t *engine) {
+	gen_render_chunk(world, engine);
+	reload_world_vao(&engine->render.world);
+	reload_world_ssbo(&engine->render.world);
+	reload_indirect_buffer(&engine->render);
 }
 
 void	set_block(chunk_t *chunk, int x, int y, int z, voxel_t *vox) {

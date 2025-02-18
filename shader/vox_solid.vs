@@ -1,8 +1,7 @@
 #version 460 core
-layout(location = 0) in input {
-	int packed_data;
-	int block_id;
-};
+
+layout(location = 0) in int input_data;
+layout(location = 1) in int block_id;
 
 layout(std430, binding = 0) buffer ChunkData {
 	int	chunk_positions[];
@@ -11,8 +10,10 @@ layout(std430, binding = 0) buffer ChunkData {
 uniform mat4	MVP;
 
 out vec3	frag_pos;
-out int		block_id;
+out vec3	face_normal;
+out int		block_id_out;
 out int		face;
+out int		extra;
 
 const vec3	NORMALS[6] = {
 	vec3( 0.0, 1.0,  0.0),  // Y+
@@ -24,21 +25,28 @@ const vec3	NORMALS[6] = {
 };
 
 const vec3	QUAD_VERTICES[4] = {
-	vec3(-0.5, -0.5, 0.0), // Bottom-left
-	vec3( 0.0, -0.5, 0.0), // Bottom-right
-	vec3(-0.5,  0.0, 0.0), // Top-left
-	vec3( 0.0,  0.0, 0.0)  // Top-right
+	vec3(-0.25, -0.25, 0.0), // Bottom-left
+	vec3( 0.25, -0.25, 0.0), // Bottom-right
+	vec3(-0.25,  0.25, 0.0), // Top-left
+	vec3( 0.25,  0.25, 0.0)  // Top-right
 };//only half unit in size
+
 
 void main() {
 	// Unpack the data
-	int x = (input) & 0x1F;
-	int y = (input << 5) & 0x1F;
-	int z = (input << 10) & 0x1F;
-	face = (input << 15) & 0x07;
+	int x = (input_data) & 0x3f;
+	int y = (input_data >> 6) & 0x3f;
+	int z = (input_data >> 12) & 0x3f;
+	int height = (input_data >> 18) & 0x3f;
+	int width = (input_data >> 24) & 0x3f;
+	face = (block_id) & 0x07;
+	block_id_out = (block_id >> 3) & 0xffff;
+	extra = (block_id >> 19) & 0xff;
 
-	int chunk_index = gl_DrawID * 3;
-	vec3 world_offset = vec3(chunk_positions[chunk_index] + x, chunk_positions[chunk_index + 1] + y, chunk_positions[chunk_index + 2] + z);
+	int chunk_index = gl_DrawID * 3;//if doesn't work use either gl_InstanceID (if gl version is too low)
+	vec3 scaled_chunk_pos = vec3(chunk_positions[chunk_index], chunk_positions[chunk_index + 1], chunk_positions[chunk_index + 2]) * 32.0;
+	vec3 voxel_offset = vec3(x, y, z) * 0.5;
+	vec3 world_offset = scaled_chunk_pos + voxel_offset;
 	vec3 vertex_pos = world_offset + QUAD_VERTICES[gl_VertexID];
 
 	face_normal = NORMALS[face];
