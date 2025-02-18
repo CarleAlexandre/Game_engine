@@ -16,14 +16,11 @@ Vector3	get_vox_pos(int idx) {
 	return ((Vector3){idx % 64, (idx /64) % 64, ((idx / 64)/ 64) % 64});
 }
 
-// int	get_chunk_idx(int x, int y, int z) {
-// 	return (x + (z * 32) + (y * 32 * 32));
-// }
+// each world part are 2048 vox^3 or 64 chunk ^ 3 but it's an octree
 
-// Vector3	get_chunk_pos(int idx) {
-// 	return ((Vector3){idx % 64, (idx / 64) % 64, ((idx / 64)/ 64) % 64});
-// }
+// only part that are heavily player edited will be save and kept in memory else it will regenerate that will make use save lot of disk space
 
+//'also dungeon should not be kept but genereted when entered and cleared when outside (else i had mecanics for player to go back inside)
 
 //gen chunk mesh
 
@@ -74,7 +71,7 @@ int	get_neighbor_id(chunk_t *chunk, int x, int y, int z, int face) {
 	return(chunk->blocks[get_vox_idx(nx, nz, ny)]->block_id);
 }
 
-void	add_face_to_mesh(mesh_t *mesh, int x, int y, int z, int face, int id, char width, char height) {
+face_data_t	add_face_to_mesh(int x, int y, int z, int face, int id, char width, char height) {
 	char pos[3];
 
 	switch(face) {
@@ -110,16 +107,14 @@ void	add_face_to_mesh(mesh_t *mesh, int x, int y, int z, int face, int id, char 
 			break;
 	}
 
-	face_data_t face_data = pack_face_data(pos, face, height, width, id);
-	if (mesh->face_count < 99999) {
-		mesh->faces[mesh->face_count++] = face_data;
-	}
+	return (pack_face_data(pos, face, height, width, id));
 }
 
-void	greedy_mesh_face(chunk_t *chunk, chunk_render_t *mesh, int face) {
+/*
+//need to redo this
+void	greedy_mesh_face(chunk_t *chunk, vox_mesh_t *mesh, int face) {
 	bool mask[32][32] = {0}; // Visibility mask for current layer
 	int primary, secondary, depth;
-
 	// Axis mapping based on face direction
 	for(depth = 0; depth < 32; depth++) {
 		// Generate visibility mask for current layer
@@ -176,7 +171,7 @@ void	greedy_mesh_face(chunk_t *chunk, chunk_render_t *mesh, int face) {
 				int z = get_z(face,i,j,depth);
 				int id = chunk->blocks[]->block_id;
 				
-				add_face_to_mesh(mesh, x, y, z, face, id, w, h);
+				face_data_t data = add_face_to_mesh(x, y, z, face, id, w, h);
 
 				// Mark region as processed
 				for(int a = 0; a < w; a++) {
@@ -188,11 +183,14 @@ void	greedy_mesh_face(chunk_t *chunk, chunk_render_t *mesh, int face) {
 		}
 	}
 }
+*/
 
-void generate_chunk_mesh(chunk_t *chunk, chunk_render_t *mesh) {
-	for(int face = 0; face < 6; face++) {
-		greedy_mesh_face(chunk, mesh, face);
-	}
+chunk_render_t	*generate_chunk_mesh(chunk_t *chunk, vox_mesh_t *mesh) {
+	chunk_render_t	*render;
+	//do only on rendered face
+	// for(int face = 0; face < 6; face++) {
+		//greedy_mesh_face(chunk, mesh, face);
+	// }
 }
 
 //World Render
@@ -218,17 +216,17 @@ bool	is_chunk_visible(BoundingBox *bbox, const plane_t frustum[6]) {
 	return(true);
 }
 
-chunk_t* get_chunk_at_position(chunk_t *chunks[128][128][64], Vector3 position) {
-	int chunk_x = (int)(position.x / 16);
-	int chunk_y = (int)(position.y / 16);
-	int chunk_z = (int)(position.z / 16);
+chunk_t* get_chunk_at_position(chunk_t **chunks, Vector3 position) {
+	int chunk_x = (int)(position.x / 32);
+	int chunk_y = (int)(position.y / 32);
+	int chunk_z = (int)(position.z / 32);
     
 	if (chunk_x < 0 || chunk_x >= 128 || chunk_y < 0 || chunk_y >= 128 || chunk_z < 0 || chunk_z >= 64) {
 	    return(NULL);
 	}
     
-	return chunks[chunk_x][chunk_y][chunk_z];
-    }
+	return (chunks[chunk_x + chunk_y + chunk_z]);// need to get chunk pos
+}
     
 voxel_t* get_voxel_at_position(chunk_t *chunk, Vector3 position) {
 	if (!chunk)
@@ -238,11 +236,11 @@ voxel_t* get_voxel_at_position(chunk_t *chunk, Vector3 position) {
 	int voxel_y = (int)(position.y * 2.0f) % 32;
 	int voxel_z = (int)(position.z * 2.0f) % 32;
     
-	return chunk->blocks[voxel_x][voxel_y][voxel_z];
+	return chunk->blocks[get_vox_idx(voxel_x, voxel_y, voxel_z)];
 }
 
 //using dda
-bool raycast(Ray ray, chunk_t *chunks[128][128][64]) {
+bool raycast(Ray ray, chunk_t **chunks) {
 	Vector3 ray_pos = ray.position;
 	Vector3 ray_dir = Vector3Normalize(ray.direction);
     
@@ -292,7 +290,7 @@ bool raycast(Ray ray, chunk_t *chunks[128][128][64]) {
 	return(false);
 }
 
-bool	is_chunk_occluded(chunk_t *chunk, Vector3 camera_position, chunk_t *chunks[128][128][64]) {
+bool	is_chunk_occluded(chunk_t *chunk, Vector3 camera_position, chunk_t **chunks) {
 	Vector3	chunk_center;
 	Ray	ray;
 
@@ -304,70 +302,23 @@ bool	is_chunk_occluded(chunk_t *chunk, Vector3 camera_position, chunk_t *chunks[
 	return (raycast(ray, chunks));
 }
 
-void	extract_frustum_planes(Matrix view_proj, plane_t *frustum) {
-	// Left plane
-	frustum[0].normal.x = view_proj.m0 + view_proj.m3;
-	frustum[0].normal.y = view_proj.m4 + view_proj.m7;
-	frustum[0].normal.z = view_proj.m8 + view_proj.m11;
-	frustum[0].distance = view_proj.m12 + view_proj.m15;
-    
-	// Right plane
-	frustum[1].normal.x = -view_proj.m0 + view_proj.m3;
-	frustum[1].normal.y = -view_proj.m4 + view_proj.m7;
-	frustum[1].normal.z = -view_proj.m8 + view_proj.m11;
-	frustum[1].distance = -view_proj.m12 + view_proj.m15;
-    
-	// Bottom plane
-	frustum[2].normal.x = view_proj.m1 + view_proj.m3;
-	frustum[2].normal.y = view_proj.m5 + view_proj.m7;
-	frustum[2].normal.z = view_proj.m9 + view_proj.m11;
-	frustum[2].distance = view_proj.m13 + view_proj.m15;
-    
-	// Top plane
-	frustum[3].normal.x = -view_proj.m1 + view_proj.m3;
-	frustum[3].normal.y = -view_proj.m5 + view_proj.m7;
-	frustum[3].normal.z = -view_proj.m9 + view_proj.m11;
-	frustum[3].distance = -view_proj.m13 + view_proj.m15;
-    
-	// Near plane
-	frustum[4].normal.x = view_proj.m2 + view_proj.m3;
-	frustum[4].normal.y = view_proj.m6 + view_proj.m7;
-	frustum[4].normal.z = view_proj.m10 + view_proj.m11;
-	frustum[4].distance = view_proj.m14 + view_proj.m15;
-    
-	// Far plane
-	frustum[5].normal.x = -view_proj.m2 + view_proj.m3;
-	frustum[5].normal.y = -view_proj.m6 + view_proj.m7;
-	frustum[5].normal.z = -view_proj.m10 + view_proj.m11;
-	frustum[5].distance = -view_proj.m14 + view_proj.m15;
+void	gen_render_chunk(world_t *world, engine_t *engine) {
+	float cx = engine->camera.position.x / 16;
+	float cy = engine->camera.position.y / 16;
+	float cz = engine->camera.position.z / 16;
 
-	for (int i = 0; i < 6; i++) {
-		float length = Vector3Length(frustum[i].normal);
-		frustum[i].normal = Vector3Normalize(frustum[i].normal);
-		frustum[i].distance /= length;
-	}
-}
+	Vector3 forward = GetCameraForward(&engine->camera);
 
-void	gen_render_chunk(world_t *world, Camera3D *camera) {
-	float cx = camera->position.x / 16;
-	float cy = camera->position.y / 16;
-	float cz = camera->position.z / 16;
-
-	Vector3 forward = GetCameraForward(camera);
-
-	Matrix view_proj = GetCameraProjectionMatrix(camera, GetRenderHeight()/ GetRenderWidth());
+	Matrix view_proj = GetCameraProjectionMatrix(&engine->camera, GetRenderHeight()/ GetRenderWidth());
 
 	plane_t frustum[6];
 	extract_frustum_planes(view_proj, &frustum[0]);
 
-	for (int x = 0; x < 128; x++) {
-		for (int z = 0; z < 128; z++) {
-			for (int y = 0; y < 64; y++) {
-				chunk_t *current_chunk = world->chunk[x][z][y];
-				if (is_chunk_visible(&current_chunk->bounding_box, frustum) && !is_chunk_occluded(current_chunk, camera->position, world->chunk)) {
-					// add_chunk_to_render_list();
-				}
-			}
+	for (int idx = 0; idx < world; idx++) {
+		chunk_t *current_chunk = world->chunk[idx];
+		if (is_chunk_visible(&current_chunk->bounding_box, frustum) && !is_chunk_occluded(current_chunk, engine->camera.position, world->chunk)) {
+			chunk_render_t *rend = generate_chunk_mesh(current_chunk, &engine->render.world.mesh);
+			dyn_add_elem(engine->render.world.rqueue, rend);
 		}
 	}
 }

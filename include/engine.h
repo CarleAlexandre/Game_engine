@@ -9,7 +9,8 @@
 #include <raymath.h>
 #include <rcamera.h>
 
-#include "sparse_voxel_octree.h"
+#include "sparse_octree.h"
+#include "dynamic_array.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -26,10 +27,6 @@
 #define RL_DRAW_FRAMEBUFFER                     0x8CA9      // GL_DRAW_FRAMEBUFFER
 
 #define GRAY_VALUE(c) ((float)(c.r + c.g + c.b)/3.0f)
-
-#define ITEM_MAGIC
-
-#define MAX_VERTICES 119164
 
 #define FACE_TOP    0
 #define FACE_BOTTOM 1
@@ -133,6 +130,14 @@ typedef enum {
 	player_filetype,
 }	filetype_enum;
 
+typedef enum {
+	block_air,
+	block_dirt,
+	block_sand,
+	block_stone,
+	block_water,
+}	block_id_enum;
+
 /* 
 	DATA STRUCT
 */
@@ -234,6 +239,10 @@ typedef struct	sv_player_s {
 	unsigned long long	uid;
 }	sv_player_t;
 
+/*
+	VOXEL RENDER
+*/
+
 typedef struct	s_face_data {
 	int		block_id;
 	int		face_data;
@@ -253,6 +262,15 @@ typedef struct	s_chunk_render {
 	int		x, y, z;
 }	chunk_render_t;
 
+typedef struct	s_world_render {
+	unsigned int	vao, vbo, ebo, ssbo;
+	vox_mesh_t	mesh;
+	dyn_array_t	*rqueue;//maybe reverse for transparency if order is from chunk distance to player dyn array of chunk_render_t
+}	world_render_t;
+
+/*
+	VOXEL
+*/
 
 typedef struct s_voxel {
 	unsigned short	block_id;
@@ -261,22 +279,21 @@ typedef struct s_voxel {
 	short		stats;
 }	voxel_t;
 
-// voxel are an height of a 1m2 block
 typedef struct	s_chunk {
 	int		x, y, z;
-	voxel_t		**blocks;//64x64x64
+	voxel_t		**blocks;//64x64x64 32m^3
 	BoundingBox	bounding_box;
 }	chunk_t;
 
 typedef struct	s_world {
-	unsigned int	vao, vbo, ebo, ssbo;
-	vox_mesh_t	mesh;
-	chunk_t		**chunk;// x*10000
-	chunk_render_t	**rqueue;
-	unsigned int	rqueue_size;
+	chunk_t		**chunk;//32m^3, 64 voxel^33
+	svo_t		tree;
 }	world_t;
 
-//
+/*
+	ENGINE
+*/
+
 typedef struct s_draw_elements_indirect_command{
 	uint32_t	count;// Number of indices to draw
 	uint32_t	instanceCount;// Number of instances to draw
@@ -297,6 +314,7 @@ typedef struct s_gbuffer{
 typedef struct s_render_pipeline {
 	gbuffer_t	gbuffer;
 	GLuint		indirect_buffer;
+	world_render_t	world;
 }	rend_pip_t;
 
 typedef struct s_engine {

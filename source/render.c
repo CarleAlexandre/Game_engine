@@ -1,6 +1,50 @@
 #include <prototype.h>
 
-void	setup_world_vao(world_t *world) {
+void	extract_frustum_planes(Matrix view_proj, plane_t *frustum) {
+	// Left plane
+	frustum[0].normal.x = view_proj.m0 + view_proj.m3;
+	frustum[0].normal.y = view_proj.m4 + view_proj.m7;
+	frustum[0].normal.z = view_proj.m8 + view_proj.m11;
+	frustum[0].distance = view_proj.m12 + view_proj.m15;
+    
+	// Right plane
+	frustum[1].normal.x = -view_proj.m0 + view_proj.m3;
+	frustum[1].normal.y = -view_proj.m4 + view_proj.m7;
+	frustum[1].normal.z = -view_proj.m8 + view_proj.m11;
+	frustum[1].distance = -view_proj.m12 + view_proj.m15;
+    
+	// Bottom plane
+	frustum[2].normal.x = view_proj.m1 + view_proj.m3;
+	frustum[2].normal.y = view_proj.m5 + view_proj.m7;
+	frustum[2].normal.z = view_proj.m9 + view_proj.m11;
+	frustum[2].distance = view_proj.m13 + view_proj.m15;
+    
+	// Top plane
+	frustum[3].normal.x = -view_proj.m1 + view_proj.m3;
+	frustum[3].normal.y = -view_proj.m5 + view_proj.m7;
+	frustum[3].normal.z = -view_proj.m9 + view_proj.m11;
+	frustum[3].distance = -view_proj.m13 + view_proj.m15;
+    
+	// Near plane
+	frustum[4].normal.x = view_proj.m2 + view_proj.m3;
+	frustum[4].normal.y = view_proj.m6 + view_proj.m7;
+	frustum[4].normal.z = view_proj.m10 + view_proj.m11;
+	frustum[4].distance = view_proj.m14 + view_proj.m15;
+    
+	// Far plane
+	frustum[5].normal.x = -view_proj.m2 + view_proj.m3;
+	frustum[5].normal.y = -view_proj.m6 + view_proj.m7;
+	frustum[5].normal.z = -view_proj.m10 + view_proj.m11;
+	frustum[5].distance = -view_proj.m14 + view_proj.m15;
+
+	for (int i = 0; i < 6; i++) {
+		float length = Vector3Length(frustum[i].normal);
+		frustum[i].normal = Vector3Normalize(frustum[i].normal);
+		frustum[i].distance /= length;
+	}
+}
+
+void	setup_world_vao(world_render_t *world) {
 	glGenVertexArrays(1, &world->vao);
 	glBindVertexArray(world->vao);
 
@@ -19,27 +63,27 @@ void	setup_world_vao(world_t *world) {
 	
 }
 
-void	setup_world_ssbo(world_t *world) {	
+void	setup_world_ssbo(world_render_t *world) {	
 	glGenBuffers(1, &world->ssbo);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, world->ssbo);
-	int *buffer = malloc(sizeof(int) * 3 * world->rqueue_size);
+	int *buffer = malloc(sizeof(int) * 3 * world->rqueue->size);
 	for (int i = 0; i < 27; i++) {
-		buffer[i * 3] = world->rqueue[i].x;
-		buffer[i * 3 + 1] = world->rqueue[i].z;
-		buffer[i * 3 + 2] = world->rqueue[i].y;
+		buffer[i * 3] = ((chunk_render_t *)world->rqueue)[i].x;
+		buffer[i * 3 + 1] = ((chunk_render_t *)world->rqueue)[i].z;
+		buffer[i * 3 + 2] = ((chunk_render_t *)world->rqueue)[i].y;
 	}
 	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, 27 * 3 * sizeof(int), buffer);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, world->ssbo);
 	free (buffer);
 }
 
-void	setup_indirect_buffer(rend_pip_t *render, world_t *world) {
-	indirect_cmd_t cmd[world->rqueue_size];
-	for (int i = 0; i < world->rqueue_size; i++) {
-		cmd[i].count = world->rqueue[i].index_count;
+void	setup_indirect_buffer(rend_pip_t *render) {
+	indirect_cmd_t cmd[render->world.rqueue->size];
+	for (int i = 0; i < render->world.rqueue->size; i++) {
+		cmd[i].count = ((chunk_render_t *)render->world.rqueue)[i].index_count;
 		cmd[i].instanceCount = 0;
-		cmd[i].firstIndex = i * world->rqueue[i].index_offset;
-		cmd[i].baseVertex = i * world->rqueue[i].vertex_offset;
+		cmd[i].firstIndex = i * ((chunk_render_t *)render->world.rqueue)[i].index_offset;
+		cmd[i].baseVertex = i * ((chunk_render_t *)render->world.rqueue)[i].vertex_offset;
 		cmd[i].baseInstance = i;
 	}
 
@@ -48,7 +92,7 @@ void	setup_indirect_buffer(rend_pip_t *render, world_t *world) {
 	glBufferData(GL_DRAW_INDIRECT_BUFFER, sizeof(cmd), cmd, GL_DYNAMIC_DRAW);
 }
 
-void	reload_world_vao(world_t *world) {
+void	reload_world_vao(world_render_t *world) {
 	glBindVertexArray(world->vao);
 
 	glBindBuffer(GL_ARRAY_BUFFER, world->vbo);
@@ -60,25 +104,25 @@ void	reload_world_vao(world_t *world) {
 	glBindVertexArray(0);
 }
 
-void	reload_world_ssbo(const world_t *world) {
+void	reload_world_ssbo(const world_render_t *world) {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, world->ssbo);
-	int *buffer = malloc(sizeof(int) * 3 * world->rqueue_size);
+	int *buffer = malloc(sizeof(int) * 3 * world->rqueue->size);
 	for (int i = 0; i < 27; i++) {
-		buffer[i * 3] = world->rqueue[i].x;
-		buffer[i * 3 + 1] = world->rqueue[i].z;
-		buffer[i * 3 + 2] = world->rqueue[i].y;
+		buffer[i * 3] = ((chunk_render_t *)world->rqueue)[i].x;
+		buffer[i * 3 + 1] = ((chunk_render_t *)world->rqueue)[i].z;
+		buffer[i * 3 + 2] = ((chunk_render_t *)world->rqueue)[i].y;
 	}
 	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, 27 * 3 * sizeof(int), buffer);
 	free (buffer);
 }
 
-void	reload_indirect_buffer(rend_pip_t *render, const world_t *world) {
-	indirect_cmd_t cmd[world->rqueue_size];
-	for (int i = 0; i < world->rqueue_size; i++) {
-		cmd[i].count = world->rqueue[i].index_count;
+void	reload_indirect_buffer(rend_pip_t *render) {
+	indirect_cmd_t cmd[render->world.rqueue->size];
+	for (int i = 0; i < render->world.rqueue->size; i++) {
+		cmd[i].count = ((chunk_render_t *)render->world.rqueue)[i].index_count;
 		cmd[i].instanceCount = 0;
-		cmd[i].firstIndex = i * world->rqueue[i].index_offset;
-		cmd[i].baseVertex = i * world->rqueue[i].vertex_offset;
+		cmd[i].firstIndex = i * ((chunk_render_t *)render->world.rqueue)[i].index_offset;
+		cmd[i].baseVertex = i * ((chunk_render_t *)render->world.rqueue)[i].vertex_offset;
 		cmd[i].baseInstance = i;
 	}
 
@@ -147,10 +191,10 @@ void	voxel_render(engine_t *engine, world_t *world) {
 		glUseProgram(engine->shader[shader_voxel_solid].id);
 		rlSetUniformMatrix(glGetUniformLocation(engine->shader[shader_voxel_solid].id, "MVP"),
 			MatrixMultiply(MatrixMultiply(rlGetMatrixModelview(), rlGetMatrixProjection()),MatrixIdentity()));
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, world->ssbo);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, engine->render.world.ssbo);
 		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, engine->render.indirect_buffer);
-		glBindVertexArray(world->vao);
-		glMultiDrawElementsIndirect(GL_TRIANGLE_STRIP, GL_UNSIGNED_INT, 0, world->rqueue_size, 0);
+		glBindVertexArray(engine->render.world.vao);
+		glMultiDrawElementsIndirect(GL_TRIANGLE_STRIP, GL_UNSIGNED_INT, 0, engine->render.world.rqueue->size, 0);
 		glBindVertexArray(0);
 
 		// //transparent material render

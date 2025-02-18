@@ -17,7 +17,7 @@ engine_t init_engine(void) {
 	engine.shader[shader_voxel_solid] = LoadShader("shader/vox_solid.vs", "shader/vox_solid.fs");
 	engine.shader[shader_deffered].locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(engine.shader[shader_deffered], "viewPosition");
 
-	engine.render.gbuffer = loadGbuffer(width, height, engine.shader[shader_deffered]) ;
+	engine.render.gbuffer = loadGbuffer(width, height, engine.shader[shader_deffered]);
 	engine.debug = true;
 
 	return (engine);
