@@ -78,21 +78,22 @@ chunk_t **chunk_gen_height(int x_off, int z_off, int *size, fnl_state *noise) {
 	for (int i = 0; i < (*size); i++) {
 		slice[i] = malloc(sizeof(chunk_t));
 		slice[i]->blocks =  init_svo(32, 6);
+		slice[i]->bounding_box.min = (Vector3){x_off * 0.5, i * 32, z_off * 0.5};
+		slice[i]->bounding_box.max = (Vector3){x_off * 0.5 + 32, i * 32 + 32, z_off * 0.5 + 32};
 	}
 	for (int x = 0; x < 64; x++) {
 		for (int z = 0; z < 64; z++) {	
 			for (int y = 0; y < value[x][z]; y++) {
 				voxel_t *vox = malloc(sizeof(voxel_t));
 				vox->block_id = 1;
-				float pos[3] = {x, y, z};
 				if (y < 64) {
-					svo_insert(pos, vox, slice[0]->blocks);
+					svo_insert((Vector3){x, y, z}, vox, slice[0]->blocks);
 				} else if (y < 128) {
-					svo_insert(pos, vox, slice[1]->blocks);
+					svo_insert((Vector3){x, y, z}, vox, slice[1]->blocks);
 				} else if (y < 196) {
-					svo_insert(pos, vox, slice[2]->blocks);
+					svo_insert((Vector3){x, y, z}, vox, slice[2]->blocks);
 				} else {
-					svo_insert(pos, vox, slice[3]->blocks);
+					svo_insert((Vector3){x, y, z}, vox, slice[3]->blocks);
 				}
 			}
 		}

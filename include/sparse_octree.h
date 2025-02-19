@@ -121,16 +121,16 @@ static void delete_svo(svo_t *svo) {
 	}
 }
 
+static svo_node_t *svo_get_node(Vector3 point, svo_t *svo) {
+	if (!is_point_valid(point, svo)) return (NULL);
+	return (svo_get_node_impl(point, svo));
+}
+
 static bool	svo_insert(Vector3 point, void *data, svo_t *svo) {
 	if (!is_point_valid(point, svo)) return (false);
 	if (!svo_get_node(point, svo)) svo->element++;
 	svo_insert_impl(svo, &svo->root, point, data, (int [3]){0, 0, 0}, 0);
 	return (true);
-}
-
-static svo_node_t *svo_get_node(Vector3 point, svo_t *svo) {
-	if (!is_point_valid(point, svo)) return (NULL);
-	return (svo_get_node_impl(point, svo));
 }
 
 #endif

@@ -22,11 +22,31 @@ int main(void) {
 		printf(" OK\n");
 	}
 	
-	printf("dyn_add_elem ...");
+	printf("dyn_add_elem ...\n");
+	printf("%i\n", dyn_array->capacity / dyn_array->data_size);
 	dyn_add_elem(dyn_array, (void *)5);
 	dyn_add_elem(dyn_array, (void *)4);
-	printf ("%i %i", *((int *)dyn_array->arena), dyn_array->size);
-	if (5 == ((int *)dyn_array->arena)[0] && dyn_array->size == 2) {
+	dyn_add_elem(dyn_array, (void *)4);
+	dyn_add_elem(dyn_array, (void *)4);
+	dyn_add_elem(dyn_array, (void *)4);
+	dyn_add_elem(dyn_array, (void *)4);
+	printf("%i\n", dyn_array->capacity / dyn_array->data_size);
+	dyn_add_elem(dyn_array, (void *)4);
+	printf("%i\n", dyn_array->capacity / dyn_array->data_size);
+	dyn_add_elem(dyn_array, (void *)4);
+	dyn_add_elem(dyn_array, (void *)4);
+	dyn_add_elem(dyn_array, (void *)4);
+	dyn_add_elem(dyn_array, (void *)4);
+	dyn_add_elem(dyn_array, (void *)4);
+	dyn_add_elem(dyn_array, (void *)4);
+	dyn_add_elem(dyn_array, (void *)4);
+	dyn_add_elem(dyn_array, (void *)4);
+	dyn_add_elem(dyn_array, (void *)4);
+	dyn_add_elem(dyn_array, (void *)4);
+	printf("%i\n", dyn_array->capacity / dyn_array->data_size);
+
+	printf ("%i %i\n", *((int *)dyn_array->arena), dyn_array->size);
+	if (5 == ((int *)dyn_array->arena)[0] && dyn_array->size == 22) {
 		printf(" OK\n");
 	} else {
 		printf(" BAD\n");
@@ -36,7 +56,7 @@ int main(void) {
 	printf("dyn_del_elem ...");
 	dyn_del_elem(dyn_array, 0);
 	printf ("%i %i", *((int *)dyn_array->arena), dyn_array->size);
-	if (4 == ((int *)dyn_array->arena)[0] && dyn_array->size == 1) {
+	if (4 == ((int *)dyn_array->arena)[0] && dyn_array->size == 21) {
 		printf(" OK\n");
 	} else {
 		printf(" BAD\n");
@@ -56,20 +76,13 @@ int main(void) {
 	}
 
 	printf("svo_insert ...");
-	float pos1[3] = {0, 0, 0};
-	float pos2[3] = {0, 0, 1};
-	float pos3[3] = {0, 1, 0};
-	float pos4[3] = {1, 0, 0};
-	float pos5[3] = {0, 1, 1};
-	float pos6[3] = {1, 0, 1};
-	float pos7[3] = {1, 1, 1};
-	svo_insert(pos1, (void *)4, svo);
-	svo_insert(pos2, (void *)5, svo);
-	svo_insert(pos3, (void *)6, svo);
-	svo_insert(pos4, (void *)7, svo);
-	svo_insert(pos5, (void *)8, svo);
-	svo_insert(pos6, (void *)9, svo);
-	svo_insert(pos7, (void *)10, svo);
+	svo_insert((Vector3){0, 0, 0}, (void *)4, svo);
+	svo_insert((Vector3){0, 0, 1}, (void *)5, svo);
+	svo_insert((Vector3){0, 1, 0}, (void *)6, svo);
+	svo_insert((Vector3){1, 0, 0}, (void *)7, svo);
+	svo_insert((Vector3){0, 1, 1}, (void *)8, svo);
+	svo_insert((Vector3){1, 0, 1}, (void *)9, svo);
+	svo_insert((Vector3){1, 1, 1}, (void *)10, svo);
 	if (svo->element == 7) {
 		printf(" OK\n");
 	} else {
@@ -77,14 +90,14 @@ int main(void) {
 	}
 
 	printf("svo_get_node ...\n");
-	int res = (int)svo_get_node(pos1, svo)->data;
-	printf ("%i %i\n", (int)svo_get_node(pos1, svo)->data, svo->element);
-	printf ("%i %i\n", (int)svo_get_node(pos2, svo)->data, svo->element);
-	printf ("%i %i\n", (int)svo_get_node(pos3, svo)->data, svo->element);
-	printf ("%i %i\n", (int)svo_get_node(pos4, svo)->data, svo->element);
-	printf ("%i %i\n", (int)svo_get_node(pos5, svo)->data, svo->element);
-	printf ("%i %i\n", (int)svo_get_node(pos6, svo)->data, svo->element);
-	printf ("%i %i\n", (int)svo_get_node(pos7, svo)->data, svo->element);
+	int res = (int)svo_get_node((Vector3){0, 0, 0}, svo)->data;
+	printf ("%i %i\n", (int)svo_get_node((Vector3){0, 0, 0}, svo)->data, svo->element);
+	printf ("%i %i\n", (int)svo_get_node((Vector3){0, 0, 1}, svo)->data, svo->element);
+	printf ("%i %i\n", (int)svo_get_node((Vector3){0, 1, 0}, svo)->data, svo->element);
+	printf ("%i %i\n", (int)svo_get_node((Vector3){1, 0, 0}, svo)->data, svo->element);
+	printf ("%i %i\n", (int)svo_get_node((Vector3){0, 1, 1}, svo)->data, svo->element);
+	printf ("%i %i\n", (int)svo_get_node((Vector3){1, 0, 1}, svo)->data, svo->element);
+	printf ("%i %i\n", (int)svo_get_node((Vector3){1, 1, 1}, svo)->data, svo->element);
 	if (res == 4) {
 		printf("OK\n");
 	} else {

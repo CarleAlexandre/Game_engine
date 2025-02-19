@@ -26,13 +26,20 @@ int main(void) {
 		for (int z = 0; z < 4; z++) {
 			tmp = chunk_gen_height(x * 64, z * 64, &size, &noise);
 			for (int y = 0; y < size ; y++) {
-				float pos[3] = {x, y, z};
-				svo_insert(pos, tmp[y], world->tree);
+				
+				svo_insert((Vector3){x, y, z}, tmp[y], world->tree);
 			}
 			tmp = 0x00;
 			size = 0;
 		}
 	}
+	engine.render.world.faces = init_dyn_array(sizeof(face_data_t));
+	engine.render.world.rqueue = init_dyn_array(sizeof(chunk_render_t));
+
+	gen_render_chunk(world, &engine);
+	setup_world_vao(&engine.render.world);
+	setup_world_ssbo(&engine.render.world);
+	setup_indirect_buffer(&engine.render);
 
 	engine.player.stats.max_health = 150;
 	engine.player.stats.health = 100;
@@ -46,7 +53,7 @@ int main(void) {
 	
 	SetTargetFPS(240);
 	while (!WindowShouldClose()) {
-		update_input(&engine);
+		update_input(&engine, world);
 		voxel_render(&engine, world);
 	}
 

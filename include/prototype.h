@@ -14,7 +14,7 @@ engine_t	init_engine(void);
 	INPUT
 */
 
-void	update_input(engine_t *engine);
+void	update_input(engine_t *engine,  world_t *world);
 
 /*
 	INVENTORY
@@ -26,7 +26,6 @@ void	update_input(engine_t *engine);
 	RENDER
 */
 
-void		extract_frustum_planes(Matrix view_proj, plane_t *frustum);
 void		setup_world_vao(world_render_t *world);
 void		setup_world_ssbo(world_render_t *world);
 void		setup_indirect_buffer(rend_pip_t *render);
@@ -44,6 +43,7 @@ gbuffer_t	loadGbuffer(int width, int height, Shader deffered_shader);
 
 void	reload_voxel_world(world_t *world, engine_t *engine);
 void	set_block(chunk_t *chunk, int x, int y, int z, voxel_t *vox);
+void	gen_render_chunk(world_t *world, engine_t *engine);
 
 /*
 	UI

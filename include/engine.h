@@ -1,39 +1,37 @@
 #ifndef ENGINE_HPP
 # define ENGINE_HPP
 
-#include <glad.h>
-#include <ext/FastNoiseLite.h>
+# include <glad.h>
+# include <ext/FastNoiseLite.h>
 
-#include <raylib.h>
-#include <rlgl.h>
-#include <raymath.h>
-#include <rcamera.h>
+# include <raylib.h>
+# include <rlgl.h>
+# include <raymath.h>
+# include <rcamera.h>
 
-#include "sparse_octree.h"
-#include "dynamic_array.h"
+# include "sparse_octree.h"
+# include "dynamic_array.h"
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <stddef.h>
-#include <stdlib.h>
-#include <string.h>
+# include <stdbool.h>
+# include <stdint.h>
+# include <stddef.h>
+# include <stdlib.h>
+# include <string.h>
+# include <stdio.h>
+# include <assert.h>
 
 /*
 	DEFINE
 */
 
-#define MAX_LIGHTS  4
-#define RL_READ_FRAMEBUFFER                     0x8CA8      // GL_READ_FRAMEBUFFER
-#define RL_DRAW_FRAMEBUFFER                     0x8CA9      // GL_DRAW_FRAMEBUFFER
+# define GRAY_VALUE(c) ((float)(c.r + c.g + c.b)/3.0f)
 
-#define GRAY_VALUE(c) ((float)(c.r + c.g + c.b)/3.0f)
-
-#define FACE_TOP    0
-#define FACE_BOTTOM 1
-#define FACE_LEFT   2
-#define FACE_RIGHT  3
-#define FACE_FRONT  4
-#define FACE_BACK   5
+# define FACE_TOP    0
+# define FACE_BOTTOM 1
+# define FACE_LEFT   2
+# define FACE_RIGHT  3
+# define FACE_FRONT  4
+# define FACE_BACK   5
 
 /* 
 	TYPEDEF
@@ -142,11 +140,6 @@ typedef enum {
 	DATA STRUCT
 */
 
-typedef struct s_plane {
-	Vector3	normal;
-	float	distance;
-}	plane_t;
-
 typedef struct s_token {
 	int	id;
 	char	*data;
@@ -248,11 +241,6 @@ typedef struct	s_face_data {
 	int		face_data;
 }	face_data_t;
 
-typedef struct	s_vox_mesh {
-	face_data_t	*faces;
-	uint32_t	face_count;
-}	vox_mesh_t;
-
 typedef struct	s_chunk_render {
 	uint32_t	face_offset;
 	uint32_t	face_count;
@@ -261,8 +249,8 @@ typedef struct	s_chunk_render {
 
 typedef struct	s_world_render {
 	unsigned int	vao, vbo, ssbo;
-	vox_mesh_t	mesh;
-	dyn_array_t	*rqueue;//maybe reverse for transparency if order is from chunk distance to player dyn array of chunk_render_t
+	dyn_array_t	*faces;//keep face_data_t *
+	dyn_array_t	*rqueue;//keep chunk_render_t*
 }	world_render_t;
 
 /*
@@ -278,7 +266,6 @@ typedef struct s_voxel {
 
 typedef struct	s_chunk {
 	svo_t		*blocks;
-	Vector3		pos;
 	BoundingBox	bounding_box;
 }	chunk_t;
 

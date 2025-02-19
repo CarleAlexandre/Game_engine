@@ -1,47 +1,10 @@
 #include <prototype.h>
 
-void	extract_frustum_planes(Matrix view_proj, plane_t *frustum) {
-	// Left plane
-	frustum[0].normal.x = view_proj.m0 + view_proj.m3;
-	frustum[0].normal.y = view_proj.m4 + view_proj.m7;
-	frustum[0].normal.z = view_proj.m8 + view_proj.m11;
-	frustum[0].distance = view_proj.m12 + view_proj.m15;
-    
-	// Right plane
-	frustum[1].normal.x = -view_proj.m0 + view_proj.m3;
-	frustum[1].normal.y = -view_proj.m4 + view_proj.m7;
-	frustum[1].normal.z = -view_proj.m8 + view_proj.m11;
-	frustum[1].distance = -view_proj.m12 + view_proj.m15;
-    
-	// Bottom plane
-	frustum[2].normal.x = view_proj.m1 + view_proj.m3;
-	frustum[2].normal.y = view_proj.m5 + view_proj.m7;
-	frustum[2].normal.z = view_proj.m9 + view_proj.m11;
-	frustum[2].distance = view_proj.m13 + view_proj.m15;
-    
-	// Top plane
-	frustum[3].normal.x = -view_proj.m1 + view_proj.m3;
-	frustum[3].normal.y = -view_proj.m5 + view_proj.m7;
-	frustum[3].normal.z = -view_proj.m9 + view_proj.m11;
-	frustum[3].distance = -view_proj.m13 + view_proj.m15;
-    
-	// Near plane
-	frustum[4].normal.x = view_proj.m2 + view_proj.m3;
-	frustum[4].normal.y = view_proj.m6 + view_proj.m7;
-	frustum[4].normal.z = view_proj.m10 + view_proj.m11;
-	frustum[4].distance = view_proj.m14 + view_proj.m15;
-    
-	// Far plane
-	frustum[5].normal.x = -view_proj.m2 + view_proj.m3;
-	frustum[5].normal.y = -view_proj.m6 + view_proj.m7;
-	frustum[5].normal.z = -view_proj.m10 + view_proj.m11;
-	frustum[5].distance = -view_proj.m14 + view_proj.m15;
+Vector4	*extract_frustum_planes(Camera3D camera) {
+	Vector4 *frustum = malloc(sizeof(Vector4) * 6);
 
-	for (int i = 0; i < 6; i++) {
-		float length = Vector3Length(frustum[i].normal);
-		frustum[i].normal = Vector3Normalize(frustum[i].normal);
-		frustum[i].distance /= length;
-	}
+
+	return (frustum);
 }
 
 void	setup_world_vao(world_render_t *world) {
@@ -50,7 +13,7 @@ void	setup_world_vao(world_render_t *world) {
 
 	glGenBuffers(1, &world->vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, world->vbo);
-	glBufferData(GL_ARRAY_BUFFER, world->mesh.face_count * sizeof(face_data_t), world->mesh.faces, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, world->faces->size * sizeof(face_data_t), (face_data_t *)world->faces->arena, GL_DYNAMIC_DRAW);
 	
 	glVertexAttribIPointer(0, 1, GL_INT, sizeof(int), (void*)0); // Packed data is an integer
 	glEnableVertexAttribArray(0);
@@ -77,7 +40,7 @@ void	setup_indirect_buffer(rend_pip_t *render) {
 	indirect_cmd_t cmd[render->world.rqueue->size];
 	for (int i = 0; i < render->world.rqueue->size; i++) {
 		cmd[i].count = ((chunk_render_t *)render->world.rqueue)[i].face_count;
-		cmd[i].instanceCount = 0;
+		cmd[i].instanceCount = 1;
 		cmd[i].first = i * ((chunk_render_t *)render->world.rqueue)[i].face_offset;
 		cmd[i].baseInstance = i;
 	}
@@ -91,7 +54,7 @@ void	reload_world_vao(world_render_t *world) {
 	glBindVertexArray(world->vao);
 
 	glBindBuffer(GL_ARRAY_BUFFER, world->vbo);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, world->mesh.face_count * sizeof(face_data_t), world->mesh.faces);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, world->faces->size * sizeof(face_data_t),  (face_data_t *)world->faces->arena);
 
 	glBindVertexArray(0);
 }
@@ -173,7 +136,10 @@ void	voxel_render(engine_t *engine, world_t *world) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 */
 	if (IsKeyPressed(KEY_F3)) {
+		printf("reloading world render!\n");
 		reload_voxel_world(world, engine);
+		printf("reloaded world render\n");
+		printf("%i\n", engine->render.world.rqueue->size);
 	}
 
 	BeginDrawing();
@@ -189,6 +155,7 @@ void	voxel_render(engine_t *engine, world_t *world) {
 		glBindVertexArray(engine->render.world.vao);
 		
 		glMultiDrawArraysIndirect(GL_TRIANGLE_STRIP, 0, engine->render.world.rqueue->size, 0);
+
 		glBindVertexArray(0);
 
 		// //transparent material render
