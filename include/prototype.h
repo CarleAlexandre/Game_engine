@@ -42,8 +42,8 @@ gbuffer_t	loadGbuffer(int width, int height, Shader deffered_shader);
 	VOXEL
 */
 
-void	reload_voxel_world(world_t *world, engine_t *engine);
-void	set_block(chunk_t *chunk, int x, int y, int z, voxel_t *vox);
+// void	reload_voxel_world(world_t *world, engine_t *engine);
+// void	set_block(chunk_t *chunk, int x, int y, int z, voxel_t *vox);
 
 /*
 	UI
@@ -59,5 +59,6 @@ void	draw_toolbar(tool_bar_t *tool_bar);
 */
 
 Texture2D	gen_texture_noise(fnl_state *noise);
+chunk_t		**chunk_gen_height(int x_off, int z_off, int *size, fnl_state *noise);
 
 #endif

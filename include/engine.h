@@ -1,7 +1,7 @@
 #ifndef ENGINE_HPP
 # define ENGINE_HPP
 
-#include <ext/glad/glad.h>
+#include <glad.h>
 #include <ext/FastNoiseLite.h>
 
 #include <raylib.h>

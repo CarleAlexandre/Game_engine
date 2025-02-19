@@ -173,7 +173,7 @@ void	voxel_render(engine_t *engine, world_t *world) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 */
 	if (IsKeyPressed(KEY_F3)) {
-		reload_voxel_world(world, engine);
+		// reload_voxel_world(world, engine);
 	}
 
 	BeginDrawing();

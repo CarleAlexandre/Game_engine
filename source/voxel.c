@@ -23,7 +23,7 @@ Vector3	get_vox_pos(int idx) {
 //'also dungeon should not be kept but genereted when entered and cleared when outside (else i had mecanics for player to go back inside)
 
 //gen chunk mesh
-
+/*
 static inline int get_x(int face, int i, int j, int depth) {
 	switch(face) {
 	    case FACE_LEFT:  return depth;
@@ -131,7 +131,7 @@ void	greedy_mesh_face(chunk_t *chunk, vox_mesh_t *mesh, int face) {
 					case FACE_BACK:  x = primary; y = secondary; z = depth; break;
 				}
 
-				int current_id = chunk->blocks[get_vox_idx(x,y,z)]->block_id;
+				int current_id = ((voxel_t*)&svo_get_node((float *){x,y,z}, chunk->blocks)->data)->block_id;
 				if(current_id == 0) {
 					mask[primary][secondary] = false;
 					continue;
@@ -287,7 +287,7 @@ voxel_t* get_voxel_at_position(chunk_t *chunk, Vector3 position) {
 }
 
 //using dda
-bool raycast(Ray ray, chunk_t **chunks) {
+bool raycast(Ray ray, svo_t *tree) {
 	Vector3 ray_pos = ray.position;
 	Vector3 ray_dir = Vector3Normalize(ray.direction);
     
@@ -362,8 +362,8 @@ void	gen_render_chunk(world_t *world, engine_t *engine) {
 	extract_frustum_planes(view_proj, &frustum[0]);
 
 	for (int idx = 0; idx < world; idx++) {
-		chunk_t *current_chunk = world->chunk[idx];
-		if (is_chunk_visible(&current_chunk->bounding_box, frustum) && !is_chunk_occluded(current_chunk, engine->camera.position, world->chunk)) {
+		chunk_t *current_chunk = svo_get_node(, world->tree)->data;
+		if (is_chunk_visible(&current_chunk->bounding_box, frustum) && !is_chunk_occluded(current_chunk, engine->camera.position, world->tree)) {
 			chunk_render_t *rend = generate_chunk_mesh(current_chunk, &engine->render.world.mesh, engine->camera.position);
 			dyn_add_elem(engine->render.world.rqueue, rend);
 		}
@@ -384,3 +384,4 @@ void	set_block(chunk_t *chunk, int x, int y, int z, voxel_t *vox) {
 void	update_block(chunk_t *chunk, int x, int y, int z, voxel_t *vox) {
 	
 }
+*/

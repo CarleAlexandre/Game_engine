@@ -1,5 +1,6 @@
 #define FNL_IMPL
 #include <engine.h>
+#include <stdio.h>
 
 void	island_mask(Image *input) {
 	Image mask = GenImageGradientRadial(1024, 1024, 0.5, BLACK, WHITE);
@@ -59,38 +60,43 @@ Texture2D	gen_texture_noise(fnl_state *noise) {
 	return (text);
 }
 
-chunk_t *chunk_gen_height() {
-	chunk_t *slice;
-
-	fnl_state noise = fnlCreateState();
+chunk_t **chunk_gen_height(int x_off, int z_off, int *size, fnl_state *noise) {
+	chunk_t **slice;
 
 	float value[64][64] = {0};
-	
 	float max = 0;
 	for (int x = 0; x < 64; x++) {
 		for (int z = 0; z < 64; z++) {	
-			value[x][z] = (fnlGetNoise2D(&noise, x, z) + 1) * 126;
+			value[x][z] = (fnlGetNoise2D(noise, x_off, z_off) + 1) * 126;
 			if (value[x][z] > max) max = value[x][z];
 		}
 	}
-	int test = roundf(max / 64);
-	slice = malloc(sizeof(chunk_t ) * test);
-	for (int i = 0; i < test; i++) {
-		slice[i].blocks =  init_svo(32, 6);
+
+	(*size) = floorf(max / 64) + 1;
+	if (*size > 4) *size = 4;
+	slice = malloc(sizeof(chunk_t*) * (*size));
+	for (int i = 0; i < (*size); i++) {
+		slice[i] = malloc(sizeof(chunk_t));
+		slice[i]->blocks =  init_svo(32, 6);
 	}
 	for (int x = 0; x < 64; x++) {
 		for (int z = 0; z < 64; z++) {	
-			for (int i = 0; i < value[x][z]; i++) {
-				if (i < 64) {
-					svo_insert((float*){x, i, z}, true, slice[i].blocks);
-				} else if (i < 128) {
-					svo_insert((float*){x, i, z}, true, slice[i].blocks);
-				} else if (i < 196) {
-					svo_insert((float*){x, i, z}, true, slice[i].blocks);
+			for (int y = 0; y < value[x][z]; y++) {
+				voxel_t *vox = malloc(sizeof(voxel_t));
+				vox->block_id = 1;
+				float pos[3] = {x, y, z};
+				if (y < 64) {
+					svo_insert(pos, vox, slice[0]->blocks);
+				} else if (y < 128) {
+					svo_insert(pos, vox, slice[1]->blocks);
+				} else if (y < 196) {
+					svo_insert(pos, vox, slice[2]->blocks);
 				} else {
-					svo_insert((float*){x, i, z}, true, slice[i].blocks);
+					svo_insert(pos, vox, slice[3]->blocks);
 				}
 			}
 		}
 	}
+
+	return (slice);
 }

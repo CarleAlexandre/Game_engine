@@ -108,6 +108,7 @@ static svo_t	*init_svo(int size_, int max_depth_) {
 	svo->size = size_;
 	svo->max_depth = max_depth_;
 	svo->root = NULL;
+	svo->element = 0;
 
 	return (svo);
 }
@@ -122,6 +123,7 @@ static void delete_svo(svo_t *svo) {
 static bool	svo_insert(float point[3], void *data, svo_t *svo) {
 	if (!is_point_valid(point, svo)) return (false);
 	svo_insert_impl(svo, &svo->root, point, data, (int [3]){0, 0, 0}, 0);
+	svo->element++;
 	return (true);
 }
 

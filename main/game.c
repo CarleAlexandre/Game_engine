@@ -15,13 +15,24 @@ int main(void) {
 
 	HideCursor();
 
-	world_t *world;
-
-	world = malloc(sizeof(world_t));
+	world_t *world = malloc(sizeof(world_t));
 
 	world->tree = init_svo(4, 2);
+	int size;
+	chunk_t **tmp;
+	fnl_state noise = fnlCreateState();
 
-	svo_insert({0, 0, 0}, );
+	for (int x = 0; x < 4; x++) {
+		for (int z = 0; z < 4; z++) {
+			tmp = chunk_gen_height(x * 64, z * 64, &size, &noise);
+			for (int y = 0; y < size ; y++) {
+				float pos[3] = {x, y, z};
+				svo_insert(pos, tmp[y], world->tree);
+			}
+			tmp = 0x00;
+			size = 0;
+		}
+	}
 
 	engine.player.stats.max_health = 150;
 	engine.player.stats.health = 100;
@@ -38,6 +49,7 @@ int main(void) {
 		update_input(&engine);
 		voxel_render(&engine, world);
 	}
+
 	ShowCursor();
 	free(world);
 	close_engine(&engine);
