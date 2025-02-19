@@ -380,3 +380,7 @@ void	reload_voxel_world(world_t *world, engine_t *engine) {
 void	set_block(chunk_t *chunk, int x, int y, int z, voxel_t *vox) {
 	
 }
+
+void	update_block(chunk_t *chunk, int x, int y, int z, voxel_t *vox) {
+	
+}

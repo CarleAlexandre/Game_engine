@@ -277,14 +277,13 @@ typedef struct s_voxel {
 }	voxel_t;
 
 typedef struct	s_chunk {
+	svo_t		*blocks;
 	int		x, y, z;
-	voxel_t		**blocks;//64x64x64 32m^3
 	BoundingBox	bounding_box;
 }	chunk_t;
 
 typedef struct	s_world {
-	chunk_t		**chunk;//32m^3, 64 voxel^33
-	svo_t		tree;
+	svo_t		*tree;
 }	world_t;
 
 /*

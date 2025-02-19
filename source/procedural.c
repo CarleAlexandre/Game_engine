@@ -58,3 +58,39 @@ Texture2D	gen_texture_noise(fnl_state *noise) {
 	UnloadImage(test);
 	return (text);
 }
+
+chunk_t *chunk_gen_height() {
+	chunk_t *slice;
+
+	fnl_state noise = fnlCreateState();
+
+	float value[64][64] = {0};
+	
+	float max = 0;
+	for (int x = 0; x < 64; x++) {
+		for (int z = 0; z < 64; z++) {	
+			value[x][z] = (fnlGetNoise2D(&noise, x, z) + 1) * 126;
+			if (value[x][z] > max) max = value[x][z];
+		}
+	}
+	int test = roundf(max / 64);
+	slice = malloc(sizeof(chunk_t ) * test);
+	for (int i = 0; i < test; i++) {
+		slice[i].blocks =  init_svo(32, 6);
+	}
+	for (int x = 0; x < 64; x++) {
+		for (int z = 0; z < 64; z++) {	
+			for (int i = 0; i < value[x][z]; i++) {
+				if (i < 64) {
+					svo_insert((float*){x, i, z}, true, slice[i].blocks);
+				} else if (i < 128) {
+					svo_insert((float*){x, i, z}, true, slice[i].blocks);
+				} else if (i < 196) {
+					svo_insert((float*){x, i, z}, true, slice[i].blocks);
+				} else {
+					svo_insert((float*){x, i, z}, true, slice[i].blocks);
+				}
+			}
+		}
+	}
+}

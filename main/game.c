@@ -17,6 +17,12 @@ int main(void) {
 
 	world_t *world;
 
+	world = malloc(sizeof(world_t));
+
+	world->tree = init_svo(4, 2);
+
+	svo_insert({0, 0, 0}, );
+
 	engine.player.stats.max_health = 150;
 	engine.player.stats.health = 100;
 	engine.player.bound = (BoundingBox){
@@ -33,6 +39,7 @@ int main(void) {
 		voxel_render(&engine, world);
 	}
 	ShowCursor();
+	free(world);
 	close_engine(&engine);
 	printf("INFO: time to launch : %.2lfms\n", launch_time * 1000);
 	printf("INFO: time to close : %.2lfs\n", GetTime());
