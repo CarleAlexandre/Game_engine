@@ -42,8 +42,8 @@ gbuffer_t	loadGbuffer(int width, int height, Shader deffered_shader);
 	VOXEL
 */
 
-// void	reload_voxel_world(world_t *world, engine_t *engine);
-// void	set_block(chunk_t *chunk, int x, int y, int z, voxel_t *vox);
+void	reload_voxel_world(world_t *world, engine_t *engine);
+void	set_block(chunk_t *chunk, int x, int y, int z, voxel_t *vox);
 
 /*
 	UI

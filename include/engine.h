@@ -278,7 +278,7 @@ typedef struct s_voxel {
 
 typedef struct	s_chunk {
 	svo_t		*blocks;
-	int		x, y, z;
+	Vector3		pos;
 	BoundingBox	bounding_box;
 }	chunk_t;
 

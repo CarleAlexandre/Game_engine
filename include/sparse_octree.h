@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <raymath.h>
 
 typedef struct	s_svo_node {
 	bool		isleaf;
@@ -29,7 +30,7 @@ static void delete_node(svo_node_t *node) {
 	free(node);
 }
 
-static void	svo_insert_impl(svo_t *svo, svo_node_t **node, float point[3], void *data, int position[3], int depth) {
+static void	svo_insert_impl(svo_t *svo, svo_node_t **node, Vector3 point, void *data, int position[3], int depth) {
 	if (!*node) {
 	    *node = (svo_node_t *)malloc(sizeof(svo_node_t));
 	    (*node)->isleaf = false;
@@ -51,9 +52,9 @@ static void	svo_insert_impl(svo_t *svo, svo_node_t **node, float point[3], void 
 	float mid_z = position[2] * node_size + node_size / 2.0f;
     
 	int child_position[3] = {
-	    (point[0] >= mid_x),
-	    (point[1] >= mid_y),
-	    (point[2] >= mid_z)
+	    (point.x >= mid_x),
+	    (point.y >= mid_y),
+	    (point.z >= mid_z)
 	};
     
 	int child_index = (child_position[0] << 0) | (child_position[1] << 1) | (child_position[2] << 2);
@@ -67,13 +68,13 @@ static void	svo_insert_impl(svo_t *svo, svo_node_t **node, float point[3], void 
 	svo_insert_impl(svo, &(*node)->children[child_index], point, data, new_position, depth + 1);
 }
 
-static bool	is_point_valid(float point[3], svo_t *svo) {
-	return (point[0] >= 0.0f && point[0] <= svo->size &&
-		point[1] >= 0.0f && point[1] <= svo->size &&
-		point[2] >= 0.0f && point[2] <= svo->size);
+static bool	is_point_valid(Vector3 point, svo_t *svo) {
+	return (point.x >= 0.0f && point.x <= svo->size &&
+		point.y >= 0.0f && point.y <= svo->size &&
+		point.z >= 0.0f && point.z <= svo->size);
 }
 
-static svo_node_t	*svo_get_node_impl(float point[3], svo_t *svo) {
+static svo_node_t	*svo_get_node_impl(Vector3 point, svo_t *svo) {
 	svo_node_t *current = svo->root;
 	int depth = 0;
 	int position[3] = {0, 0, 0};
@@ -84,9 +85,9 @@ static svo_node_t	*svo_get_node_impl(float point[3], svo_t *svo) {
 	    float mid_y = position[1] * node_size + node_size / 2.0f;
 	    float mid_z = position[2] * node_size + node_size / 2.0f;
     
-	    int child_x = (point[0] >= mid_x);
-	    int child_y = (point[1] >= mid_y);
-	    int child_z = (point[2] >= mid_z);
+	    int child_x = (point.x >= mid_x);
+	    int child_y = (point.y >= mid_y);
+	    int child_z = (point.z >= mid_z);
     
 	    int child_index = (child_x << 0) | (child_y << 1) | (child_z << 2);
     
@@ -120,14 +121,14 @@ static void delete_svo(svo_t *svo) {
 	}
 }
 
-static bool	svo_insert(float point[3], void *data, svo_t *svo) {
+static bool	svo_insert(Vector3 point, void *data, svo_t *svo) {
 	if (!is_point_valid(point, svo)) return (false);
+	if (!svo_get_node(point, svo)) svo->element++;
 	svo_insert_impl(svo, &svo->root, point, data, (int [3]){0, 0, 0}, 0);
-	svo->element++;
 	return (true);
 }
 
-static svo_node_t *svo_get_node(float point[3], svo_t *svo) {
+static svo_node_t *svo_get_node(Vector3 point, svo_t *svo) {
 	if (!is_point_valid(point, svo)) return (NULL);
 	return (svo_get_node_impl(point, svo));
 }

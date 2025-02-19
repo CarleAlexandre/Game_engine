@@ -12,8 +12,9 @@ int	get_vox_idx(int x, int y, int z) {
 	return (x + (z * 64) + (y * 64 * 64));
 }
 
-Vector3	get_vox_pos(int idx) {
-	return ((Vector3){idx % 64, (idx /64) % 64, ((idx / 64)/ 64) % 64});
+float	*get_vox_pos(int idx) {
+	float pos[3] = {idx % 64, (idx /64) % 64, ((idx / 64)/ 64) % 64};
+	return (pos);
 }
 
 // each world part are 2048 vox^3 or 64 chunk ^ 3 but it's an octree
@@ -23,7 +24,7 @@ Vector3	get_vox_pos(int idx) {
 //'also dungeon should not be kept but genereted when entered and cleared when outside (else i had mecanics for player to go back inside)
 
 //gen chunk mesh
-/*
+
 static inline int get_x(int face, int i, int j, int depth) {
 	switch(face) {
 	    case FACE_LEFT:  return depth;
@@ -67,8 +68,8 @@ int	get_neighbor_id(chunk_t *chunk, int x, int y, int z, int face) {
 
 	if(nx < 0 || nx >= 32 || nz < 0 || nz >= 32 || ny < 0 || ny >= 32)
 	    return(0);
-	
-	return(chunk->blocks[get_vox_idx(nx, nz, ny)]->block_id);
+	float pos[3] = {nx,ny,nz};
+	return(((voxel_t *)svo_get_node(pos, chunk->blocks)->data)->block_id);
 }
 
 face_data_t	add_face_to_mesh(int x, int y, int z, int face, int id, char width, char height) {
@@ -310,7 +311,7 @@ bool raycast(Ray ray, svo_t *tree) {
 	side_dist = Vector3Multiply(side_dist, delta_dist);
 
 	while (true) {
-		chunk_t *current_chunk = get_chunk_at_position(chunks, ray_pos);
+		chunk_t *current_chunk = svo_get_node(ray_pos, tree);
 		if (current_chunk) {
 			voxel_t *current_voxel = get_voxel_at_position(current_chunk, ray_pos);
 			if (current_voxel && current_voxel->block_id != 0) {
@@ -362,7 +363,7 @@ void	gen_render_chunk(world_t *world, engine_t *engine) {
 	extract_frustum_planes(view_proj, &frustum[0]);
 
 	for (int idx = 0; idx < world; idx++) {
-		chunk_t *current_chunk = svo_get_node(, world->tree)->data;
+		chunk_t *current_chunk = svo_get_node(get_vox_pos(idx), world->tree)->data;
 		if (is_chunk_visible(&current_chunk->bounding_box, frustum) && !is_chunk_occluded(current_chunk, engine->camera.position, world->tree)) {
 			chunk_render_t *rend = generate_chunk_mesh(current_chunk, &engine->render.world.mesh, engine->camera.position);
 			dyn_add_elem(engine->render.world.rqueue, rend);
@@ -384,4 +385,3 @@ void	set_block(chunk_t *chunk, int x, int y, int z, voxel_t *vox) {
 void	update_block(chunk_t *chunk, int x, int y, int z, voxel_t *vox) {
 	
 }
-*/
