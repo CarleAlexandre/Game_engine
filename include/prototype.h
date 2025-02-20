@@ -26,13 +26,8 @@ void	update_input(engine_t *engine,  world_t *world);
 	RENDER
 */
 
-void		setup_world_vao(world_render_t *world);
-void		setup_world_ssbo(world_render_t *world);
-void		setup_indirect_buffer(rend_pip_t *render);
-
-void		reload_world_vao(world_render_t *world);
-void		reload_world_ssbo(world_render_t *world);
-void		reload_indirect_buffer(rend_pip_t *render);
+void		setup_world_render(rend_pip_t *pipeline);
+void		reload_world_render(rend_pip_t *pipeline);
 
 void		voxel_render(engine_t *engine, world_t *world);
 gbuffer_t	loadGbuffer(int width, int height, Shader deffered_shader);

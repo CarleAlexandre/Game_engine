@@ -37,9 +37,7 @@ int main(void) {
 	engine.render.world.rqueue = init_dyn_array(sizeof(chunk_render_t));
 
 	gen_render_chunk(world, &engine);
-	setup_world_vao(&engine.render.world);
-	setup_world_ssbo(&engine.render.world);
-	setup_indirect_buffer(&engine.render);
+	setup_world_render(&engine.render);
 
 	engine.player.stats.max_health = 150;
 	engine.player.stats.health = 100;

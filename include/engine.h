@@ -248,7 +248,7 @@ typedef struct	s_chunk_render {
 }	chunk_render_t;
 
 typedef struct	s_world_render {
-	unsigned int	vao, vbo, ssbo;
+	unsigned int	vao, ssbo, ibo;
 	dyn_array_t	*faces;//keep face_data_t *
 	dyn_array_t	*rqueue;//keep chunk_render_t*
 }	world_render_t;
@@ -277,12 +277,13 @@ typedef struct	s_world {
 	ENGINE
 */
 
-typedef struct s_draw_arrays_indirect_command{
-	uint32_t	count;// Number of faces
-	uint32_t	instanceCount;// Number of instances to draw
-	uint32_t	first;// Offset into the VBO (in face)
-	uint32_t	baseInstance;// Instance id
-}	indirect_cmd_t;
+typedef  struct {
+        uint32_t  count;
+        uint32_t  instanceCount;
+        uint32_t  firstIndex;
+        uint32_t  baseVertex;
+        uint32_t  baseInstance;
+}	glDrawElementsIndirectCommand;
 
 typedef struct s_gbuffer{
 	unsigned int	framebuffer;
