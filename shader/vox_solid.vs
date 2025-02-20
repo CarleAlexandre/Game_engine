@@ -43,7 +43,7 @@ void main() {
 	block_id_out = (block_id >> 3) & 0xffff;
 	extra = (block_id >> 19) & 0xff;
 
-	int chunk_index = gl_DrawID * 3;//if doesn't work use either gl_InstanceID (if gl version is too low)
+	int chunk_index = gl_InstanceID * 3;//if doesn't work use either gl_InstanceID (if gl version is too low)
 	vec3 scaled_chunk_pos = vec3(chunk_positions[chunk_index], chunk_positions[chunk_index + 1], chunk_positions[chunk_index + 2]) * 32.0;
 	vec3 voxel_offset = vec3(x, y, z) * 0.5;
 	vec3 world_offset = scaled_chunk_pos + voxel_offset;

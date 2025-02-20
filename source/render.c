@@ -15,9 +15,15 @@ void	setup_world_vao(world_render_t *world) {
 	glBindBuffer(GL_ARRAY_BUFFER, world->vbo);
 	glBufferData(GL_ARRAY_BUFFER, world->faces->size * sizeof(face_data_t), (face_data_t *)world->faces->arena, GL_DYNAMIC_DRAW);
 	
-	glVertexAttribIPointer(0, 1, GL_INT, sizeof(int), (void*)0); // Packed data is an integer
+	glVertexAttribIPointer(0, 1, GL_INT, sizeof(face_data_t), (void*)offsetof(face_data_t, face_data));
 	glEnableVertexAttribArray(0);
-	
+    
+	glVertexAttribIPointer(1, 1, GL_INT, sizeof(face_data_t), (void*)offsetof(face_data_t, block_id));
+	glEnableVertexAttribArray(1);
+
+	glVertexAttribDivisor(0, 1); // Update once per instance
+	glVertexAttribDivisor(1, 1); // Update once per instance
+
 	glBindVertexArray(0);
 	
 }
@@ -39,9 +45,10 @@ void	setup_world_ssbo(world_render_t *world) {
 void	setup_indirect_buffer(rend_pip_t *render) {
 	indirect_cmd_t cmd[render->world.rqueue->size];
 	for (int i = 0; i < render->world.rqueue->size; i++) {
-		cmd[i].count = ((chunk_render_t *)render->world.rqueue)[i].face_count;
-		cmd[i].instanceCount = 1;
-		cmd[i].first = i * ((chunk_render_t *)render->world.rqueue)[i].face_offset;
+		chunk_render_t * chunk = &((chunk_render_t *)render->world.rqueue->arena)[i];
+		cmd[i].count = 4;
+		cmd[i].instanceCount = chunk->face_count;
+		cmd[i].first = 0;
 		cmd[i].baseInstance = i;
 	}
 
@@ -74,9 +81,10 @@ void	reload_world_ssbo(world_render_t *world) {
 void	reload_indirect_buffer(rend_pip_t *render) {
 	indirect_cmd_t cmd[render->world.rqueue->size];
 	for (int i = 0; i < render->world.rqueue->size; i++) {
-		cmd[i].count = ((chunk_render_t *)render->world.rqueue)[i].face_count;
-		cmd[i].instanceCount = 1;
-		cmd[i].first = i * ((chunk_render_t *)render->world.rqueue)[i].face_offset;
+		chunk_render_t * chunk = &((chunk_render_t *)render->world.rqueue->arena)[i];
+		cmd[i].count = 4;
+		cmd[i].instanceCount = chunk->face_count;
+		cmd[i].first = 0;
 		cmd[i].baseInstance = i;
 	}
 
