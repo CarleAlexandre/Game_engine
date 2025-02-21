@@ -26,9 +26,6 @@ void	update_input(engine_t *engine,  world_t *world);
 	RENDER
 */
 
-void		setup_world_render(rend_pip_t *pipeline);
-void		reload_world_render(rend_pip_t *pipeline);
-
 void		voxel_render(engine_t *engine, world_t *world);
 gbuffer_t	loadGbuffer(int width, int height, Shader deffered_shader);
 
@@ -36,9 +33,10 @@ gbuffer_t	loadGbuffer(int width, int height, Shader deffered_shader);
 	VOXEL
 */
 
-void	reload_voxel_world(world_t *world, engine_t *engine);
-void	set_block(chunk_t *chunk, int x, int y, int z, voxel_t *vox);
-void	gen_render_chunk(world_t *world, engine_t *engine);
+
+void	gen_world_mesh(world_t *world, engine_t *engine);
+void	update_chunk_render(world_t *world, Vector3 pos);
+void	update_world_render(world_t *world, engine_t *engine);
 
 /*
 	UI

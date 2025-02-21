@@ -4,6 +4,7 @@
 # include <glad.h>
 # include <ext/FastNoiseLite.h>
 
+#define GRAPHICS_API_OPENGL_43
 # include <raylib.h>
 # include <rlgl.h>
 # include <raymath.h>
@@ -26,12 +27,12 @@
 
 # define GRAY_VALUE(c) ((float)(c.r + c.g + c.b)/3.0f)
 
-# define FACE_TOP    0
-# define FACE_BOTTOM 1
-# define FACE_LEFT   2
-# define FACE_RIGHT  3
-# define FACE_FRONT  4
-# define FACE_BACK   5
+# define FACE_YP	0
+# define FACE_Y		1
+# define FACE_XP	2
+# define FACE_X		3
+# define FACE_ZP	4
+# define FACE_Z		5
 
 /* 
 	TYPEDEF
@@ -233,7 +234,7 @@ typedef struct	sv_player_s {
 }	sv_player_t;
 
 /*
-	VOXEL RENDER
+	VOXEL
 */
 
 typedef struct	s_face_data {
@@ -242,40 +243,22 @@ typedef struct	s_face_data {
 }	face_data_t;
 
 typedef struct	s_chunk_render {
-	uint32_t	face_offset;
-	uint32_t	face_count;
-	int		x, y, z;
+	dyn_array_t	*faces;//one array for each face orientation? if it's better
+	Vector3		position;
 }	chunk_render_t;
 
-typedef struct	s_world_render {
-	unsigned int	vao, ssbo, ibo;
-	dyn_array_t	*faces;//keep face_data_t *
-	dyn_array_t	*rqueue;//keep chunk_render_t*
-}	world_render_t;
-
-/*
-	VOXEL
-*/
-
 typedef struct s_voxel {
-	unsigned short	block_id;
-	float		height;
-	float		pressure;
-	short		stats;
+	uint16_t	block_id;
+	uint8_t		height;
+	uint8_t		pressure;
 }	voxel_t;
 
 typedef struct	s_chunk {
 	svo_t		*blocks;
+	chunk_render_t	mesh;
 	BoundingBox	bounding_box;
 }	chunk_t;
 
-typedef struct	s_world {
-	svo_t		*tree;
-}	world_t;
-
-/*
-	ENGINE
-*/
 
 typedef  struct {
         uint32_t  count;
@@ -283,7 +266,28 @@ typedef  struct {
         uint32_t  firstIndex;
         uint32_t  baseVertex;
         uint32_t  baseInstance;
-}	glDrawElementsIndirectCommand;
+}	DrawElementsIndirectCommand;
+
+typedef struct	s_world_render {
+	uint32_t	vertex_array;
+	uint32_t	vertex_buffer;
+	uint32_t	element_buffer;
+	uint32_t	indirect_buffer;//used to store face data
+	uint32_t	storage_buffer;//used to store chunk pos
+	Vector3		*position_buffer;
+	face_data_t	*face_buffer;
+	DrawElementsIndirectCommand cmd;
+	dyn_array_t	*render_queue;//store chunk_t * of chunk to render
+}	world_render_t;
+
+typedef struct	s_world {
+	svo_t		*tree;
+	world_render_t	render;
+}	world_t;
+
+/*
+	ENGINE
+*/
 
 typedef struct s_gbuffer{
 	unsigned int	framebuffer;
@@ -294,16 +298,10 @@ typedef struct s_gbuffer{
 	unsigned int	zTexture;
 }	gbuffer_t;
 
-typedef struct s_render_pipeline {
-	gbuffer_t	gbuffer;
-	GLuint		indirect_buffer;
-	world_render_t	world;
-}	rend_pip_t;
-
 typedef struct s_engine {
 	Shader		shader[8];
 	Camera3D	camera;
-	rend_pip_t	render;
+	gbuffer_t	gbuffer;
 	bool		debug;
 	sv_player_t	player;
 }	engine_t;

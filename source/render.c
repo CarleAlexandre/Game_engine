@@ -7,103 +7,53 @@ const float quad_vertices[] = {
 	 0.5f,  0.5f, 0.0f//top_right
 };
 
-//for triangle strips
-const uint32_t quad_indices_strip[] = {0, 1, 2, 3};
+const uint32_t quad_indices[] = {0, 1, 2, 3};
 
-//for triangle
-const uint32_t quad_indices[] = {0, 1, 2, 2, 1, 3};
-
-void	setup_world_render(rend_pip_t *pipeline) {
-	glGenVertexArrays(1, &pipeline->world.vao);
-	glBindVertexArray(pipeline->world.vao);
-
-	GLuint vbo;	
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(quad_vertices), quad_vertices, GL_STATIC_DRAW);
-
-	GLuint ebo;
-	glGenBuffers(1, &ebo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(quad_indices), quad_indices, GL_STATIC_DRAW);
+DrawElementsIndirectCommand	*assemble_world_mesh(dyn_array_t *render_queue) {
+	unsigned int rqueue_size = render_queue->size;
+	unsigned int total_size = 0;
 	
-	glGenBuffers(1, &pipeline->world.ibo);
-	glBindBuffer(GL_ARRAY_BUFFER, pipeline->world.ibo);
-	glBufferData(GL_ARRAY_BUFFER, pipeline->world.faces->size * sizeof(face_data_t), pipeline->world.faces->arena, GL_DYNAMIC_DRAW);
+	DrawElementsIndirectCommand cmd[rqueue_size];
+	for (int i = 0; i < rqueue_size; i++) {
+		chunk_t *current = dyn_get(render_queue->arena, i);
+		cmd[i].count = 6;
+		cmd[i].instanceCount = current->mesh.faces->size;
+		cmd[i].firstIndex = 0;
+		cmd[i].baseVertex = 0;
+		cmd[i].baseInstance = total_size;
+		total_size += current->mesh.faces->size;
+		// copy all face from current .mesh into new buffer
+	}
 
-	glVertexAttribIPointer(1, 1, GL_INT, sizeof(face_data_t), (void*)offsetof(face_data_t, face_data));
-	glEnableVertexAttribArray(1);
-	glVertexAttribDivisor(1, 1); // Update once per instance at pos idx 1
-	
-	glVertexAttribIPointer(2, 1, GL_INT, sizeof(face_data_t), (void*)offsetof(face_data_t, block_id));
-	glEnableVertexAttribArray(2);
-	glVertexAttribDivisor(2, 1); // Update once per instance at pos idx 2
+}
 
-	glBindVertexArray(0);
+world_render_t	gen_world_render(dyn_array_t *faces, dyn_array_t *pos) {
+	world_render_t render;
+
+	render.vertex_array = rlLoadVertexArray();
+	rlEnableVertexArray(render.vertex_array);
+
+	render.vertex_buffer = rlLoadVertexBuffer(quad_vertices, sizeof(quad_vertices), false);
+	rlSetVertexAttribute(0, 3, RL_FLOAT, false, 3 *sizeof(float), 0);
+	rlEnableVertexAttribute(0);
+
+	render.element_buffer = rlLoadVertexBufferElement(quad_indices, sizeof(quad_indices), false);
+
+	render.indirect_buffer = rlLoadVertexBuffer(faces, faces->size, true);
+
+	rlSetVertexAttribute(1, 1, RL_FLOAT, false, sizeof(face_data_t), offsetof(face_data_t, face_data));
+	rlEnableVertexAttribute(1);
+	rlSetVertexAttributeDivisor(1, 1);
+
+	rlSetVertexAttribute(2, 1, RL_FLOAT, false, sizeof(face_data_t), offsetof(face_data_t, block_id));
+	rlEnableVertexAttribute(2);
+	rlSetVertexAttributeDivisor(2, 1);
+
+	rlDisableVertexArray();
 
 	//ssbo
 
-	glGenBuffers(1, &pipeline->world.ssbo);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, pipeline->world.ssbo);
-	int *buffer = malloc(sizeof(int) * 3 * pipeline->world.rqueue->size);
-	for (int i = 0; i < pipeline->world.rqueue->size; i++) {
-		chunk_render_t *chunk = ((chunk_render_t *)pipeline->world.rqueue);
-		buffer[i * 3] = chunk[i].x;
-		buffer[i * 3 + 1] = chunk[i].y;
-		buffer[i * 3 + 2] = chunk[i].z;
-	}
-	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, pipeline->world.rqueue->size * 3 * sizeof(int), buffer);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, pipeline->world.ssbo);
-	free (buffer);
-
-	//drawcmd
-
-	glDrawElementsIndirectCommand cmd[pipeline->world.rqueue->size];
-	for (int i = 0; i < pipeline->world.rqueue->size; i++) {
-		chunk_render_t * chunk = &((chunk_render_t *)pipeline->world.rqueue->arena)[i];
-		cmd[i].count = 6;
-		cmd[i].instanceCount = chunk->face_count;
-		cmd[i].firstIndex = 0;
-		cmd[i].baseVertex = 0;
-		cmd[i].baseInstance = chunk->face_offset;
-	}
-
-	glGenBuffers(1, &pipeline->indirect_buffer);
-	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, pipeline->indirect_buffer);
-	glBufferData(GL_DRAW_INDIRECT_BUFFER, sizeof(cmd), cmd, GL_DYNAMIC_DRAW);
-}
-
-void	reload_world_render(rend_pip_t *pipeline) {
-	glBindVertexArray(pipeline->world.vao);
-
-	glBindBuffer(GL_ARRAY_BUFFER, pipeline->world.ibo);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, pipeline->world.faces->size * sizeof(face_data_t),  (face_data_t *)pipeline->world.faces->arena);
-
-	glBindVertexArray(0);
-	
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, pipeline->world.ssbo);
-	int *buffer = malloc(sizeof(int) * 3 * pipeline->world.rqueue->size);
-	for (int i = 0; i < pipeline->world.rqueue->size; i++) {
-		chunk_render_t *chunk = ((chunk_render_t *)pipeline->world.rqueue);
-		buffer[i * 3] = chunk[i].x;
-		buffer[i * 3 + 1] = chunk[i].y;
-		buffer[i * 3 + 2] = chunk[i].z;
-	}
-	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, pipeline->world.rqueue->size * 3 * sizeof(int), buffer);
-	free (buffer);
-
-	glDrawElementsIndirectCommand cmd[pipeline->world.rqueue->size];
-	for (int i = 0; i < pipeline->world.rqueue->size; i++) {
-		chunk_render_t * chunk = &((chunk_render_t *)pipeline->world.rqueue->arena)[i];
-		cmd[i].count = 6;
-		cmd[i].instanceCount = chunk->face_count;
-		cmd[i].firstIndex = 0;
-		cmd[i].baseVertex = 0;
-		cmd[i].baseInstance = chunk->face_offset;
-	}
-
-	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, pipeline->indirect_buffer);
-	glBufferSubData(GL_DRAW_INDIRECT_BUFFER, 0, sizeof(cmd), cmd);
+	render.storage_buffer = rlLoadShaderBuffer(pos->size, pos->arena, RL_STREAM_COPY);
 }
 
 gbuffer_t	loadGbuffer(int width, int height, Shader deffered_shader) {
@@ -142,26 +92,20 @@ gbuffer_t	loadGbuffer(int width, int height, Shader deffered_shader) {
 	rlDisableShader();
 
 	rlEnableDepthTest();
-	// rlEnableBackfaceCulling();
+	rlEnableBackfaceCulling();
 	return (buffer);
 }
 
 void	voxel_render(engine_t *engine, world_t *world) {
 	float camera_pos[3] = {engine->camera.position.x, engine->camera.position.y, engine->camera.position.z};
 	int screen_height = GetScreenHeight(), screen_width = GetScreenWidth();
-/*
-	glBindFramebuffer(GL_FRAMEBUFFER, engine->gbuffer.framebuffer);
-	glClearColor(0.0, 0.0, 0.0, 1.0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glUseProgram(engine->shader[shader_gbuffer].id);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-*/
 	if (IsKeyPressed(KEY_F3)) {
 		printf("reloading world render!\n");
-		reload_voxel_world(world, engine);
+		for (int i = 0; i < sizeof(engine->shader) / sizeof(Shader); i++) {
+			//reload shader here
+		}
 		printf("reloaded world render\n");
-		printf("%i\n", engine->render.world.rqueue->size);
 	}
 
 	BeginDrawing();
@@ -169,17 +113,19 @@ void	voxel_render(engine_t *engine, world_t *world) {
 	BeginMode3D(engine->camera);
 		
 		//opaque material render
-		glUseProgram(engine->shader[shader_voxel_solid].id);
-		rlSetUniformMatrix(glGetUniformLocation(engine->shader[shader_voxel_solid].id, "MVP"),
-			MatrixMultiply(MatrixMultiply(rlGetMatrixProjection(), rlGetMatrixModelview()),MatrixIdentity()));
-
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, engine->render.world.ssbo);
-		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, engine->render.indirect_buffer);
-		glBindVertexArray(engine->render.world.vao);
+		rlEnableShader(engine->shader[shader_voxel_solid].id);
+		Matrix mvp = MatrixMultiply(MatrixMultiply(rlGetMatrixModelview(), rlGetMatrixProjection()),MatrixIdentity());
+		rlSetUniformMatrix(engine->shader[SHADER_LOC_MATRIX_MVP].id, mvp);
 		
-		glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, engine->render.world.rqueue->size, 0);
+		rlBindShaderBuffer(world->render.storage_buffer, 0);
+		rlEnableVertexArray(world->render.vertex_array);
 
-		glBindVertexArray(0);
+		rlBindShaderBuffer(world->render.storage_buffer, 0);
+
+		glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, (const void*)0, world->render.render_queue->size, sizeof(DrawElementsIndirectCommand));
+
+		rlDisableVertexArray();
+		rlDisableShader();
 
 	if (engine->debug == true) {
 		DrawBoundingBox(engine->player.bound, RED);

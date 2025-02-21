@@ -142,4 +142,10 @@ static void dyn_sort(dyn_array_t *array, int (*comparator)(const void *, const v
 	qsort(array->arena, array->size, array->data_size, comparator);
 }
 
+//return a pointer to data idx;
+static void *dyn_get(dyn_array_t *array,unsigned int idx) {
+	return ((array->arena + idx * array->data_size));
+}
+
+
 #endif
