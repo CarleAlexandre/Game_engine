@@ -9,25 +9,39 @@ const float quad_vertices[] = {
 
 const uint32_t quad_indices[] = {0, 1, 2, 3};
 
-DrawElementsIndirectCommand	*assemble_world_mesh(dyn_array_t *render_queue) {
+void	assemble_world_mesh(dyn_array_t *render_queue, world_render_t *render) {
 	unsigned int rqueue_size = render_queue->size;
 	unsigned int total_size = 0;
-	
-	DrawElementsIndirectCommand cmd[rqueue_size];
+	void *buffer;
+
+	if (render->cmd) {
+		free(render->cmd);
+	}
+	render->cmd = malloc(sizeof(deic_t) * rqueue_size);
 	for (int i = 0; i < rqueue_size; i++) {
 		chunk_t *current = dyn_get(render_queue->arena, i);
-		cmd[i].count = 6;
-		cmd[i].instanceCount = current->mesh.faces->size;
-		cmd[i].firstIndex = 0;
-		cmd[i].baseVertex = 0;
-		cmd[i].baseInstance = total_size;
+		render->cmd[i].count = 6;
+		render->cmd[i].instanceCount = current->mesh.faces->size;
+		render->cmd[i].firstIndex = 0;
+		render->cmd[i].baseVertex = 0;
+		render->cmd[i].baseInstance = total_size;
 		total_size += current->mesh.faces->size;
 		// copy all face from current .mesh into new buffer
 	}
+	buffer = malloc(sizeof(face_data_t) * total_size);
+	assert(buffer);
 
+	for (int i = 0; i < rqueue_size;) {
+		chunk_t *current = dyn_get(render_queue->arena, i);
+		memcpy(buffer, current->mesh.faces->arena, current->mesh.faces->size);
+		i+= current->mesh.faces->size;
+	}
+
+	rlUpdateVertexBuffer(render->indirect_buffer, buffer, sizeof(face_data_t) * total_size, 0);
+	rlUpdateShaderBuffer(render->storage_buffer, render->position_buffer, rqueue_size, 0);
 }
 
-world_render_t	gen_world_render(dyn_array_t *faces, dyn_array_t *pos) {
+world_render_t	gen_world_render(dyn_array_t *faces, Vector3 *pos, int num_chunk) {
 	world_render_t render;
 
 	render.vertex_array = rlLoadVertexArray();
@@ -39,7 +53,7 @@ world_render_t	gen_world_render(dyn_array_t *faces, dyn_array_t *pos) {
 
 	render.element_buffer = rlLoadVertexBufferElement(quad_indices, sizeof(quad_indices), false);
 
-	render.indirect_buffer = rlLoadVertexBuffer(faces, faces->size, true);
+	render.indirect_buffer = rlLoadVertexBuffer(faces, (faces->size * sizeof(face_data_t)), true);
 
 	rlSetVertexAttribute(1, 1, RL_FLOAT, false, sizeof(face_data_t), offsetof(face_data_t, face_data));
 	rlEnableVertexAttribute(1);
@@ -53,7 +67,7 @@ world_render_t	gen_world_render(dyn_array_t *faces, dyn_array_t *pos) {
 
 	//ssbo
 
-	render.storage_buffer = rlLoadShaderBuffer(pos->size, pos->arena, RL_STREAM_COPY);
+	render.storage_buffer = rlLoadShaderBuffer(num_chunk * sizeof(face_data_t), pos, RL_STREAM_COPY);
 }
 
 gbuffer_t	loadGbuffer(int width, int height, Shader deffered_shader) {
@@ -122,7 +136,7 @@ void	voxel_render(engine_t *engine, world_t *world) {
 
 		rlBindShaderBuffer(world->render.storage_buffer, 0);
 
-		glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, (const void*)0, world->render.render_queue->size, sizeof(DrawElementsIndirectCommand));
+		glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, (const void*)0, world->render.render_queue->size, sizeof(deic_t));
 
 		rlDisableVertexArray();
 		rlDisableShader();

@@ -266,7 +266,7 @@ typedef  struct {
         uint32_t  firstIndex;
         uint32_t  baseVertex;
         uint32_t  baseInstance;
-}	DrawElementsIndirectCommand;
+}	deic_t;
 
 typedef struct	s_world_render {
 	uint32_t	vertex_array;
@@ -276,7 +276,7 @@ typedef struct	s_world_render {
 	uint32_t	storage_buffer;//used to store chunk pos
 	Vector3		*position_buffer;
 	face_data_t	*face_buffer;
-	DrawElementsIndirectCommand cmd;
+	deic_t		*cmd;
 	dyn_array_t	*render_queue;//store chunk_t * of chunk to render
 }	world_render_t;
 

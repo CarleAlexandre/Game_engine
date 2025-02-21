@@ -26,6 +26,8 @@ void	update_input(engine_t *engine,  world_t *world);
 	RENDER
 */
 
+void		assemble_world_mesh(dyn_array_t *render_queue, world_render_t *render);
+world_render_t	gen_world_render(dyn_array_t *faces, dyn_array_t *pos);
 void		voxel_render(engine_t *engine, world_t *world);
 gbuffer_t	loadGbuffer(int width, int height, Shader deffered_shader);
 
