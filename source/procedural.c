@@ -67,7 +67,7 @@ chunk_t **chunk_gen_height(int x_off, int z_off, int *size, fnl_state *noise) {
 	float max = 0;
 	for (int x = 0; x < 64; x++) {
 		for (int z = 0; z < 64; z++) {	
-			value[x][z] = (fnlGetNoise2D(noise, x_off, z_off) + 1) * 256;
+			value[x][z] = (fnlGetNoise2D(noise, x_off + x, z_off + z) + 1) * 20;
 			if (value[x][z] > max) max = value[x][z];
 		}
 	}
