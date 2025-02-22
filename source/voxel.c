@@ -43,9 +43,9 @@ svo_node_t* get_neighbor_block(Vector3 pos, FaceDirection dir, chunk_t *current,
 
 	if (!current || !current->blocks) return NULL;
 
-	if (neighbor_pos.x > 0 && neighbor_pos.x < 64 &&
-	    neighbor_pos.y > 0 && neighbor_pos.y < 64 &&
-	    neighbor_pos.z > 0 && neighbor_pos.z < 64) {
+	if (neighbor_pos.x >= 0 && neighbor_pos.x < 64 &&
+	    neighbor_pos.y >= 0 && neighbor_pos.y < 64 &&
+	    neighbor_pos.z >= 0 && neighbor_pos.z < 64) {
 	    return svo_get_node(neighbor_pos, current->blocks);
 	}
     
