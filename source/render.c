@@ -1,10 +1,10 @@
 #include <prototype.h>
 
 const float quad_vertices[] = {
-	-0.5f,  -0.5f,  0.0f, //bot_left
-	 0.5f,  -0.5f,  0.0f,//bot_right
-	-0.5f,   0.5f,  0.0f,//top_left
-	 0.5f,   0.5f,  0.0f, //top_right
+	-0.5f,  -0.5f, 0.0f, //bot_left
+	 0.5f,  -0.5f, 0.0f,//bot_right
+	-0.5f,   0.5f, 0.0f,//top_left
+	 0.5f,    0.5f, 0.0f //top_right
 };
 
 const uint32_t quad_indices[] = {0, 1, 2, 3};
@@ -70,10 +70,10 @@ bool IsBoxInFrustum(BoundingBox box, Frustum frustum) {
 	return true;
 }
 
-world_mesh_t	assemble_world_mesh(chunk_t *rqueue[128], unsigned int rcount) {
+world_mesh_t	assemble_world_mesh(chunk_t *rqueue[512], unsigned int rcount) {
 	face_data_t	faces[10000000] = {0};
 	unsigned int	face_count = 0;
-	Vector3		pos[128] = {0};
+	Vector3		pos[512] = {0};
 	unsigned int	pos_count = 0;
 
 	for (int i = 0; i < rcount; i++) {
@@ -133,7 +133,7 @@ void	gen_chunk_render(chunk_mesh_t *mesh) {
 
 	mesh->ebo = rlLoadVertexBufferElement(quad_indices, sizeof(quad_indices), false);
 
-	mesh->ibo = rlLoadVertexBuffer(&mesh->faces[0], mesh->faces_count, true);
+	mesh->ibo = rlLoadVertexBuffer(mesh->faces, mesh->faces_count * sizeof(face_data_t), true);
 
 	rlSetVertexAttribute(1, 1, RL_FLOAT, false, sizeof(face_data_t), offsetof(face_data_t, face_data));
 	rlEnableVertexAttribute(1);
@@ -182,8 +182,59 @@ gbuffer_t	loadGbuffer(int width, int height, Shader deffered_shader) {
 	rlDisableShader();
 
 	rlEnableDepthTest();
-	// rlEnableBackfaceCulling();
+	rlEnableBackfaceCulling();
 	return (buffer);
+}
+
+void	render_voxel_work(Shader shader, Matrix transform, world_t *world) {
+	rlEnableShader(shader.id );
+
+	Matrix matModel = MatrixIdentity();
+	Matrix matView = rlGetMatrixModelview();
+	Matrix matModelView = MatrixIdentity();
+	Matrix matProjection = rlGetMatrixProjection();
+
+	if (shader.locs[SHADER_LOC_MATRIX_VIEW] != -1) rlSetUniformMatrix(shader.locs[SHADER_LOC_MATRIX_VIEW], matView);
+	if (shader.locs[SHADER_LOC_MATRIX_PROJECTION] != -1) rlSetUniformMatrix(shader.locs[SHADER_LOC_MATRIX_PROJECTION], matProjection);
+	
+	matModel = MatrixMultiply(transform, rlGetMatrixTransform());
+
+	if (shader.locs[SHADER_LOC_MATRIX_MODEL] != -1) rlSetUniformMatrix(shader.locs[SHADER_LOC_MATRIX_MODEL], matModel);
+
+	matModelView = MatrixMultiply(matModel, matView);
+
+	if (shader.locs[SHADER_LOC_MATRIX_NORMAL] != -1) rlSetUniformMatrix(shader.locs[SHADER_LOC_MATRIX_NORMAL], MatrixTranspose(MatrixInvert(matModel)));
+
+	Matrix matModelViewProjection = MatrixIdentity();
+	matModelViewProjection = MatrixMultiply(matModelView, matProjection);
+
+	rlSetUniformMatrix(shader.locs[SHADER_LOC_MATRIX_MVP], matModelViewProjection);
+
+	// glMultiDrawArrays(GL_TRIANGLE_STRIP, 0, 0, 0);
+	for (int i = 0; i < world->rcount; i++) {
+		chunk_t *chk = world->rqueue[i];
+		float pos[3] = {chk->pos.x, chk->pos.y, chk->pos.z};
+		
+		SetShaderValue(shader, GetShaderLocation(shader, "chunk_pos"), &pos[0], RL_SHADER_UNIFORM_VEC3);
+
+		rlEnableVertexArray(chk->mesh->vao);
+		
+		glDrawElementsInstanced(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, 0, chk->mesh->faces_count);
+
+		rlDisableVertexArray();
+	}
+
+
+	// Disable all possible vertex array objects (or VBOs)
+	// rlDisableVertexArray();
+	// rlDisableVertexBuffer();
+	// rlDisableVertexBufferElement();
+
+	// Disable shader program
+	rlDisableShader();
+
+	rlSetMatrixModelview(matView);
+	rlSetMatrixProjection(matProjection);
 }
 
 void	voxel_render(engine_t *engine, world_t *world) {
@@ -192,47 +243,23 @@ void	voxel_render(engine_t *engine, world_t *world) {
 
 	if (IsKeyPressed(KEY_F3)) {
 		printf("reloading world render!\n");
-		update_world_render(world, engine);
+		// update_world_render(world, engine);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		printf("reloaded world render\n");
 	}
 
 	BeginDrawing();
 	ClearBackground(BLACK);
+	
 	BeginMode3D(engine->camera);
-		
-		BeginShaderMode(engine->shader[shader_voxel_solid]);
+		render_voxel_work(engine->shader[shader_voxel_solid], MatrixIdentity(), world);
 
-		Matrix matProjection = GetCameraProjectionMatrix(&engine->camera, GetScreenWidth() / GetScreenHeight());
-		Matrix matView = GetCameraViewMatrix(&engine->camera);
-		
-		for (int i = 0; i < world->rcount; i++) {
-			chunk_t *chk = world->rqueue[i];
-			// printf("%i %i\n", chk->mesh->faces_count, world->rcount);
-		
-			Matrix matModel = MatrixTranslate(
-				chk->pos.x * 0.5f,
-				chk->pos.y * 0.5f,
-				chk->pos.z * 0.5f
-			);
-
-			Matrix mvp = MatrixMultiply(MatrixMultiply(matModel, matView), matProjection);
-
-			rlSetUniformMatrix(rlGetLocationUniform(engine->shader[shader_voxel_solid].id, "mvp"), mvp);
-
-			glBindVertexArray(chk->mesh->vao);
-			glDrawElementsInstanced(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, 0, chk->mesh->faces_count);
-			// glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, chk->mesh->faces_count);
-			glBindVertexArray(0);
+		if (engine->debug == true) {
+			DrawBoundingBox(engine->player.bound, RED);
+			DrawLine3D((Vector3){-100, 0, 0}, (Vector3){100, 0, 0}, RED);
+			DrawLine3D((Vector3){0, -100, 0}, (Vector3){0, 100, 0}, GREEN);
+			DrawLine3D((Vector3){0, 0, -100}, (Vector3){0, 0, 100}, BLUE);
 		}
-		
-		EndShaderMode();
-
-	if (engine->debug == true) {
-		DrawBoundingBox(engine->player.bound, RED);
-		DrawLine3D((Vector3){-100, 0, 0}, (Vector3){100, 0, 0}, RED);
-		DrawLine3D((Vector3){0, -100, 0}, (Vector3){0, 100, 0}, GREEN);
-		DrawLine3D((Vector3){0, 0, -100}, (Vector3){0, 0, 100}, BLUE);
-	}
 	EndMode3D();
 	draw_ui(engine->player);
 	EndDrawing();

@@ -300,7 +300,7 @@ typedef struct s_world_mesh {
 
 typedef struct	s_world {
 	svo_t		*tree;
-	chunk_t		*rqueue[128];
+	chunk_t		*rqueue[512];
 	
 	world_mesh_t	mesh;
 	unsigned int	rcount;

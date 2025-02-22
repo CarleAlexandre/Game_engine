@@ -67,17 +67,17 @@ chunk_t **chunk_gen_height(int x_off, int z_off, int *size, fnl_state *noise) {
 	float max = 0;
 	for (int x = 0; x < 64; x++) {
 		for (int z = 0; z < 64; z++) {	
-			value[x][z] = (fnlGetNoise2D(noise, x_off, z_off) + 1) * 126;
+			value[x][z] = (fnlGetNoise2D(noise, x_off, z_off) + 1) * 256;
 			if (value[x][z] > max) max = value[x][z];
 		}
 	}
 
 	(*size) = floorf(max / 64) + 1;
-	if (*size > 4) *size = 4;
+	if ((*size) > 8) *size = 8;
 	slice = malloc(sizeof(chunk_t*) * (*size));
 	for (int i = 0; i < (*size); i++) {
 		slice[i] = malloc(sizeof(chunk_t));
-		slice[i]->blocks =  init_svo(32, 6);
+		slice[i]->blocks =  init_svo(64, 6);
 		slice[i]->pos = (Vector3){x_off * 0.5, i * 32, z_off * 0.5};
 	}
 	for (int x = 0; x < 64; x++) {
@@ -91,8 +91,16 @@ chunk_t **chunk_gen_height(int x_off, int z_off, int *size, fnl_state *noise) {
 					svo_insert((Vector3){x, y, z}, vox, slice[1]->blocks);
 				} else if (y < 196) {
 					svo_insert((Vector3){x, y, z}, vox, slice[2]->blocks);
-				} else {
+				} else if (y < 256) {
 					svo_insert((Vector3){x, y, z}, vox, slice[3]->blocks);
+				} else if (y < 320) {
+					svo_insert((Vector3){x, y, z}, vox, slice[4]->blocks);
+				} else if (y < 384) {
+					svo_insert((Vector3){x, y, z}, vox, slice[5]->blocks);
+				} else if (y < 448) {
+					svo_insert((Vector3){x, y, z}, vox, slice[6]->blocks);
+				} else {
+					svo_insert((Vector3){x, y, z}, vox, slice[7]->blocks);
 				}
 			}
 		}

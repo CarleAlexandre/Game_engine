@@ -17,19 +17,19 @@ int main(void) {
 
 	world_t *world = malloc(sizeof(world_t));
 
-	world->tree = init_svo(4, 2);
-	int size;
+	world->tree = init_svo(8, 3);
+	int size = 0;
 	chunk_t **tmp;
 	fnl_state noise = fnlCreateState();
 
-	for (int x = 0; x < 4; x++) {
-		for (int z = 0; z < 4; z++) {
+	for (int x = 0; x < 8; x++) {
+		for (int z = 0; z < 8; z++) {
 			tmp = chunk_gen_height(x * 64, z * 64, &size, &noise);
-			for (int y = 0; y < size ; y++) {
+			for (int y = 0; y < size; y++) {
 				tmp[y]->pos = (Vector3){
-					x * 64.0f,
-					y * 64.0f,
-					z * 64.0f
+					x * 32.0f,
+					y * 32.0f,
+					z * 32.0f
 				};
 				svo_insert((Vector3){x, y, z}, tmp[y], world->tree);
 			}
@@ -38,15 +38,15 @@ int main(void) {
 		}
 	}
 	world->rcount = 0;
-
-	gen_world_mesh(world, &engine);
-	update_world_render(world, &engine);
 	
+	gen_world_mesh(world, &engine);
+	
+	update_world_render(world, &engine);
 	for (int i = 0; i < world->rcount; i++) {
 		gen_chunk_render(world->rqueue[i]->mesh);
 	}
-
 	// goto end;
+
 
 	engine.player.stats.max_health = 150;
 	engine.player.stats.health = 100;
