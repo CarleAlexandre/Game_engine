@@ -4,7 +4,7 @@
 # include <glad.h>
 # include <ext/FastNoiseLite.h>
 
-#define GRAPHICS_API_OPENGL_43
+# define GRAPHICS_API_OPENGL_43
 # include <raylib.h>
 # include <rlgl.h>
 # include <raymath.h>
@@ -27,13 +27,14 @@
 
 # define GRAY_VALUE(c) ((float)(c.r + c.g + c.b)/3.0f)
 
-# define FACE_YP	0
-# define FACE_Y		1
-# define FACE_XP	2
-# define FACE_X		3
-# define FACE_ZP	4
-# define FACE_Z		5
-
+typedef enum {
+	FACE_YP,
+	FACE_Y,
+	FACE_XP,
+	FACE_X,
+	FACE_ZP,
+	FACE_Z,
+} FaceDirection;
 /* 
 	TYPEDEF
 */
@@ -141,6 +142,16 @@ typedef enum {
 	DATA STRUCT
 */
 
+
+typedef struct Plane {
+	Vector3 normal;
+	float distance;
+} Plane;
+    
+typedef struct Frustum {
+	Plane planes[6];
+} Frustum;
+
 typedef struct s_token {
 	int	id;
 	char	*data;
@@ -242,23 +253,11 @@ typedef struct	s_face_data {
 	int		face_data;
 }	face_data_t;
 
-typedef struct	s_chunk_render {
-	dyn_array_t	*faces;//one array for each face orientation? if it's better
-	Vector3		position;
-}	chunk_render_t;
-
 typedef struct s_voxel {
 	uint16_t	block_id;
 	uint8_t		height;
 	uint8_t		pressure;
 }	voxel_t;
-
-typedef struct	s_chunk {
-	svo_t		*blocks;
-	chunk_render_t	mesh;
-	BoundingBox	bounding_box;
-}	chunk_t;
-
 
 typedef  struct {
         uint32_t  count;
@@ -268,21 +267,43 @@ typedef  struct {
         uint32_t  baseInstance;
 }	deic_t;
 
+typedef struct s_chunk_mesh {
+	uint32_t	vao;
+	uint32_t	vbo;
+	uint32_t	ebo;
+	uint32_t	ibo;
+	face_data_t	faces[100000];
+	unsigned int	faces_count;
+}	chunk_mesh_t;
+
+typedef struct	s_chunk {
+	svo_t		*blocks;
+	chunk_mesh_t	*mesh;
+	Vector3		pos;//center of min or max ?????
+}	chunk_t;
+
 typedef struct	s_world_render {
-	uint32_t	vertex_array;
-	uint32_t	vertex_buffer;
-	uint32_t	element_buffer;
-	uint32_t	indirect_buffer;//used to store face data
-	uint32_t	storage_buffer;//used to store chunk pos
-	Vector3		*position_buffer;
-	face_data_t	*face_buffer;
-	deic_t		*cmd;
-	dyn_array_t	*render_queue;//store chunk_t * of chunk to render
+	uint32_t	vao;
+	uint32_t	vbo;
+	uint32_t	ebo;
+	uint32_t	ibo;//used to store face data
+	uint32_t	ssbo;//used to store chunk pos
 }	world_render_t;
+
+typedef struct s_world_mesh {
+	world_render_t	render;
+	face_data_t	*faces;
+	unsigned int	faces_count;
+	Vector3		*pos;
+	unsigned int	pos_count;
+}	world_mesh_t;
 
 typedef struct	s_world {
 	svo_t		*tree;
-	world_render_t	render;
+	chunk_t		*rqueue[128];
+	
+	world_mesh_t	mesh;
+	unsigned int	rcount;
 }	world_t;
 
 /*

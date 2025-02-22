@@ -26,18 +26,20 @@ void	update_input(engine_t *engine,  world_t *world);
 	RENDER
 */
 
-void		assemble_world_mesh(dyn_array_t *render_queue, world_render_t *render);
-world_render_t	gen_world_render(dyn_array_t *faces, dyn_array_t *pos);
+void	ExtractFrustumFromMatrix(Matrix mat, Frustum *frustum);
+bool	IsBoxInFrustum(BoundingBox box, Frustum frustum);
+
+void		gen_chunk_render(chunk_mesh_t *mesh);
 void		voxel_render(engine_t *engine, world_t *world);
 gbuffer_t	loadGbuffer(int width, int height, Shader deffered_shader);
+world_mesh_t	assemble_world_mesh(chunk_t *rqueue[128], unsigned int rcount);
+world_render_t	gen_world_render(world_mesh_t *mesh);
 
 /*
 	VOXEL
 */
 
-
 void	gen_world_mesh(world_t *world, engine_t *engine);
-void	update_chunk_render(world_t *world, Vector3 pos);
 void	update_world_render(world_t *world, engine_t *engine);
 
 /*

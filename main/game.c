@@ -26,18 +26,27 @@ int main(void) {
 		for (int z = 0; z < 4; z++) {
 			tmp = chunk_gen_height(x * 64, z * 64, &size, &noise);
 			for (int y = 0; y < size ; y++) {
-				
+				tmp[y]->pos = (Vector3){
+					x * 64.0f,
+					y * 64.0f,
+					z * 64.0f
+				};
 				svo_insert((Vector3){x, y, z}, tmp[y], world->tree);
 			}
 			tmp = 0x00;
 			size = 0;
 		}
 	}
-	engine.render.world.faces = init_dyn_array(sizeof(face_data_t));
-	engine.render.world.rqueue = init_dyn_array(sizeof(chunk_render_t));
+	world->rcount = 0;
 
-	gen_render_chunk(world, &engine);
-	setup_world_render(&engine.render);
+	gen_world_mesh(world, &engine);
+	update_world_render(world, &engine);
+	
+	for (int i = 0; i < world->rcount; i++) {
+		gen_chunk_render(world->rqueue[i]->mesh);
+	}
+
+	// goto end;
 
 	engine.player.stats.max_health = 150;
 	engine.player.stats.health = 100;
@@ -54,6 +63,8 @@ int main(void) {
 		update_input(&engine, world);
 		voxel_render(&engine, world);
 	}
+
+	end:
 
 	ShowCursor();
 	free(world);

@@ -10,31 +10,19 @@
 
 ## thread
 
-## Graphical Pipeline
-	deffered rendering
-	postprocessing
+## Graphic
+
+
 
 ## Sound
 
-## entity copenment system (modular, ecs only if ecs needed)
+## AI
 
 ## game loop
 
 ## physic
 
-## console debug
-
-## editor interface
-
 ## animation
-
-## voxel building
-
-	need to add micro block/ different shap voxel
-
-	add raytracing algorithme and raycasting too
-
-	transparency got a simple solution but could cost me much need to optimize it in the future
 
 ## voxel items
 
@@ -75,52 +63,67 @@
 
 ## CREDIT
 
-	RAYSAN: https://www.raylib.com/
+	raylib
+	raygui
+	librg
+	fastNoiseLight
+	enet.h
 
+	printf("UwU\n");
 ## TODO 
 
-	chunk rendering
+	setup and update of shader
+
+	engine setup
 
 
-need to create a name for Different place
+	create voxel mesh
 
-Day 0 is when you start the game.
+	render voxel
+	render one voxel
+	render one chunk
+	render all chunk
 
-Tutorial phase
+## Naration Idea
 
-Day 12, the force of the shadow advance and start to build a bridge
+```
+	Day 0 is when you start the game.
 
-First game loop (gather ressources and combat)
+	Tutorial phase
 
-Day 20 The bridge is finished
+	Day 12, the force of the shadow advance and start to build a bridge
 
-mid game, dungeon and exploring the mainland
+	First game loop (gather ressources and combat)
 
-Day 50 the force advance through the middle island 
+	Day 20 The bridge is finished
 
-Start introducing the full picture of the story
-player need to reenforce is base
+	mid game, dungeon and exploring the mainland
 
-Day 75 The second bridge start building
+	Day 50 the force advance through the middle island 
 
-same gameloop as before
+	Start introducing the full picture of the story
+	player need to reenforce is base
 
-Day 100 the scond bridge is finished and the shadow advance through the mainland
+	Day 75 The second bridge start building
 
-Start to defend Your City (free build) (biger and biger wave).
+	same gameloop as before
 
-if player start to explore, he enter the third gameloop
-where
+	Day 100 the scond bridge is finished and the shadow advance through the mainland
 
-when the player advance to the evil domain (south island), go to the late game where you start your journey to conquer the forgotten land
+	Start to defend Your City (free build) (biger and biger wave).
 
-you can go back but explored and conquered land will be lost
+	if player start to explore, he enter the third gameloop
+	where
 
-the point of the late game is to use what you aquired trhough the early and mid game to go as far as you can, and when you finish you unlock the good ending,
-bad ending when you lose your base,
-neutral / Unending when cannot go to terme on the 999 days (hidden success).
+	when the player advance to the evil domain (south island), go to the late game where you start your journey to conquer the forgotten land
+
+	you can go back but explored and conquered land will be lost
+
+	the point of the late game is to use what you aquired trhough the early and mid game to go as far as you can, and when you finish you unlock the good ending,
+	bad ending when you lose your base,
+	neutral / Unending when cannot go to terme on the 999 days (hidden success).
 
 
-Pendant plus de 10000 ans, les manikins on prospère sous la montagne. Leurs royaumes s'étend à perte de vue sous terre, les gemmes et les minéraux brillent telle des étoiles donnant le sentiment de ne pas etre enterre, sur le plafond, soutenue par d'imposantes statues.
-Les murs sont recouverts d'habitations avec des mécanismes de toutes sortes.
-
+	Pendant plus de 10000 ans, les manikins on prospère sous la montagne. Leurs royaumes s'étend à perte de vue sous terre, les gemmes et les minéraux brillent telle des étoiles donnant le sentiment de ne pas etre enterre, sur le plafond, soutenue par d'imposantes statues.
+	Les murs sont recouverts d'habitations avec des mécanismes de toutes sortes.
+```

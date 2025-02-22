@@ -17,7 +17,9 @@ engine_t init_engine(void) {
 	engine.shader[shader_voxel_solid] = LoadShader("shader/vox_solid.vs", "shader/vox_solid.fs");
 	engine.shader[shader_deffered].locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(engine.shader[shader_deffered], "viewPosition");
 
-	engine.render.gbuffer = loadGbuffer(width, height, engine.shader[shader_deffered]);
+	engine.shader[shader_voxel_solid].locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(engine.shader[shader_deffered], "viewPosition");
+
+	engine.gbuffer = loadGbuffer(width, height, engine.shader[shader_deffered]);
 	engine.debug = true;
 
 	return (engine);
@@ -29,11 +31,11 @@ void close_engine(engine_t *engine) {
 			UnloadShader(engine->shader[i]);
 		}
 	}
-	rlUnloadFramebuffer(engine->render.gbuffer.framebuffer);
-	rlUnloadTexture(engine->render.gbuffer.positionTexture);
-	rlUnloadTexture(engine->render.gbuffer.normalTexture);
-	rlUnloadTexture(engine->render.gbuffer.albedoSpecTexture);
-	rlUnloadTexture(engine->render.gbuffer.zTexture);
-	rlUnloadTexture(engine->render.gbuffer.depthRenderbuffer);
+	rlUnloadFramebuffer(engine->gbuffer.framebuffer);
+	rlUnloadTexture(engine->gbuffer.positionTexture);
+	rlUnloadTexture(engine->gbuffer.normalTexture);
+	rlUnloadTexture(engine->gbuffer.albedoSpecTexture);
+	rlUnloadTexture(engine->gbuffer.zTexture);
+	rlUnloadTexture(engine->gbuffer.depthRenderbuffer);
 	CloseWindow();
 }

@@ -1,59 +1,109 @@
 #include <prototype.h>
 
 const float quad_vertices[] = {
-	-0.5f, -0.5f, 0.0f,//bot_left
-	 0.5f, -0.5f, 0.0f,//bot_right
-	-0.5f,  0.5f, 0.0f,//top_left
-	 0.5f,  0.5f, 0.0f//top_right
+	-0.5f,  -0.5f,  0.0f, //bot_left
+	 0.5f,  -0.5f,  0.0f,//bot_right
+	-0.5f,   0.5f,  0.0f,//top_left
+	 0.5f,   0.5f,  0.0f, //top_right
 };
 
 const uint32_t quad_indices[] = {0, 1, 2, 3};
 
-void	assemble_world_mesh(dyn_array_t *render_queue, world_render_t *render) {
-	unsigned int rqueue_size = render_queue->size;
-	unsigned int total_size = 0;
-	void *buffer;
-
-	if (render->cmd) {
-		free(render->cmd);
+void ExtractFrustumFromMatrix(Matrix mat, Frustum *frustum) {
+	// Left plane
+	frustum->planes[0].normal.x = mat.m3 + mat.m0;
+	frustum->planes[0].normal.y = mat.m7 + mat.m4;
+	frustum->planes[0].normal.z = mat.m11 + mat.m8;
+	frustum->planes[0].distance = mat.m15 + mat.m12;
+    
+	// Right plane
+	frustum->planes[1].normal.x = mat.m3 - mat.m0;
+	frustum->planes[1].normal.y = mat.m7 - mat.m4;
+	frustum->planes[1].normal.z = mat.m11 - mat.m8;
+	frustum->planes[1].distance = mat.m15 - mat.m12;
+    
+	// Bottom plane
+	frustum->planes[2].normal.x = mat.m3 + mat.m1;
+	frustum->planes[2].normal.y = mat.m7 + mat.m5;
+	frustum->planes[2].normal.z = mat.m11 + mat.m9;
+	frustum->planes[2].distance = mat.m15 + mat.m13;
+    
+	// Top plane
+	frustum->planes[3].normal.x = mat.m3 - mat.m1;
+	frustum->planes[3].normal.y = mat.m7 - mat.m5;
+	frustum->planes[3].normal.z = mat.m11 - mat.m9;
+	frustum->planes[3].distance = mat.m15 - mat.m13;
+    
+	// Near plane
+	frustum->planes[4].normal.x = mat.m3 + mat.m2;
+	frustum->planes[4].normal.y = mat.m7 + mat.m6;
+	frustum->planes[4].normal.z = mat.m11 + mat.m10;
+	frustum->planes[4].distance = mat.m15 + mat.m14;
+    
+	// Far plane
+	frustum->planes[5].normal.x = mat.m3 - mat.m2;
+	frustum->planes[5].normal.y = mat.m7 - mat.m6;
+	frustum->planes[5].normal.z = mat.m11 - mat.m10;
+	frustum->planes[5].distance = mat.m15 - mat.m14;
+    
+	// Normalize all planes
+	for (int i = 0; i < 6; i++) {
+		float length = Vector3Length(frustum->planes[i].normal);
+		frustum->planes[i].normal = Vector3Normalize(frustum->planes[i].normal);
+		frustum->planes[i].distance /= length;
 	}
-	render->cmd = malloc(sizeof(deic_t) * rqueue_size);
-	for (int i = 0; i < rqueue_size; i++) {
-		chunk_t *current = dyn_get(render_queue->arena, i);
-		render->cmd[i].count = 6;
-		render->cmd[i].instanceCount = current->mesh.faces->size;
-		render->cmd[i].firstIndex = 0;
-		render->cmd[i].baseVertex = 0;
-		render->cmd[i].baseInstance = total_size;
-		total_size += current->mesh.faces->size;
-		// copy all face from current .mesh into new buffer
-	}
-	buffer = malloc(sizeof(face_data_t) * total_size);
-	assert(buffer);
-
-	for (int i = 0; i < rqueue_size;) {
-		chunk_t *current = dyn_get(render_queue->arena, i);
-		memcpy(buffer, current->mesh.faces->arena, current->mesh.faces->size);
-		i+= current->mesh.faces->size;
-	}
-
-	rlUpdateVertexBuffer(render->indirect_buffer, buffer, sizeof(face_data_t) * total_size, 0);
-	rlUpdateShaderBuffer(render->storage_buffer, render->position_buffer, rqueue_size, 0);
 }
 
-world_render_t	gen_world_render(dyn_array_t *faces, Vector3 *pos, int num_chunk) {
+bool IsBoxInFrustum(BoundingBox box, Frustum frustum) {
+	for (int i = 0; i < 6; i++) {
+		Vector3 positive = box.min;
+		
+		if (frustum.planes[i].normal.x >= 0) positive.x = box.max.x;
+		if (frustum.planes[i].normal.y >= 0) positive.y = box.max.y;
+		if (frustum.planes[i].normal.z >= 0) positive.z = box.max.z;
+
+		float distance = Vector3DotProduct(frustum.planes[i].normal, positive) + 
+				frustum.planes[i].distance;
+				
+		if (distance < 0) return false;
+	}
+	return true;
+}
+
+world_mesh_t	assemble_world_mesh(chunk_t *rqueue[128], unsigned int rcount) {
+	face_data_t	faces[10000000] = {0};
+	unsigned int	face_count = 0;
+	Vector3		pos[128] = {0};
+	unsigned int	pos_count = 0;
+
+	for (int i = 0; i < rcount; i++) {
+		for (int k = 0; k < rqueue[i]->mesh->faces_count; k++) {
+			faces[face_count++] = rqueue[i]->mesh->faces[k];
+		}
+		pos[pos_count++] = rqueue[i]->pos;
+	}
+
+	world_mesh_t mesh = {0};
+
+	mesh.faces = malloc(sizeof(face_data_t) * face_count);
+	mesh.faces_count = face_count;
+	mesh.pos = malloc(sizeof(Vector3) * pos_count);
+	mesh.pos_count = pos_count;
+}
+
+world_render_t	gen_world_render(world_mesh_t *mesh) {
 	world_render_t render;
 
-	render.vertex_array = rlLoadVertexArray();
-	rlEnableVertexArray(render.vertex_array);
+	render.vao = rlLoadVertexArray();
+	rlEnableVertexArray(render.vao);
 
-	render.vertex_buffer = rlLoadVertexBuffer(quad_vertices, sizeof(quad_vertices), false);
+	render.vbo = rlLoadVertexBuffer(quad_vertices, sizeof(quad_vertices), false);
 	rlSetVertexAttribute(0, 3, RL_FLOAT, false, 3 *sizeof(float), 0);
 	rlEnableVertexAttribute(0);
 
-	render.element_buffer = rlLoadVertexBufferElement(quad_indices, sizeof(quad_indices), false);
+	render.ebo = rlLoadVertexBufferElement(quad_indices, sizeof(quad_indices), false);
 
-	render.indirect_buffer = rlLoadVertexBuffer(faces, (faces->size * sizeof(face_data_t)), true);
+	render.ibo = rlLoadVertexBuffer(mesh->faces, mesh->faces_count, true);
 
 	rlSetVertexAttribute(1, 1, RL_FLOAT, false, sizeof(face_data_t), offsetof(face_data_t, face_data));
 	rlEnableVertexAttribute(1);
@@ -66,8 +116,34 @@ world_render_t	gen_world_render(dyn_array_t *faces, Vector3 *pos, int num_chunk)
 	rlDisableVertexArray();
 
 	//ssbo
+	glCreateBuffers(1, &render.ssbo);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, render.ssbo);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, mesh->pos_count, mesh->pos, GL_STREAM_COPY);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+}
 
-	render.storage_buffer = rlLoadShaderBuffer(num_chunk * sizeof(face_data_t), pos, RL_STREAM_COPY);
+void	gen_chunk_render(chunk_mesh_t *mesh) {
+
+	mesh->vao = rlLoadVertexArray();
+	rlEnableVertexArray(mesh->vao);
+
+	mesh->vbo = rlLoadVertexBuffer(quad_vertices, sizeof(quad_vertices), false);
+	rlSetVertexAttribute(0, 3, RL_FLOAT, false, 3 *sizeof(float), 0);
+	rlEnableVertexAttribute(0);
+
+	mesh->ebo = rlLoadVertexBufferElement(quad_indices, sizeof(quad_indices), false);
+
+	mesh->ibo = rlLoadVertexBuffer(&mesh->faces[0], mesh->faces_count, true);
+
+	rlSetVertexAttribute(1, 1, RL_FLOAT, false, sizeof(face_data_t), offsetof(face_data_t, face_data));
+	rlEnableVertexAttribute(1);
+	rlSetVertexAttributeDivisor(1, 1);
+
+	rlSetVertexAttribute(2, 1, RL_FLOAT, false, sizeof(face_data_t), offsetof(face_data_t, block_id));
+	rlEnableVertexAttribute(2);
+	rlSetVertexAttributeDivisor(2, 1);
+
+	rlDisableVertexArray();
 }
 
 gbuffer_t	loadGbuffer(int width, int height, Shader deffered_shader) {
@@ -106,7 +182,7 @@ gbuffer_t	loadGbuffer(int width, int height, Shader deffered_shader) {
 	rlDisableShader();
 
 	rlEnableDepthTest();
-	rlEnableBackfaceCulling();
+	// rlEnableBackfaceCulling();
 	return (buffer);
 }
 
@@ -116,9 +192,7 @@ void	voxel_render(engine_t *engine, world_t *world) {
 
 	if (IsKeyPressed(KEY_F3)) {
 		printf("reloading world render!\n");
-		for (int i = 0; i < sizeof(engine->shader) / sizeof(Shader); i++) {
-			//reload shader here
-		}
+		update_world_render(world, engine);
 		printf("reloaded world render\n");
 	}
 
@@ -126,20 +200,32 @@ void	voxel_render(engine_t *engine, world_t *world) {
 	ClearBackground(BLACK);
 	BeginMode3D(engine->camera);
 		
-		//opaque material render
-		rlEnableShader(engine->shader[shader_voxel_solid].id);
-		Matrix mvp = MatrixMultiply(MatrixMultiply(rlGetMatrixModelview(), rlGetMatrixProjection()),MatrixIdentity());
-		rlSetUniformMatrix(engine->shader[SHADER_LOC_MATRIX_MVP].id, mvp);
+		BeginShaderMode(engine->shader[shader_voxel_solid]);
+
+		Matrix matProjection = GetCameraProjectionMatrix(&engine->camera, GetScreenWidth() / GetScreenHeight());
+		Matrix matView = GetCameraViewMatrix(&engine->camera);
 		
-		rlBindShaderBuffer(world->render.storage_buffer, 0);
-		rlEnableVertexArray(world->render.vertex_array);
+		for (int i = 0; i < world->rcount; i++) {
+			chunk_t *chk = world->rqueue[i];
+			// printf("%i %i\n", chk->mesh->faces_count, world->rcount);
+		
+			Matrix matModel = MatrixTranslate(
+				chk->pos.x * 0.5f,
+				chk->pos.y * 0.5f,
+				chk->pos.z * 0.5f
+			);
 
-		rlBindShaderBuffer(world->render.storage_buffer, 0);
+			Matrix mvp = MatrixMultiply(MatrixMultiply(matModel, matView), matProjection);
 
-		glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, (const void*)0, world->render.render_queue->size, sizeof(deic_t));
+			rlSetUniformMatrix(rlGetLocationUniform(engine->shader[shader_voxel_solid].id, "mvp"), mvp);
 
-		rlDisableVertexArray();
-		rlDisableShader();
+			glBindVertexArray(chk->mesh->vao);
+			glDrawElementsInstanced(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, 0, chk->mesh->faces_count);
+			// glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, chk->mesh->faces_count);
+			glBindVertexArray(0);
+		}
+		
+		EndShaderMode();
 
 	if (engine->debug == true) {
 		DrawBoundingBox(engine->player.bound, RED);

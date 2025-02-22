@@ -10,9 +10,28 @@ out vec4 frag_color;
 
 void main() {
     // Example: Use the normal for shading
-    vec3 light_dir = normalize(vec3(1.0, 1.0, 1.0));
-    float diffuse = max(dot(face_normal, light_dir), 0.0);
-    frag_color = vec4(vec3(diffuse), 1.0);
+//     vec3 light_dir = normalize(vec3(1.0, 1.0, 1.0));
+//     float diffuse = max(dot(face_normal, light_dir), 0.0);
+	vec3 color;
+	if (face == 0) {
+		color = vec3(1,0,0);
+	}
+	if (face == 1) {
+		color = vec3(0.5,0,0);
+	}
+	if (face == 2) {
+		color = vec3(0,1,0);
+	}
+	if (face == 3) {
+		color = vec3(0,0.5,0);
+	}
+	if (face == 4) {
+		color = vec3(0,0,1);
+	}
+	if (face == 5) {
+		color = vec3(0,0,0.5);
+	}
+	frag_color = vec4(color, 1.0);
 }
 
 // #version 430 core

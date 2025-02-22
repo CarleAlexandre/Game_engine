@@ -78,8 +78,7 @@ chunk_t **chunk_gen_height(int x_off, int z_off, int *size, fnl_state *noise) {
 	for (int i = 0; i < (*size); i++) {
 		slice[i] = malloc(sizeof(chunk_t));
 		slice[i]->blocks =  init_svo(32, 6);
-		slice[i]->bounding_box.min = (Vector3){x_off * 0.5, i * 32, z_off * 0.5};
-		slice[i]->bounding_box.max = (Vector3){x_off * 0.5 + 32, i * 32 + 32, z_off * 0.5 + 32};
+		slice[i]->pos = (Vector3){x_off * 0.5, i * 32, z_off * 0.5};
 	}
 	for (int x = 0; x < 64; x++) {
 		for (int z = 0; z < 64; z++) {	
