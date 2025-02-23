@@ -244,7 +244,7 @@ void	voxel_render(engine_t *engine, world_t *world) {
 	if (IsKeyPressed(KEY_F3)) {
 		printf("reloading world render!\n");
 		update_world_render(world, engine);
-		if (poly) {
+		if (!poly) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		} else {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
