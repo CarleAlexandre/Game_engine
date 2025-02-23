@@ -113,36 +113,24 @@ void	gen_world_mesh(world_t *world, engine_t *engine) {
 					chunk_t *current_chunk = node->data;
 					current_chunk->mesh = malloc(sizeof(chunk_mesh_t));
 					gen_chunk_mesh(current_chunk, world);
-					printf("%i\n", current_chunk->mesh->faces_count);
 				}
 			}
 		}
 	}
 }
-
-
-// bool is_chunk_visible(Vector3 chunk_pos, Camera camera) {
-// 	// Convert chunk position to world coordinates
-// 	BoundingBox chunk_bb = (BoundingBox){
-// 	    .min = Vector3Add(chunk_pos, (Vector3){0, 0, 0}),
-// 	    .max = Vector3Add(chunk_pos, (Vector3){64, 64, 64})
-// 	};
-	
-// 	return CheckCollisionBoxFrustum(chunk_bb, GetCameraFrustum(&camera));
-//     }
     
-//     void update_world_render(world_t *world, engine_t *engine) {
+// void update_world_render(world_t *world, engine_t *engine) {
 // 	world->rcount = 0;
 	
-// 	for (int x = 0; x < 4; x++) {
-// 	    for (int z = 0; z < 4; z++) {
-// 		for (int y = 0; y < 4; y++) {
+// 	for (int x = 0; x < world->tree->size; x++) {
+// 	    for (int z = 0; z < world->tree->size; z++) {
+// 		for (int y = 0; y < world->tree->size; y++) {
 // 		    svo_node_t *node = svo_get_node((Vector3){x, y, z}, world->tree);
 // 		    if (node && node->data) {
 // 			chunk_t *chunk = node->data;
 			
 // 			if (is_chunk_visible(chunk->pos, engine->camera)) {
-// 			    if (world->rcount < 100000) {
+// 			    if (world->rcount < 512) {
 // 				world->rqueue[world->rcount++] = chunk;
     
 // 				if (!chunk->mesh) {
@@ -160,7 +148,7 @@ void	gen_world_mesh(world_t *world, engine_t *engine) {
 bool is_chunk_visible(Vector3 chunk_pos, Camera camera) {
 	// Create view-projection matrix
 	Matrix view = GetCameraViewMatrix(&camera);
-	Matrix proj = GetCameraProjectionMatrix(&camera, GetScreenWidth()/ GetScreenHeight());
+	Matrix proj = GetCameraProjectionMatrix(&camera, GetScreenHeight()/ GetScreenWidth());
 	Matrix view_proj = MatrixMultiply(view, proj);
 	
 	// Extract frustum
@@ -179,7 +167,7 @@ bool is_chunk_visible(Vector3 chunk_pos, Camera camera) {
 //check this every few frame;
 void	update_world_render(world_t *world, engine_t *engine) {
 	if (world->rcount) {
-		for (int i = 0; i < 128; i++) {
+		for (int i = 0; i < 512; i++) {
 			world->rqueue[i] = NULL;
 		}
 		world->rcount = 0;
@@ -190,9 +178,29 @@ void	update_world_render(world_t *world, engine_t *engine) {
 				svo_node_t *node = svo_get_node((Vector3){x,y,z}, world->tree);
 				if (node && node->data) {
 					chunk_t *current_chunk = node->data;
-					// if (is_chunk_visible(current_chunk->pos, engine->camera) && current_chunk->mesh->faces_count) {
+					if (is_chunk_visible(current_chunk->pos, engine->camera) && current_chunk->mesh->faces_count) {
 						world->rqueue[world->rcount++] = current_chunk;
-					// }
+					}
+				}
+			}
+		}
+	}
+}
+
+void	setup_world_render(world_t *world, engine_t *engine) {
+	if (world->rcount) {
+		for (int i = 0; i < 512; i++) {
+			world->rqueue[i] = NULL;
+		}
+		world->rcount = 0;
+	}
+	for (int x = 0; x < 8; x++) {
+		for (int z = 0; z < 8; z++) {
+			for (int y = 0; y < 8; y++) {
+				svo_node_t *node = svo_get_node((Vector3){x,y,z}, world->tree);
+				if (node && node->data) {
+					chunk_t *current_chunk = node->data;
+					world->rqueue[world->rcount++] = current_chunk;
 				}
 			}
 		}

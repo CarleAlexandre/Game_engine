@@ -107,6 +107,7 @@ typedef enum {
 	shader_gbuffer,
 	shader_deffered,
 	shader_sobel,
+	shader_cubemap,
 }	shader_enum;
 
 typedef enum {
@@ -325,6 +326,7 @@ typedef struct s_engine {
 	gbuffer_t	gbuffer;
 	bool		debug;
 	sv_player_t	player;
+	Model		skybox;
 }	engine_t;
 
 #endif

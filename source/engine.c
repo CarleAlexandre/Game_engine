@@ -15,12 +15,27 @@ engine_t init_engine(void) {
 	engine.shader[shader_deffered] = LoadShader("shader/defered.vs", "shader/defered.fs");
 	engine.shader[shader_gbuffer] = LoadShader("shader/gbuffer.vs", "shader/gbuffer.fs");
 	engine.shader[shader_voxel_solid] = LoadShader("shader/vox_solid.vs", "shader/vox_solid.fs");
+
 	engine.shader[shader_deffered].locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(engine.shader[shader_deffered], "viewPosition");
 
 	engine.shader[shader_voxel_solid].locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(engine.shader[shader_deffered], "viewPosition");
 
 	engine.gbuffer = loadGbuffer(width, height, engine.shader[shader_deffered]);
 	engine.debug = true;
+
+	Mesh cube = GenMeshCube(1, 1, 1);
+
+	engine.skybox = LoadModelFromMesh(cube);
+
+	engine.skybox.materials[0].shader = LoadShader("shader/skybox.vs", "shader/skybox.fs");
+
+	SetShaderValue(engine.skybox.materials[0].shader, GetShaderLocation(engine.skybox.materials[0].shader, "environmentMap"), (int[1]){ MATERIAL_MAP_CUBEMAP }, SHADER_UNIFORM_INT);
+	SetShaderValue(engine.skybox.materials[0].shader, GetShaderLocation(engine.skybox.materials[0].shader, "doGamma"), (int[1]){ 0 }, SHADER_UNIFORM_INT);
+	SetShaderValue(engine.skybox.materials[0].shader, GetShaderLocation(engine.skybox.materials[0].shader, "vflipped"), (int[1]){ 0 }, SHADER_UNIFORM_INT);
+
+	Image img = LoadImage("include/ext/skybox.png");
+	engine.skybox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(img, CUBEMAP_LAYOUT_AUTO_DETECT);
+	UnloadImage(img);
 
 	return (engine);
 }

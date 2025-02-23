@@ -65,7 +65,7 @@ bool IsBoxInFrustum(BoundingBox box, Frustum frustum) {
 		float distance = Vector3DotProduct(frustum.planes[i].normal, positive) + 
 				frustum.planes[i].distance;
 				
-		if (distance < 0) return false;
+		if (distance < 0.01) return false;
 	}
 	return true;
 }
@@ -123,7 +123,6 @@ world_render_t	gen_world_render(world_mesh_t *mesh) {
 }
 
 void	gen_chunk_render(chunk_mesh_t *mesh) {
-
 	mesh->vao = rlLoadVertexArray();
 	rlEnableVertexArray(mesh->vao);
 
@@ -240,18 +239,30 @@ void	render_voxel_work(Shader shader, Matrix transform, world_t *world) {
 void	voxel_render(engine_t *engine, world_t *world) {
 	float camera_pos[3] = {engine->camera.position.x, engine->camera.position.y, engine->camera.position.z};
 	int screen_height = GetScreenHeight(), screen_width = GetScreenWidth();
+	static bool poly = false;
 
 	if (IsKeyPressed(KEY_F3)) {
 		printf("reloading world render!\n");
-		// update_world_render(world, engine);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		update_world_render(world, engine);
+		if (poly) {
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		} else {
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		}
 		printf("reloaded world render\n");
+		poly = !poly;
 	}
 
 	BeginDrawing();
 	ClearBackground(BLACK);
 	
 	BeginMode3D(engine->camera);
+		rlDisableBackfaceCulling();
+		rlDisableDepthMask();
+		DrawModel(engine->skybox, (Vector3){0, 0, 0}, 1.0f, WHITE);
+		rlEnableBackfaceCulling();
+		rlEnableDepthMask();	
+	
 		render_voxel_work(engine->shader[shader_voxel_solid], MatrixIdentity(), world);
 
 		if (engine->debug == true) {

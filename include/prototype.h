@@ -41,6 +41,7 @@ world_render_t	gen_world_render(world_mesh_t *mesh);
 
 void	gen_world_mesh(world_t *world, engine_t *engine);
 void	update_world_render(world_t *world, engine_t *engine);
+void	setup_world_render(world_t *world, engine_t *engine);
 
 /*
 	UI
