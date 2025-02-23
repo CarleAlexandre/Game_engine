@@ -22,6 +22,10 @@ int main(void) {
 	chunk_t **tmp;
 	fnl_state noise = fnlCreateState();
 
+	noise.frequency = 0.003;
+	noise.fractal_type = FNL_FRACTAL_FBM;
+	noise.gain = 0.8;
+
 	for (int x = 0; x < 8; x++) {
 		for (int z = 0; z < 8; z++) {
 			tmp = chunk_gen_height(x * 64, z * 64, &size, &noise);
@@ -45,8 +49,6 @@ int main(void) {
 	for (int i = 0; i < world->rcount; i++) {
 		gen_chunk_render(world->rqueue[i]->mesh);
 	}
-	// goto end;
-
 
 	engine.player.stats.max_health = 150;
 	engine.player.stats.health = 100;
@@ -63,8 +65,6 @@ int main(void) {
 		update_input(&engine, world);
 		voxel_render(&engine, world);
 	}
-
-	end:
 
 	ShowCursor();
 	free(world);

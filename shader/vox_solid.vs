@@ -53,7 +53,7 @@ void main() {
 	block_id_out = (block_id >> 3) & 0x1FFF;
 
 	// Base position in chunk space (0.5 units per voxel)
-	vec3 voxel_center = vec3(x, y, z) * 0.5;
+	vec3 voxel_center = vec3(x + 1, y + 1, z + 1) * 0.5;
     
 	//     Face offset calculation (0.25 units from center)
 	vec3 face_offset = vec3(0.0);

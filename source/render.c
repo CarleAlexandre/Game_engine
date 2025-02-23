@@ -256,9 +256,13 @@ void	voxel_render(engine_t *engine, world_t *world) {
 
 		if (engine->debug == true) {
 			DrawBoundingBox(engine->player.bound, RED);
-			DrawLine3D((Vector3){-100, 0, 0}, (Vector3){100, 0, 0}, RED);
-			DrawLine3D((Vector3){0, -100, 0}, (Vector3){0, 100, 0}, GREEN);
-			DrawLine3D((Vector3){0, 0, -100}, (Vector3){0, 0, 100}, BLUE);
+			for (int i = 0; i <= 8; i++) {
+				for (int k = 0; k <= 8; k++) {
+					DrawLine3D((Vector3){0, i * 32, k * 32}, (Vector3){256,i * 32, k * 32}, RED);
+					DrawLine3D((Vector3){i * 32, 0, k * 32}, (Vector3){i * 32, 256, k * 32}, GREEN);
+					DrawLine3D((Vector3){i * 32, k * 32, 0}, (Vector3){i * 32, k * 32, 256}, BLUE);
+				}
+			}
 		}
 	EndMode3D();
 	draw_ui(engine->player);
