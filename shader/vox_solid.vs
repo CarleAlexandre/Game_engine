@@ -53,23 +53,22 @@ void main() {
 	block_id_out = (block_id >> 3) & 0x1FFF;
 
 	// Base position in chunk space (0.5 units per voxel)
-	vec3 voxel_center = vec3(x + 1, y + 1, z + 1) * 0.5;
-    
-	//     Face offset calculation (0.25 units from center)
+	vec3 vox_pos = vec3(x, y, z) * 0.5;
+
 	vec3 face_offset = vec3(0.0);
 	switch(face) {
-		case FACE_YP: face_offset = vec3(0.0, 0.5, 0.0); break;
-		case FACE_Y:  face_offset = vec3(0.0, -0.5, 0.0); break;
-		case FACE_XP: face_offset = vec3(0.5, 0.0, 0.0); break;
-		case FACE_X:  face_offset = vec3(-0.5, 0.0, 0.0); break;
+		case FACE_YP: face_offset = vec3(0.0, 0.5, 0.5); break;
+	// 	case FACE_Y:  face_offset = vec3(0.0, 0.0, 0.0); break;
+		case FACE_XP: face_offset = vec3(0.5, 0.0, 0.5); break;
+	//	case FACE_X:  face_offset = vec3(0.0, 0.0, 0.0); break;
 		case FACE_ZP: face_offset = vec3(0.0, 0.0, 0.5); break;
-		case FACE_Z:  face_offset = vec3(0.0, 0.0, -0.5); break;
+		case FACE_Z:  face_offset = vec3(0.5, 0.0, 0.0); break;
 	}
 
 	vec3 rotated_aPos = ROTATIONS[face] * aPos;
 
 	// Final position calculation
-	vec3 world_pos = voxel_center + chunk_pos + face_offset + rotated_aPos;
+	vec3 world_pos = vox_pos +face_offset + chunk_pos + rotated_aPos;
 	gl_Position = matProjection * matView * matModel * vec4(world_pos, 1.0);
 
 	frag_pos = world_pos;

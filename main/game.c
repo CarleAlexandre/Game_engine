@@ -100,7 +100,7 @@ int main(void) {
 
 	double launch_time = GetTime();
 	
-	SetTargetFPS(240);
+	SetTargetFPS(165);
 	while (!WindowShouldClose()) {
 		update_input(&engine, world);
 		voxel_render(&engine, world);

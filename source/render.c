@@ -1,10 +1,10 @@
 #include <prototype.h>
 
 const float quad_vertices[] = {
-	-0.5f,  -0.5f, 0.0f, //bot_left
-	 0.5f,  -0.5f, 0.0f,//bot_right
-	-0.5f,   0.5f, 0.0f,//top_left
-	 0.5f,    0.5f, 0.0f //top_right
+	0.0f, 0.0f, 0.0f, //bot_left
+	0.5f, 0.0f, 0.0f,//bot_right
+	0.0f, 0.5f, 0.0f,//top_left
+	0.5f, 0.5f, 0.0f //top_right
 };
 
 const uint32_t quad_indices[] = {0, 1, 2, 3};
@@ -243,7 +243,6 @@ void	voxel_render(engine_t *engine, world_t *world) {
 
 	if (IsKeyPressed(KEY_F3)) {
 		printf("reloading world render!\n");
-		update_world_render(world, engine);
 		if (!poly) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		} else {
