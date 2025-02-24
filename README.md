@@ -20,6 +20,67 @@
 
 ## game loop
 
+###1. Define Your Narrative Goals
+
+	Establish Core Themes and Structures
+
+    Core Themes: Decide on the overarching themes or motifs (e.g., mystery, survival, redemption) that will be echoed in the generated stories.
+    Narrative Arcs: Even in procedurally generated content, a basic narrative arc (introduction, conflict, climax, resolution) can help maintain coherence.
+    Player Agency: Consider how much control the player will have in influencing the story. In roguelikes, emergent narratives often arise from the interplay between random events and player choices.
+
+###2. Techniques for Procedural Story Generation
+
+	Modular Narrative Building:
+
+    Narrative Fragments: Break the story into smaller, reusable segments (such as events, quests, or dialogue snippets) that can be assembled in various ways.
+    Grammar-Based Systems: Use formal grammar rules or templates to construct sentences or narrative segments dynamically. For instance, a context-free grammar can generate different story outcomes by recombining predefined elements.
+
+	Graph-Based and State Machine Approaches:
+
+    Story Graphs: Create nodes representing narrative events and edges as transitions between them. This graph can be traversed differently each playthrough, ensuring varied storylines while adhering to logical narrative progression.
+    Finite State Machines: Use state machines to model story states and transitions triggered by player actions or random events. This helps manage narrative flow and ensure that the story progresses logically.
+
+	Event-Driven and Emergent Narratives:
+
+    Random Events and Triggers: Implement systems where random events (or player-triggered events) introduce narrative changes. These events can be linked to environmental factors or character interactions.
+    Dynamic Quests: Generate quests on the fly by combining objectives, characters, and locations. Ensure that each quest fits within the broader narrative context, even if loosely.
+
+	Balancing Randomness and Coherence:
+
+    Constraints and Rules: Introduce constraints that prevent illogical or contradictory narrative outcomes. For example, if a character is established as an ally, subsequent events should not contradict that role unless there’s a narrative justification.
+    Narrative “Anchors”: Design certain fixed or semi-fixed events that serve as anchors. These can provide a backbone to the story, ensuring that, despite procedural variability, the narrative maintains a coherent structure.
+
+	###3. Algorithmic Approaches and Tools
+
+	Algorithms and Techniques:
+
+    Markov Chains: Use Markov chains to generate sequences of events or dialogue. This can work well for text-based narrative generation but may require careful tuning to maintain context over longer passages.
+    Planning Algorithms: Techniques like Hierarchical Task Networks (HTNs) can be adapted to plan narrative sequences, ensuring that events follow a logical order.
+    Machine Learning Approaches: Although more advanced, models trained on narrative data (or even transformers in a constrained setting) can suggest story elements or dialogue. However, integrating these effectively into game logic can be challenging.
+
+	Integration with Narrative Scripting Tools:
+
+    Narrative Scripting Languages: Tools like Ink or Yarn Spinner allow for branching narratives and can be combined with procedural systems. They let you write narrative nodes manually while incorporating dynamic elements via variables or external triggers.
+    Hybrid Systems: Many games benefit from a mix of handcrafted and procedurally generated content. For example, you might use fixed story arcs with procedurally generated side quests that enrich the main narrative.
+
+###4. Design Considerations for Roguelike Games
+
+	Replayability and Variation:
+
+    Randomization with Purpose: In roguelikes, players expect different experiences on each run. Ensure that your procedural system doesn’t just randomize elements but creates meaningful variations that affect gameplay and narrative.
+    Emergent Storytelling: Allow the game world to react to player actions in unexpected ways. Emergent narratives arise when players combine procedural events with creative problem-solving.
+
+	Balancing Complexity and Accessibility:
+
+    Simplicity vs. Depth: While a highly complex narrative generator can be impressive, it might overwhelm both you and the player. Strive for a system that is deep enough to be engaging but simple enough to manage and debug.
+    Player Feedback: Test the narrative generator with real players. Their feedback will help you balance narrative coherence with the variability that makes roguelikes fun.
+
+	5. Resources and Further Reading
+
+    Academic Papers and Articles: Research on procedural content generation (PCG) for narratives can provide insights into various algorithms and design philosophies. Look up studies on narrative generation and PCG in games.
+    Game Postmortems: Many indie developers share their experiences with procedural narrative systems (for instance, insights from games like Dwarf Fortress or Rogue Legacy can be valuable).
+    Online Communities and Forums: Communities like the Procedural Generation subreddit or game development forums (e.g., TIGSource, GameDev.net) can be great places to ask for advice and see how others have tackled similar challenges
+
 ## physic
 
 ## animation

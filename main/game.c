@@ -107,11 +107,11 @@ int main(void) {
 	}
 
 	end:
-
+	
 	ShowCursor();
 	free(world);
-	close_engine(&engine);
 	printf("INFO: time to launch : %.2lfms\n", launch_time * 1000);
-	printf("INFO: time to close : %.2lfs\n", GetTime());
+	printf("INFO: total run time : %.2lfs\n", GetTime());
+	close_engine(&engine);
 	return (0);
 }

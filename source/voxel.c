@@ -14,21 +14,6 @@ bool is_solid_block(svo_node_t *node) {
 	return node && node->data;
 }
 
-void get_chunk_neighbor(Vector3 pos, svo_t *tree, chunk_t *chunk[6]) {
-	float nx, ny, nz;
-
-	nx = pos.x;
-	ny = pos.y;
-	nz = pos.z;
-
-	chunk[0] = (chunk_t *)svo_get_node((Vector3){nx, ny + 1, nz}, tree);
-	chunk[1] = (chunk_t *)svo_get_node((Vector3){nx, ny - 1, nz}, tree);
-	chunk[2] = (chunk_t *)svo_get_node((Vector3){nx + 1, ny, nz}, tree);
-	chunk[3] = (chunk_t *)svo_get_node((Vector3){nx - 1, ny, nz}, tree);
-	chunk[4] = (chunk_t *)svo_get_node((Vector3){nx, ny, nz + 1}, tree);
-	chunk[5] = (chunk_t *)svo_get_node((Vector3){nx, ny, nz - 1}, tree);
-}
-
 svo_node_t* get_neighbor_block(Vector3 pos, FaceDirection dir, chunk_t *current, world_t *world) {
 	Vector3 neighbor_pos = pos;
 	
@@ -44,26 +29,23 @@ svo_node_t* get_neighbor_block(Vector3 pos, FaceDirection dir, chunk_t *current,
 	if (!current || !current->blocks) return NULL;
 
 	if (neighbor_pos.x >= 0 && neighbor_pos.x < 64 &&
-	    neighbor_pos.y >= 0 && neighbor_pos.y < 64 &&
-	    neighbor_pos.z >= 0 && neighbor_pos.z < 64) {
-	    return svo_get_node(neighbor_pos, current->blocks);
+		neighbor_pos.y >= 0 && neighbor_pos.y < 64 &&
+		neighbor_pos.z >= 0 && neighbor_pos.z < 64) {
+		return svo_get_node(neighbor_pos, current->blocks);
 	}
     
 	Vector3 chunk_pos = {
-		current->pos.x + ((dir == FACE_XP) ? 1 : (dir == FACE_X) ? -1 : 0),
-		current->pos.y + ((dir == FACE_YP) ? 1 : (dir == FACE_Y) ? -1 : 0),
-		current->pos.z + ((dir == FACE_ZP) ? 1 : (dir == FACE_Z) ? -1 : 0)
+		(current->pos.x / 32) + ((dir == FACE_XP) ? 1 : (dir == FACE_X) ? -1 : 0),
+		(current->pos.y / 32) + ((dir == FACE_YP) ? 1 : (dir == FACE_Y) ? -1 : 0),
+		(current->pos.z / 32) + ((dir == FACE_ZP) ? 1 : (dir == FACE_Z) ? -1 : 0)
 	};
 
-	if (chunk_pos.x < 0 || chunk_pos.x >= 8 ||
-		chunk_pos.y < 0 || chunk_pos.y >= 8 || 
-		chunk_pos.z < 0 || chunk_pos.z >= 8) {
-		return NULL;
-	}
 	svo_node_t *node = svo_get_node(chunk_pos, world->tree);
-	if (!node) return (NULL);
+	if (!node)
+		return (NULL);
 	chunk_t *neighbor_chunk = node->data;
-	if (!neighbor_chunk || !neighbor_chunk->blocks) return NULL;
+	if (!neighbor_chunk || !neighbor_chunk->blocks)
+		return NULL;
 
 	Vector3 local_pos = {
 		(dir == FACE_XP) ? 0 : (dir == FACE_X) ? 63 : pos.x,
@@ -74,10 +56,8 @@ svo_node_t* get_neighbor_block(Vector3 pos, FaceDirection dir, chunk_t *current,
 	return svo_get_node(local_pos, neighbor_chunk->blocks);
 }
 
-
+//add skiping mesh that aren't visible to player ??
 void gen_chunk_mesh(chunk_t *current, world_t *world) {
-	const FaceDirection directions[6] = {FACE_YP, FACE_Y, FACE_XP, FACE_X, FACE_ZP, FACE_Z};
-	
 	for (char x = 0; x < 64; x++) {
 		for (char z = 0; z < 64; z++) {
 			for (char y = 0; y < 64; y++) {
@@ -87,12 +67,11 @@ void gen_chunk_mesh(chunk_t *current, world_t *world) {
 				if (!is_solid_block(node)) continue;
 
 				for (int i = 0; i < 6; i++) {
-					FaceDirection dir = directions[i];
-					svo_node_t *neighbor = get_neighbor_block(pos, dir, current, world);
+					svo_node_t *neighbor = get_neighbor_block(pos, i, current, world);
 					
 					if (!is_solid_block(neighbor)) {
 						char packed_pos[3] = {x, y, z};
-						face_data_t face = pack_face_data(packed_pos, dir, 1, 1, 1);
+						face_data_t face = pack_face_data(packed_pos, i, 1, 1, 1);
 						
 						if (current->mesh->faces_count < 100000) {
 							current->mesh->faces[current->mesh->faces_count++] = face;

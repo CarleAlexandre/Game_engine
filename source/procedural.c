@@ -108,3 +108,7 @@ chunk_t **chunk_gen_height(int x_off, int z_off, int *size, fnl_state *noise) {
 
 	return (slice);
 }
+
+void gen_world() {
+	printf("Uruk The Mad God has Begun Creation\n");
+}

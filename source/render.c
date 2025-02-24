@@ -223,13 +223,6 @@ void	render_voxel_work(Shader shader, Matrix transform, world_t *world) {
 		rlDisableVertexArray();
 	}
 
-
-	// Disable all possible vertex array objects (or VBOs)
-	// rlDisableVertexArray();
-	// rlDisableVertexBuffer();
-	// rlDisableVertexBufferElement();
-
-	// Disable shader program
 	rlDisableShader();
 
 	rlSetMatrixModelview(matView);
