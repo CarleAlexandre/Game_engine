@@ -263,6 +263,11 @@ void	voxel_render(engine_t *engine, world_t *world) {
 			DrawCubeWires(pos, 0.5, 0.5, 0.5, BLACK);
 		}
 
+		// if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+		// 	voxel_set_block(engine->camera, world, 5, NULL);
+		// 	//need to update chunk_mesh and chunk_vao
+		// }
+
 		if (engine->debug == true) {
 			DrawBoundingBox(engine->player.bound, RED);
 			for (int i = 0; i <= 8; i++) {

@@ -34,4 +34,5 @@ void	update_input(engine_t *engine, world_t *world) {
 	if (step.x != 0 || step.y != 0 || step.z != 0 || delta.x != 0 || delta.y != 0) {
 		update_world_render(world, engine);
 	}
+
 }

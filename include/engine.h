@@ -27,6 +27,9 @@
 
 # define GRAY_VALUE(c) ((float)(c.r + c.g + c.b)/3.0f)
 
+# define VOXEL_SIZE 0.5
+# define CHUNK_SIZE 64
+
 typedef enum {
 	FACE_YP,
 	FACE_Y,
