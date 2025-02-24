@@ -42,6 +42,7 @@ world_render_t	gen_world_render(world_mesh_t *mesh);
 void	gen_world_mesh(world_t *world, engine_t *engine);
 void	update_world_render(world_t *world, engine_t *engine);
 void	setup_world_render(world_t *world, engine_t *engine);
+svo_node_t* voxel_look_at(Camera3D camera, world_t *world, float max_range, Vector3 *position);
 
 /*
 	UI

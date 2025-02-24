@@ -257,6 +257,12 @@ void	voxel_render(engine_t *engine, world_t *world) {
 	
 		render_voxel_work(engine->shader[shader_voxel_solid], MatrixIdentity(), world);
 
+		Vector3 pos = {0};		
+		svo_node_t *node = voxel_look_at(engine->camera, world, 5, &pos);
+		if (node && node->data) {
+			DrawCubeWires(pos, 0.5, 0.5, 0.5, BLACK);
+		}
+
 		if (engine->debug == true) {
 			DrawBoundingBox(engine->player.bound, RED);
 			for (int i = 0; i <= 8; i++) {

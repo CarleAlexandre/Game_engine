@@ -185,3 +185,60 @@ void	setup_world_render(world_t *world, engine_t *engine) {
 		}
 	}
 }
+
+// Converts a world position (in world units) into voxel coordinates.
+// Since voxels are 0.5 units in size, multiplying by 2 converts world to voxel coordinates.
+static inline void world_to_voxel(const Vector3 worldPos, int *voxelX, int *voxelY, int *voxelZ) {
+	*voxelX = (int)floorf(worldPos.x * 2.0f);
+	*voxelY = (int)floorf(worldPos.y * 2.0f);
+	*voxelZ = (int)floorf(worldPos.z * 2.0f);
+}
+    
+// Given a voxel coordinate, determine the chunk grid coordinate and the local voxel coordinate within that chunk.
+static inline void voxel_to_chunk_local(int voxelX, int voxelY, int voxelZ,
+	int *chunkX, int *chunkY, int *chunkZ,
+	int *localX, int *localY, int *localZ) {
+
+	*chunkX = voxelX / 64;
+	*chunkY = voxelY / 64;
+	*chunkZ = voxelZ / 64;
+	
+	if (voxelX < 0 && (voxelX % 64) != 0) (*chunkX)--;
+	if (voxelY < 0 && (voxelY % 64) != 0) (*chunkY)--;
+	if (voxelZ < 0 && (voxelZ % 64) != 0) (*chunkZ)--;
+
+	*localX = voxelX - (*chunkX) * 64;
+	*localY = voxelY - (*chunkY) * 64;
+	*localZ = voxelZ - (*chunkZ) * 64;
+}
+
+
+// This function casts a ray from the camera’s center and returns the first solid voxel
+// hit along the ray, up to max_range (which would be player->range).
+svo_node_t *voxel_look_at(Camera3D camera, world_t *world, float max_range, Vector3 *position) {
+	Ray ray = GetScreenToWorldRay((Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f }, camera);
+	const float step = 0.1f;
+
+	for (float t = 0.0f; t < max_range; t += step) {
+		Vector3 pos = Vector3Add(ray.position, Vector3Scale(ray.direction, t));
+		int voxelX, voxelY, voxelZ;
+		world_to_voxel(pos, &voxelX, &voxelY, &voxelZ);
+		int chunkX, chunkY, chunkZ;
+		int localX, localY, localZ;
+		voxel_to_chunk_local(voxelX, voxelY, voxelZ, &chunkX, &chunkY, &chunkZ, &localX, &localY, &localZ);
+		Vector3 chunkPos = { chunkX, chunkY, chunkZ };
+		svo_node_t* chunkNode = svo_get_node(chunkPos, world->tree);
+		if (chunkNode && chunkNode->data) {
+			chunk_t *chunk = chunkNode->data;
+			if (chunk->blocks) {
+				Vector3 localPos = { localX, localY, localZ };
+				svo_node_t* voxelNode = svo_get_node(localPos, chunk->blocks);
+				if (is_solid_block(voxelNode)) {
+					*position = Vector3Add(Vector3Multiply(chunkPos, (Vector3){32, 32, 32}), Vector3AddValue(Vector3Multiply(localPos, (Vector3){0.5, 0.5, 0.5}), 0.25));
+					return (voxelNode);
+				}
+			}
+		}
+	}
+	return (NULL);
+}
