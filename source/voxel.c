@@ -191,81 +191,60 @@ need to refator after this to have correct nomenclature and also need to change 
 */
 
 // Converts a world position (in world units) into voxel coordinates.
-// Since voxels are 0.5 units in size, multiplying by 2 converts world to voxel coordinates.
-static inline void world_to_voxel(const Vector3 worldPos, int *voxelX, int *voxelY, int *voxelZ) {
-	*voxelX = (int)floorf(worldPos.x * 2.0f);
-	*voxelY = (int)floorf(worldPos.y * 2.0f);
-	*voxelZ = (int)floorf(worldPos.z * 2.0f);
+Vector3 world_to_voxel(const Vector3 worldPos) {
+	return ((Vector3){floorf(worldPos.x * 2.0f), floorf(worldPos.y * 2.0f), floorf(worldPos.z * 2.0f)});
 }
-    
-// Given a voxel coordinate, determine the chunk grid coordinate and the local voxel coordinate within that chunk.
-static inline void voxel_to_chunk_local(int voxelX, int voxelY, int voxelZ,
-	int *chunkX, int *chunkY, int *chunkZ,
-	int *localX, int *localY, int *localZ) {
-
-	*chunkX = voxelX / CHUNK_SIZE;
-	*chunkY = voxelY / CHUNK_SIZE;
-	*chunkZ = voxelZ / CHUNK_SIZE;
-	
-	*localX = voxelX % CHUNK_SIZE;
-	*localY = voxelY % CHUNK_SIZE;
-	*localZ = voxelZ % CHUNK_SIZE;
-}
-
 
 // This function casts a ray from the camera’s center and returns the first solid voxel
 // hit along the ray, up to max_range (which would be player->range).
-svo_node_t *voxel_look_at(Camera3D camera, world_t *world, float max_range, Vector3 *position) {
+bool voxel_look_at(Camera3D camera, world_t *world, float max_range, Vector3 *position) {
 	Ray ray = GetScreenToWorldRay((Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f }, camera);
 	const float step = 0.1f;
 
 	for (float t = 0.0f; t < max_range; t += step) {
 		Vector3 pos = Vector3Add(ray.position, Vector3Scale(ray.direction, t));
-		int voxelX, voxelY, voxelZ;
-		world_to_voxel(pos, &voxelX, &voxelY, &voxelZ);
-		int chunkX, chunkY, chunkZ;
-		int localX, localY, localZ;
-		voxel_to_chunk_local(voxelX, voxelY, voxelZ, &chunkX, &chunkY, &chunkZ, &localX, &localY, &localZ);
-		Vector3 chunkPos = { chunkX, chunkY, chunkZ };
-		svo_node_t* chunkNode = svo_get_node(chunkPos, world->tree);
-		if (chunkNode && chunkNode->data) {
-			chunk_t *chunk = chunkNode->data;
+		Vector3 voxel = world_to_voxel(pos);
+
+		Vector3 chunk_pos = {voxel.x / CHUNK_SIZE, voxel.y / CHUNK_SIZE, voxel.z / CHUNK_SIZE};
+		svo_node_t* chunk_node = svo_get_node(chunk_pos, world->tree);
+		if (chunk_node && chunk_node->data) {
+			chunk_t *chunk = chunk_node->data;
 			if (chunk->blocks) {
-				Vector3 localPos = { localX, localY, localZ };
-				svo_node_t* voxelNode = svo_get_node(localPos, chunk->blocks);
-				if (is_solid_block(voxelNode)) {
-					*position = Vector3Add(Vector3Multiply(chunkPos, (Vector3){32, 32, 32}), Vector3AddValue(Vector3Multiply(localPos, (Vector3){0.5, 0.5, 0.5}), 0.25));
-					return (voxelNode);
+				Vector3 local_pos = {voxel.x / CHUNK_SIZE, voxel.y / CHUNK_SIZE, voxel.z / CHUNK_SIZE};
+				if (is_solid_block(svo_get_node(local_pos, chunk->blocks))) {
+					*position = Vector3Add(Vector3Multiply(chunk_pos, (Vector3){32, 32, 32}), Vector3AddValue(Vector3Multiply(local_pos, (Vector3){0.5, 0.5, 0.5}), 0.25));
+					return (false);
 				}
 			}
 		}
 	}
-	return (NULL);
+	return (true);
 }
 
+//change block id at position
 void	voxel_set_block(Camera3D camera, world_t *world, float max_range, voxel_t *vox) {
 	Ray ray = GetScreenToWorldRay((Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f }, camera);
 	const float step = 0.1f;
 
 	for (float t = 0.0f; t < max_range; t += step) {
 		Vector3 pos = Vector3Add(ray.position, Vector3Scale(ray.direction, t));
-		int voxelX, voxelY, voxelZ;
-		world_to_voxel(pos, &voxelX, &voxelY, &voxelZ);
-		int chunkX, chunkY, chunkZ;
-		int localX, localY, localZ;
-		voxel_to_chunk_local(voxelX, voxelY, voxelZ, &chunkX, &chunkY, &chunkZ, &localX, &localY, &localZ);
-		Vector3 chunkPos = { chunkX, chunkY, chunkZ };
-		svo_node_t* chunkNode = svo_get_node(chunkPos, world->tree);
-		if (chunkNode && chunkNode->data) {
-			chunk_t *chunk = chunkNode->data;
+		Vector3 voxel = world_to_voxel(pos);
+
+		Vector3 chunk_pos = {voxel.x / CHUNK_SIZE, voxel.y / CHUNK_SIZE, voxel.z / CHUNK_SIZE};
+		svo_node_t* chunk_node = svo_get_node(chunk_pos, world->tree);
+		if (chunk_node && chunk_node->data) {
+			chunk_t *chunk = chunk_node->data;
 			if (chunk->blocks) {
-				Vector3 localPos = { localX, localY, localZ };
-				svo_node_t* voxelNode = svo_get_node(localPos, chunk->blocks);
-				if (voxelNode) {
-					if (voxelNode->data) {
-						free(chunkNode->data);
+				Vector3 local_pos = {voxel.x / CHUNK_SIZE, voxel.y / CHUNK_SIZE, voxel.z / CHUNK_SIZE};
+				svo_node_t* voxe_node = svo_get_node(local_pos, chunk->blocks);
+				if (voxe_node) {
+					if (voxe_node->data) {
+						free(voxe_node->data);
 					}
-					voxelNode = vox;
+					voxe_node = vox;
+					return;
+				} else {
+					svo_insert(local_pos, vox, chunk->blocks);
 					return;
 				}
 			}

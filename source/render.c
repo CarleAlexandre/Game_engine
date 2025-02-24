@@ -1,15 +1,15 @@
 #include <prototype.h>
 
-const float quad_vertices[] = {
+const float	quad_vertices[] = {
 	0.0f, 0.0f, 0.0f, //bot_left
 	0.5f, 0.0f, 0.0f,//bot_right
 	0.0f, 0.5f, 0.0f,//top_left
 	0.5f, 0.5f, 0.0f //top_right
 };
 
-const uint32_t quad_indices[] = {0, 1, 2, 3};
+const uint32_t	quad_indices[] = {0, 1, 2, 3};
 
-void ExtractFrustumFromMatrix(Matrix mat, Frustum *frustum) {
+void	ExtractFrustumFromMatrix(Matrix mat, Frustum *frustum) {
 	// Left plane
 	frustum->planes[0].normal.x = mat.m3 + mat.m0;
 	frustum->planes[0].normal.y = mat.m7 + mat.m4;
@@ -54,7 +54,7 @@ void ExtractFrustumFromMatrix(Matrix mat, Frustum *frustum) {
 	}
 }
 
-bool IsBoxInFrustum(BoundingBox box, Frustum frustum) {
+bool	IsBoxInFrustum(BoundingBox box, Frustum frustum) {
 	for (int i = 0; i < 6; i++) {
 		Vector3 positive = box.min;
 		
@@ -68,6 +68,11 @@ bool IsBoxInFrustum(BoundingBox box, Frustum frustum) {
 		if (distance < 0.01) return false;
 	}
 	return true;
+}
+
+void	adsf() {
+
+	return ;
 }
 
 world_mesh_t	assemble_world_mesh(chunk_t *rqueue[512], unsigned int rcount) {
@@ -94,16 +99,23 @@ world_mesh_t	assemble_world_mesh(chunk_t *rqueue[512], unsigned int rcount) {
 world_render_t	gen_world_render(world_mesh_t *mesh) {
 	world_render_t render;
 
-	render.vao = rlLoadVertexArray();
-	rlEnableVertexArray(render.vao);
+	glGenVertexArrays(1, &render.vao);
+	glBindVertexArray(render.vao);
 
-	render.vbo = rlLoadVertexBuffer(quad_vertices, sizeof(quad_vertices), false);
-	rlSetVertexAttribute(0, 3, RL_FLOAT, false, 3 *sizeof(float), 0);
-	rlEnableVertexAttribute(0);
+	glGenBuffers(1, &render.vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, render.vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quad_vertices), quad_vertices, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, false, 3 *sizeof(float), (void *)0);
+	glEnableVertexAttribArray(0);
 
-	render.ebo = rlLoadVertexBufferElement(quad_indices, sizeof(quad_indices), false);
+	glGenBuffers(1, &render.ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, render.ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(quad_indices), quad_indices, GL_STATIC_DRAW);
 
-	render.ibo = rlLoadVertexBuffer(mesh->faces, mesh->faces_count, true);
+
+	glGenBuffers(1, &render.ibo);
+	glBindBuffer(GL_ARRAY_BUFFER, render.ibo);
+	glBufferData(GL_ARRAY_BUFFER, 0, 0, GL_DYNAMIC_DRAW);
 
 	rlSetVertexAttribute(1, 1, RL_FLOAT, false, sizeof(face_data_t), offsetof(face_data_t, face_data));
 	rlEnableVertexAttribute(1);
@@ -113,13 +125,21 @@ world_render_t	gen_world_render(world_mesh_t *mesh) {
 	rlEnableVertexAttribute(2);
 	rlSetVertexAttributeDivisor(2, 1);
 
-	rlDisableVertexArray();
+	glBindVertexArray(0);
 
 	//ssbo
 	glCreateBuffers(1, &render.ssbo);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, render.ssbo);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, mesh->pos_count, mesh->pos, GL_STREAM_COPY);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, 0, 0, GL_STREAM_COPY);
+
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+	return (render);
+}
+
+void	update_world_render(uint32_t id, void *queue) {
+	glBindBuffer(GL_ARRAY_BUFFER, id);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, 0, 0);
 }
 
 void	gen_chunk_render(chunk_mesh_t *mesh) {
@@ -158,14 +178,13 @@ gbuffer_t	loadGbuffer(int width, int height, Shader deffered_shader) {
 	buffer.normalTexture = rlLoadTexture(NULL, width,height, RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32, 1);
 	buffer.albedoSpecTexture = rlLoadTexture(NULL, width,height, RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, 1);
 	buffer.zTexture = rlLoadTexture(NULL, width,height, RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, 1);
+	buffer.depthRenderbuffer = rlLoadTextureDepth(width, height, true);
 	rlActiveDrawBuffers(4);
 
 	rlFramebufferAttach(buffer.framebuffer, buffer.positionTexture, RL_ATTACHMENT_COLOR_CHANNEL0, RL_ATTACHMENT_TEXTURE2D, 0);
 	rlFramebufferAttach(buffer.framebuffer, buffer.normalTexture, RL_ATTACHMENT_COLOR_CHANNEL1, RL_ATTACHMENT_TEXTURE2D, 0);
 	rlFramebufferAttach(buffer.framebuffer, buffer.albedoSpecTexture, RL_ATTACHMENT_COLOR_CHANNEL2, RL_ATTACHMENT_TEXTURE2D, 0);
 	rlFramebufferAttach(buffer.framebuffer, buffer.zTexture, RL_ATTACHMENT_COLOR_CHANNEL3, RL_ATTACHMENT_TEXTURE2D, 0);
-
-	buffer.depthRenderbuffer = rlLoadTextureDepth(width, height, true);
 	rlFramebufferAttach(buffer.framebuffer, buffer.depthRenderbuffer, RL_ATTACHMENT_DEPTH, RL_ATTACHMENT_RENDERBUFFER, 0);
 
 	if (!rlFramebufferComplete(buffer.framebuffer)) {
@@ -262,11 +281,6 @@ void	voxel_render(engine_t *engine, world_t *world) {
 		if (node && node->data) {
 			DrawCubeWires(pos, 0.5, 0.5, 0.5, BLACK);
 		}
-
-		// if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-		// 	voxel_set_block(engine->camera, world, 5, NULL);
-		// 	//need to update chunk_mesh and chunk_vao
-		// }
 
 		if (engine->debug == true) {
 			DrawBoundingBox(engine->player.bound, RED);

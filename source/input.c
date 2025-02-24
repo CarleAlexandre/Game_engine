@@ -1,5 +1,6 @@
 #include <prototype.h>
 
+//need to rework this part
 void	update_input(engine_t *engine, world_t *world) {
 	Vector2 delta = GetMouseDelta();
 	SetMousePosition(GetScreenWidth() * 0.5, GetScreenHeight() * 0.5); 
@@ -34,5 +35,10 @@ void	update_input(engine_t *engine, world_t *world) {
 	if (step.x != 0 || step.y != 0 || step.z != 0 || delta.x != 0 || delta.y != 0) {
 		update_world_render(world, engine);
 	}
+
+	// if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+	// 	voxel_set_block(engine->camera, world, 5, NULL);
+	// 	//need to update chunk_mesh and chunk_vao
+	// }
 
 }

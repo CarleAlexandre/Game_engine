@@ -24,10 +24,10 @@
 // 	pthread_join(thread_pool[0], &res);
 // }
 
-void	physic_thread() {
+// void	physic_thread() {
 
-}
+// }
 
-void	meshing_thread() {
+// void	meshing_thread() {
 
-}
+// }
