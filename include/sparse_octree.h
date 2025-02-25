@@ -133,4 +133,9 @@ static bool	svo_insert(Vector3 point, void *data, svo_t *svo) {
 	return (true);
 }
 
+
+static bool	is_node_valid(svo_node_t *node) {
+	return node && node->data;
+}
+
 #endif

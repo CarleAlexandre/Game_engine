@@ -148,6 +148,7 @@ typedef enum {
 	DATA STRUCT
 */
 
+typedef uint64_t bitmask;
 
 typedef struct Plane {
 	Vector3 normal;

@@ -8,19 +8,17 @@ face_data_t	pack_face_data(unsigned char pos[3], unsigned char face, unsigned ch
 	return (data);
 }
 
-//World Render
-
-bool	is_chunk_valid(svo_node_t *node) {
-	return node && node->data;
-}
-
-bool	is_solid_block(svo_node_t *node) {
-	return node && node->data;
-}
-
 // Converts a world position (in world units) into voxel coordinates.
 Vector3	world_to_voxel(const Vector3 worldPos) {
 	return ((Vector3){floorf(worldPos.x * 2.0f), floorf(worldPos.y * 2.0f), floorf(worldPos.z * 2.0f)});
+}
+
+static void modify_axis(Vector3* vec, int axis, int value) {
+	switch(axis) {
+		case 0: vec->x = value; break;
+		case 1: vec->y = value; break;
+		case 2: vec->z = value; break;
+	}
 }
 
 svo_node_t*	get_neighbor_block(Vector3 pos, FaceDirection dir, chunk_t *current, world_t *world) {
@@ -69,6 +67,31 @@ svo_node_t*	get_neighbor_block(Vector3 pos, FaceDirection dir, chunk_t *current,
 	return svo_get_node(local_pos, neighbor_chunk->blocks);
 }
 
+void	greedy_mesh(world_t *world) {
+	bitmask mask[64][64];
+
+	for (int x = 0; x < CHUNK_SIZE; x++) {
+		for (int z = 0; z < CHUNK_SIZE; z++) {
+			for (int y = 0; y < CHUNK_SIZE; y++) {
+				svo_node_t *node = svo_get_node((Vector3){x, y, z}, world);
+				if (is_node_valid(node)) {
+					mask[x][z] += 1 << y;
+				}
+			}
+		}
+	}
+}
+
+void	gen_chunk_greedymesh(chunk_t *current, world_t *world) {
+	for (int i = 0; i < 6; i++) {
+		current->mesh->faces_count[i] = 0;
+	}
+    
+	for (FaceDirection face_dir = FACE_XP; face_dir <= FACE_Z; face_dir++) {
+		// greedy_mesh(face_dir, current, world);
+	}
+}
+
 //add skiping mesh that aren't visible to player ??
 void	gen_chunk_mesh(chunk_t *current, world_t *world) {
 	for (char x = 0; x < CHUNK_SIZE; x++) {
@@ -78,12 +101,12 @@ void	gen_chunk_mesh(chunk_t *current, world_t *world) {
 				
 				svo_node_t *node = svo_get_node(pos, current->blocks);
 				
-				if (!is_chunk_valid(node)) continue;
+				if (!is_node_valid(node)) continue;
 				
 				for (int i = 0; i < 6; i++) {
 					svo_node_t *neighbor = get_neighbor_block(pos, i, current, world);
 					
-					if (!is_solid_block(neighbor)) {
+					if (!is_node_valid(neighbor)) {
 						char packed_pos[3] = {x, y, z};
 						face_data_t face = pack_face_data(packed_pos, i, 1, 1, 1);
 						
@@ -99,7 +122,7 @@ void	gen_chunk_mesh(chunk_t *current, world_t *world) {
 
 void	update_chunk_mesh(Vector3 pos, world_t *world) {
 	svo_node_t *node = svo_get_node(pos, world->chunks);
-	if (node && node->data) {
+	if (is_node_valid(node)) {
 		chunk_t *current_chunk = node->data;
 		if (!current_chunk->mesh) {
 			current_chunk->mesh = calloc(1, sizeof(chunk_mesh_t));
@@ -118,7 +141,7 @@ void	gen_world_mesh(world_t *world, engine_t *engine) {
 		for (int z = 0; z < 8; z++) {
 			for (int y = 0; y < 8; y++) {
 				svo_node_t *node = svo_get_node((Vector3){x,y,z}, world->chunks);
-				if (is_solid_block(node)) {
+				if (is_node_valid(node)) {
 					chunk_t *current_chunk = node->data;
 					current_chunk->mesh = calloc(1, sizeof(chunk_mesh_t));
 					gen_chunk_mesh(current_chunk, world);
@@ -129,16 +152,13 @@ void	gen_world_mesh(world_t *world, engine_t *engine) {
 }
 
 bool	is_chunk_visible(Vector3 chunk_pos, Camera camera) {
-	// Create view-projection matrix
 	Matrix view = GetCameraViewMatrix(&camera);
-	Matrix proj = GetCameraProjectionMatrix(&camera, GetScreenHeight()/ GetScreenWidth());
+	Matrix proj = GetCameraProjectionMatrix(&camera, GetScreenHeight() / GetScreenWidth());
 	Matrix view_proj = MatrixMultiply(view, proj);
-	
-	// Extract frustum
+
 	Frustum frustum;
 	ExtractFrustumFromMatrix(view_proj, &frustum);
-	
-	// Create chunk bounding box
+
 	BoundingBox chunk_box = {
 		.min = chunk_pos,
 		.max = {chunk_pos.x + CHUNK_SIZE * VOXEL_SIZE, chunk_pos.y + CHUNK_SIZE * VOXEL_SIZE, chunk_pos.z + CHUNK_SIZE * VOXEL_SIZE}
@@ -159,7 +179,7 @@ void	update_world_render(world_t *world, engine_t *engine) {
 		for (int z = 0; z < 8; z++) {
 			for (int y = 0; y < 8; y++) {
 				svo_node_t *node = svo_get_node((Vector3){x,y,z}, world->chunks);
-				if (is_chunk_valid(node)) {
+				if (is_node_valid(node)) {
 					chunk_t *current_chunk = node->data;
 					if (is_chunk_visible(current_chunk->pos, engine->camera) && current_chunk->mesh->faces_count) {
 						world->rqueue[world->rcount++] = current_chunk;
@@ -181,7 +201,7 @@ void	setup_world_render(world_t *world, engine_t *engine) {
 		for (int z = 0; z < 8; z++) {
 			for (int y = 0; y < 8; y++) {
 				svo_node_t *node = svo_get_node((Vector3){x,y,z}, world->chunks);
-				if (is_chunk_valid(node)) {
+				if (is_node_valid(node)) {
 					chunk_t *current_chunk = node->data;
 					world->rqueue[world->rcount++] = current_chunk;
 				}
@@ -210,11 +230,11 @@ bool	voxel_look_at(Camera3D camera, world_t *world, float max_range, Vector3 *po
 		if (voxel.z < 0 && ((int)voxel.z % 64) != 0)
 			chunk_pos.z--;
 		svo_node_t* chunk_node = svo_get_node(chunk_pos, world->chunks);
-		if (is_chunk_valid(chunk_node)) {
+		if (is_node_valid(chunk_node)) {
 			chunk_t *chunk = chunk_node->data;
 			if (chunk->blocks) {
 				Vector3 local_pos = {(int)voxel.x % CHUNK_SIZE, (int)voxel.y % CHUNK_SIZE, (int)voxel.z % CHUNK_SIZE};
-				if (is_solid_block(svo_get_node(local_pos, chunk->blocks))) {
+				if (is_node_valid(svo_get_node(local_pos, chunk->blocks))) {
 					*position = Vector3Add((Vector3){0.25, 0.25, 0.25}, Vector3Multiply(voxel, (Vector3){0.5, 0.5, 0.5}));
 					return (true);
 				}
@@ -237,7 +257,7 @@ void	voxel_destroy_block(Camera3D camera, world_t *world, float max_range) {
 			floorf(voxel.z / CHUNK_SIZE)
 		};
 		svo_node_t *chunk_node = svo_get_node(chunk_pos, world->chunks);
-		if (is_chunk_valid(chunk_node)) {
+		if (is_node_valid(chunk_node)) {
 			chunk_t *chunk = chunk_node->data;
 			if (chunk->blocks) {
 				Vector3 local_pos = {
@@ -246,7 +266,7 @@ void	voxel_destroy_block(Camera3D camera, world_t *world, float max_range) {
 					(int)fmodf(voxel.z, CHUNK_SIZE)
 				};
 				svo_node_t *vox_node = svo_get_node(local_pos, chunk->blocks);
-				if (vox_node && vox_node->data) {
+				if (is_node_valid(vox_node)) {
 					free(vox_node->data);
 					vox_node->data = NULL;
 					delete_node(vox_node);
@@ -274,7 +294,7 @@ void	voxel_place_block(Camera3D camera, world_t *world, float max_range, unsigne
 			floorf(voxel.z / CHUNK_SIZE)
 		};
 		svo_node_t *chunk_node = svo_get_node(chunk_pos, world->chunks);
-		if (is_chunk_valid(chunk_node)) {
+		if (is_node_valid(chunk_node)) {
 			chunk_t *chunk = chunk_node->data;
 			if (chunk->blocks) {
 				Vector3 local_pos = {
@@ -292,7 +312,7 @@ void	voxel_place_block(Camera3D camera, world_t *world, float max_range, unsigne
 							floorf(place_voxel.z / CHUNK_SIZE)
 						};
 						svo_node_t *place_chunk_node = svo_get_node(place_chunk_pos, world->chunks);
-						if (is_chunk_valid(place_chunk_node)) {
+						if (is_node_valid(place_chunk_node)) {
 							chunk_t *place_chunk = place_chunk_node->data;
 							if (place_chunk->blocks) {
 								Vector3 local_place = {
