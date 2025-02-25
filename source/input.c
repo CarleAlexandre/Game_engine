@@ -31,18 +31,17 @@ void	update_input(engine_t *engine, world_t *world) {
 	if (IsKeyPressed(KEY_TAB)) {
 		engine->player.show_inventory = !engine->player.show_inventory;
 	}
-	UpdateCameraPro(&engine->camera, step, (Vector3){(float)(delta.x * 0.2), (float)(delta.y * 0.2), 0}, 0);
-	if (step.x != 0 || step.y != 0 || step.z != 0 || delta.x != 0 || delta.y != 0) {
-		update_world_render(world, engine);
-	}
-
+	
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 		voxel_destroy_block(engine->camera, world, 5);
-		//need to update chunk_mesh and chunk_vao
 	}
 	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
 		voxel_place_block(engine->camera, world, 5, 1);
-		//need to update chunk_mesh and chunk_vao
+	}
+
+	UpdateCameraPro(&engine->camera, step, (Vector3){(float)(delta.x * 0.2), (float)(delta.y * 0.2), 0}, 0);
+	if (step.x != 0 || step.y != 0 || step.z != 0 || delta.x != 0 || delta.y != 0) {
+		update_world_render(world, engine);
 	}
 
 }
