@@ -36,9 +36,9 @@ void	update_input(engine_t *engine, world_t *world) {
 		update_world_render(world, engine);
 	}
 
-	// if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-	// 	voxel_set_block(engine->camera, world, 5, NULL);
-	// 	//need to update chunk_mesh and chunk_vao
-	// }
+	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+		voxel_set_block(engine->camera, world, 5, 0);
+		//need to update chunk_mesh and chunk_vao
+	}
 
 }

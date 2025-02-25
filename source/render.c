@@ -70,30 +70,25 @@ bool	IsBoxInFrustum(BoundingBox box, Frustum frustum) {
 	return true;
 }
 
-void	adsf() {
-
-	return ;
-}
-
 world_mesh_t	assemble_world_mesh(chunk_t *rqueue[512], unsigned int rcount) {
-	face_data_t	faces[10000000] = {0};
-	unsigned int	face_count = 0;
-	Vector3		pos[512] = {0};
-	unsigned int	pos_count = 0;
+	// face_data_t	faces[10000000] = {0};
+	// unsigned int	face_count = 0;
+	// Vector3		pos[512] = {0};
+	// unsigned int	pos_count = 0;
 
-	for (int i = 0; i < rcount; i++) {
-		for (int k = 0; k < rqueue[i]->mesh->faces_count; k++) {
-			faces[face_count++] = rqueue[i]->mesh->faces[k];
-		}
-		pos[pos_count++] = rqueue[i]->pos;
-	}
+	// for (int i = 0; i < rcount; i++) {
+	// 	for (int k = 0; k < rqueue[i]->mesh->faces_count; k++) {
+	// 		faces[face_count++] = rqueue[i]->mesh->faces[k];
+	// 	}
+	// 	pos[pos_count++] = rqueue[i]->pos;
+	// }
 
-	world_mesh_t mesh = {0};
+	// world_mesh_t mesh = {0};
 
-	mesh.faces = malloc(sizeof(face_data_t) * face_count);
-	mesh.faces_count = face_count;
-	mesh.pos = malloc(sizeof(Vector3) * pos_count);
-	mesh.pos_count = pos_count;
+	// mesh.faces = malloc(sizeof(face_data_t) * face_count);
+	// mesh.faces_count = face_count;
+	// mesh.pos = malloc(sizeof(Vector3) * pos_count);
+	// mesh.pos_count = pos_count;
 }
 
 world_render_t	gen_world_render(world_mesh_t *mesh) {
@@ -137,12 +132,51 @@ world_render_t	gen_world_render(world_mesh_t *mesh) {
 	return (render);
 }
 
-void	update_world_render(uint32_t id, void *queue) {
-	glBindBuffer(GL_ARRAY_BUFFER, id);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, 0, 0);
+// void	update_world_render(uint32_t id, void *queue) {
+// 	glBindBuffer(GL_ARRAY_BUFFER, id);
+// 	glBufferSubData(GL_ARRAY_BUFFER, 0, 0, 0);
+// }
+
+void	update_chunk_render(chunk_mesh_t *mesh) {
+	int total_size = 0;
+
+	for (int i = 0; i < 6; i++) {
+		total_size += mesh->faces_count[i];
+	}
+
+	face_data_t *buffer = calloc(total_size, sizeof(face_data_t));
+
+	int prev = 0;
+
+	for (int i = 0; i < 6; i++) {
+		memcpy(&buffer[prev], mesh->faces[i], mesh->faces_count[i] * sizeof(face_data_t));
+		prev += mesh->faces_count[i];
+	}
+
+	glBindVertexArray(mesh->vao);
+
+	glBindBuffer(GL_ARRAY_BUFFER, mesh->ibo);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, total_size * sizeof(face_data_t), buffer);
+
+	glBindVertexArray(0);
 }
 
 void	gen_chunk_render(chunk_mesh_t *mesh) {
+	int total_size = 0;
+
+	for (int i = 0; i < 6; i++) {
+		total_size += mesh->faces_count[i];
+	}
+
+	face_data_t *buffer = calloc(total_size, sizeof(face_data_t));
+
+	int prev = 0;
+
+	for (int i = 0; i < 6; i++) {
+		memcpy(&buffer[prev], mesh->faces[i], mesh->faces_count[i] * sizeof(face_data_t));
+		prev += mesh->faces_count[i];
+	}
+
 	mesh->vao = rlLoadVertexArray();
 	rlEnableVertexArray(mesh->vao);
 
@@ -152,7 +186,7 @@ void	gen_chunk_render(chunk_mesh_t *mesh) {
 
 	mesh->ebo = rlLoadVertexBufferElement(quad_indices, sizeof(quad_indices), false);
 
-	mesh->ibo = rlLoadVertexBuffer(mesh->faces, mesh->faces_count * sizeof(face_data_t), true);
+	mesh->ibo = rlLoadVertexBuffer(buffer, total_size * sizeof(face_data_t), true);
 
 	rlSetVertexAttribute(1, 1, RL_FLOAT, false, sizeof(face_data_t), offsetof(face_data_t, face_data));
 	rlEnableVertexAttribute(1);
@@ -236,8 +270,13 @@ void	render_voxel_work(Shader shader, Matrix transform, world_t *world) {
 		SetShaderValue(shader, GetShaderLocation(shader, "chunk_pos"), &pos[0], RL_SHADER_UNIFORM_VEC3);
 
 		rlEnableVertexArray(chk->mesh->vao);
+
+		int total = 0;
+		for (int i = 0; i < 6; i++) {
+			total += chk->mesh->faces_count[i];
+		}
 		
-		glDrawElementsInstanced(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, 0, chk->mesh->faces_count);
+		glDrawElementsInstanced(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, 0, total);
 
 		rlDisableVertexArray();
 	}
@@ -254,14 +293,18 @@ void	voxel_render(engine_t *engine, world_t *world) {
 	static bool poly = false;
 
 	if (IsKeyPressed(KEY_F3)) {
-		printf("reloading world render!\n");
+		printf("debug_render!\n");
 		if (!poly) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		} else {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		}
-		printf("reloaded world render\n");
 		poly = !poly;
+	}
+
+	if (IsKeyPressed(KEY_F5)) {
+		reload_shader(engine);
+		printf("reloaded shader\n");
 	}
 
 	BeginDrawing();
@@ -276,9 +319,9 @@ void	voxel_render(engine_t *engine, world_t *world) {
 	
 		render_voxel_work(engine->shader[shader_voxel_solid], MatrixIdentity(), world);
 
-		Vector3 pos = {0};		
-		svo_node_t *node = voxel_look_at(engine->camera, world, 5, &pos);
-		if (node && node->data) {
+		Vector3 pos = {0};
+		bool ret = voxel_look_at(engine->camera, world, 5, &pos);
+		if (ret) {
 			DrawCubeWires(pos, 0.5, 0.5, 0.5, BLACK);
 		}
 

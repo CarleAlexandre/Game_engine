@@ -11,7 +11,8 @@
 # include <rcamera.h>
 
 # include "sparse_octree.h"
-# include "dynamic_array.h"
+//this currently segfault
+// # include "dynamic_array.h"
 
 # include <stdbool.h>
 # include <stdint.h>
@@ -30,6 +31,10 @@
 # define VOXEL_SIZE 0.5
 # define CHUNK_SIZE 64
 
+/* 
+	TYPEDEF
+*/
+
 typedef enum {
 	FACE_YP,
 	FACE_Y,
@@ -38,9 +43,6 @@ typedef enum {
 	FACE_ZP,
 	FACE_Z,
 } FaceDirection;
-/* 
-	TYPEDEF
-*/
 
 // typedef enum {
 // 	DEFERRED_POSITION,
@@ -276,8 +278,8 @@ typedef struct s_chunk_mesh {
 	uint32_t	vbo;
 	uint32_t	ebo;
 	uint32_t	ibo;
-	face_data_t	faces[100000];
-	unsigned int	faces_count;
+	face_data_t	faces[6][4096];
+	unsigned int	faces_count[6];
 }	chunk_mesh_t;
 
 typedef struct	s_chunk {
@@ -303,11 +305,12 @@ typedef struct s_world_mesh {
 }	world_mesh_t;
 
 typedef struct	s_world {
-	svo_t		*tree;
-	chunk_t		*rqueue[512];
-	
+	svo_t		*chunks;
+	Vector3		dim;
+
 	world_mesh_t	mesh;
 	unsigned int	rcount;
+	chunk_t		*rqueue[512];
 }	world_t;
 
 /*

@@ -42,7 +42,7 @@ int main(void) {
 
 	world_t *world = malloc(sizeof(world_t));
 
-	world->tree = init_svo(8, 3);
+	world->chunks = init_svo(8, 3);
 	int size = 0;
 	chunk_t **tmp;
 	fnl_state noise = fnlCreateState();
@@ -66,7 +66,7 @@ int main(void) {
 					y * 32.0f,
 					z * 32.0f
 				};
-				svo_insert((Vector3){x, y, z}, tmp[y], world->tree);
+				svo_insert((Vector3){x, y, z}, tmp[y], world->chunks);
 			}
 			tmp = 0x00;
 			size = 0;
