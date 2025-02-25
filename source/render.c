@@ -153,12 +153,9 @@ void	update_chunk_render(chunk_mesh_t *mesh) {
 		prev += mesh->faces_count[i];
 	}
 
-	glBindVertexArray(mesh->vao);
-
 	glBindBuffer(GL_ARRAY_BUFFER, mesh->ibo);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, total_size * sizeof(face_data_t), buffer);
 
-	glBindVertexArray(0);
 }
 
 void	gen_chunk_render(chunk_mesh_t *mesh) {

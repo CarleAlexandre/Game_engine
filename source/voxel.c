@@ -85,7 +85,7 @@ void	gen_chunk_mesh(chunk_t *current, world_t *world) {
 					
 					if (!is_solid_block(neighbor)) {
 						char packed_pos[3] = {x, y, z};
-						face_data_t face = pack_face_data(packed_pos, i, 1, 1, (unsigned short)node->data);
+						face_data_t face = pack_face_data(packed_pos, i, 1, 1, 1);
 						
 						if (current->mesh->faces_count[i] < 4096) {
 							current->mesh->faces[i][current->mesh->faces_count[i]++] = face;
@@ -106,6 +106,7 @@ void	update_chunk_mesh(Vector3 pos, world_t *world) {
 		} else {
 			for (int i = 0; i < 6; i++) {
 				memset(current_chunk->mesh->faces[i], 0, sizeof(face_data_t) * 4096);
+				current_chunk->mesh->faces_count[i] = 0;
 			}
 		}
 		gen_chunk_mesh(current_chunk, world);
@@ -204,13 +205,19 @@ bool	voxel_look_at(Camera3D camera, world_t *world, float max_range, Vector3 *po
 		Vector3 voxel = world_to_voxel(pos);
 
 		Vector3 chunk_pos = {voxel.x / CHUNK_SIZE, voxel.y / CHUNK_SIZE, voxel.z / CHUNK_SIZE};
+		if (voxel.x < 0 && ((int)voxel.x % 64) != 0)
+			chunk_pos.x--;
+		if (voxel.y < 0 && ((int)voxel.y % 64) != 0)
+			chunk_pos.y--;
+		if (voxel.z < 0 && ((int)voxel.z % 64) != 0)
+			chunk_pos.z--;
 		svo_node_t* chunk_node = svo_get_node(chunk_pos, world->chunks);
 		if (is_chunk_valid(chunk_node)) {
 			chunk_t *chunk = chunk_node->data;
 			if (chunk->blocks) {
-				Vector3 local_pos = {voxel.x / CHUNK_SIZE, voxel.y / CHUNK_SIZE, voxel.z / CHUNK_SIZE};
+				Vector3 local_pos = {(int)voxel.x % CHUNK_SIZE, (int)voxel.y % CHUNK_SIZE, (int)voxel.z % CHUNK_SIZE};
 				if (is_solid_block(svo_get_node(local_pos, chunk->blocks))) {
-					*position = Vector3Add(Vector3Multiply(chunk_pos, (Vector3){32, 32, 32}), Vector3AddValue(Vector3Multiply(local_pos, (Vector3){0.5, 0.5, 0.5}), 0.25));
+					*position = Vector3Add((Vector3){0.25, 0.25, 0.25}, Vector3Multiply(voxel, (Vector3){0.5, 0.5, 0.5}));
 					return (true);
 				}
 			}
@@ -235,13 +242,24 @@ void	voxel_set_block(Camera3D camera, world_t *world, float max_range, unsigned 
 		if (is_chunk_valid(chunk_node)) {
 			chunk_t *chunk = chunk_node->data;
 			if (chunk->blocks) {
-				Vector3 local_pos = {voxel.x / CHUNK_SIZE, voxel.y / CHUNK_SIZE, voxel.z / CHUNK_SIZE};
+				Vector3 local_pos = {(int)voxel.x % CHUNK_SIZE, (int)voxel.y % CHUNK_SIZE, (int)voxel.z % CHUNK_SIZE};
+				// Vector3 local_pos = {voxel.x / CHUNK_SIZE, voxel.y / CHUNK_SIZE, voxel.z / CHUNK_SIZE};
 				svo_node_t* vox_node = svo_get_node(local_pos, chunk->blocks);
-				if (vox_node) {
-					vox_node->data = (void *)id;
-					// return;
+				if (!id) {
+					// printf ("delete at : %0.0f, %0.0f, %0.0f\n", local_pos.x, local_pos.y, local_pos.z);
+					if (vox_node && vox_node->data) {
+						free(vox_node->data);
+						vox_node->data = NULL;
+					}
+					delete_node(vox_node);
 				} else {
-					svo_insert(local_pos, (void *)id, chunk->blocks);
+					if (vox_node && vox_node->data) {
+						((voxel_t *)vox_node->data)->block_id = id;
+					} else {
+						voxel_t *vox = calloc(1, sizeof(voxel_t));
+						vox->block_id = id;
+						svo_insert(local_pos, vox, chunk->blocks);
+					}
 				}
 				update_chunk_mesh(chunk_pos, world);
 				update_chunk_render(chunk->mesh);

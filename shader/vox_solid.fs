@@ -13,7 +13,8 @@ void main() {
 	// vec3 light_dir = normalize(vec3(1.0, 1.0, 1.0));
 	// float diffuse = max(dot(face_normal, light_dir), 0.0);
 	
-	vec3 color = normalize(face_normal * face_normal);
+	vec3 color = normalize(face_normal * face_normal) * vec3(0.5, 0.5, 0.5);
+	
 	frag_color = vec4(color, 1.0);
 }
 
