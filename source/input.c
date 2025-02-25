@@ -37,7 +37,11 @@ void	update_input(engine_t *engine, world_t *world) {
 	}
 
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-		voxel_set_block(engine->camera, world, 5, 0);
+		voxel_destroy_block(engine->camera, world, 5);
+		//need to update chunk_mesh and chunk_vao
+	}
+	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+		voxel_place_block(engine->camera, world, 5, 1);
 		//need to update chunk_mesh and chunk_vao
 	}
 

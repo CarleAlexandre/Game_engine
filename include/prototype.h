@@ -45,8 +45,10 @@ void		update_chunk_mesh(Vector3 pos, world_t *world);
 void		gen_world_mesh(world_t *world, engine_t *engine);
 void		update_world_render(world_t *world, engine_t *engine);
 void		setup_world_render(world_t *world, engine_t *engine);
-void		voxel_set_block(Camera3D camera, world_t *world, float max_range, unsigned short id);
 bool		voxel_look_at(Camera3D camera, world_t *world, float max_range, Vector3 *position);
+
+void		voxel_destroy_block(Camera3D camera, world_t *world, float max_range);
+void		voxel_place_block(Camera3D camera, world_t *world, float max_range, unsigned short id);
 
 /*
 	UI

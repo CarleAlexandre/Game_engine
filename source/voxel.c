@@ -191,14 +191,12 @@ void	setup_world_render(world_t *world, engine_t *engine) {
 }
 
 /*
-need to refator after this to have correct nomenclature and also need to change some define and number
+still not very good, but for debug issue good enough
 */
 
-// This function casts a ray from the camera’s center and returns the first solid voxel
-// hit along the ray, up to max_range (which would be player->range).
 bool	voxel_look_at(Camera3D camera, world_t *world, float max_range, Vector3 *position) {
 	Ray ray = GetScreenToWorldRay((Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f }, camera);
-	const float step = 0.1f;
+	const float step = 0.01f;
 
 	for (float t = 0.0f; t < max_range; t += step) {
 		Vector3 pos = Vector3Add(ray.position, Vector3Scale(ray.direction, t));
@@ -226,46 +224,99 @@ bool	voxel_look_at(Camera3D camera, world_t *world, float max_range, Vector3 *po
 	return (false);
 }
 
-
-// This function casts a ray from the camera’s center and change first hit solid voxel
-// hit along the ray, up to max_range (which would be player->range).
-void	voxel_set_block(Camera3D camera, world_t *world, float max_range, unsigned short id) {
+void	voxel_destroy_block(Camera3D camera, world_t *world, float max_range) {
 	Ray ray = GetScreenToWorldRay((Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f }, camera);
-	const float step = 0.1f;
+	const float step = 0.01f;
+    
+	for (float t = 0.0f; t < max_range; t += step) {
+		Vector3 pos = Vector3Add(ray.position, Vector3Scale(ray.direction, t));
+		Vector3 voxel = world_to_voxel(pos);
+		Vector3 chunk_pos = {
+			floorf(voxel.x / CHUNK_SIZE),
+			floorf(voxel.y / CHUNK_SIZE),
+			floorf(voxel.z / CHUNK_SIZE)
+		};
+		svo_node_t *chunk_node = svo_get_node(chunk_pos, world->chunks);
+		if (is_chunk_valid(chunk_node)) {
+			chunk_t *chunk = chunk_node->data;
+			if (chunk->blocks) {
+				Vector3 local_pos = {
+					(int)fmodf(voxel.x, CHUNK_SIZE),
+					(int)fmodf(voxel.y, CHUNK_SIZE),
+					(int)fmodf(voxel.z, CHUNK_SIZE)
+				};
+				svo_node_t *vox_node = svo_get_node(local_pos, chunk->blocks);
+				if (vox_node && vox_node->data) {
+					free(vox_node->data);
+					vox_node->data = NULL;
+					delete_node(vox_node);
+					update_chunk_mesh(chunk_pos, world);
+					update_chunk_render(chunk->mesh);
+					return;
+				}
+			}
+		}
+	}
+}
+
+void	voxel_place_block(Camera3D camera, world_t *world, float max_range, unsigned short id) {
+	Ray ray = GetScreenToWorldRay((Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f }, camera);
+	const float step = 0.01f;
+	Vector3 last_empty_voxel = {0, 0, 0};
+	bool last_empty_found = false;
 
 	for (float t = 0.0f; t < max_range; t += step) {
 		Vector3 pos = Vector3Add(ray.position, Vector3Scale(ray.direction, t));
 		Vector3 voxel = world_to_voxel(pos);
-
-		Vector3 chunk_pos = {voxel.x / CHUNK_SIZE, voxel.y / CHUNK_SIZE, voxel.z / CHUNK_SIZE};
-		svo_node_t* chunk_node = svo_get_node(chunk_pos, world->chunks);
+		Vector3 chunk_pos = {
+			floorf(voxel.x / CHUNK_SIZE),
+			floorf(voxel.y / CHUNK_SIZE),
+			floorf(voxel.z / CHUNK_SIZE)
+		};
+		svo_node_t *chunk_node = svo_get_node(chunk_pos, world->chunks);
 		if (is_chunk_valid(chunk_node)) {
 			chunk_t *chunk = chunk_node->data;
 			if (chunk->blocks) {
-				Vector3 local_pos = {(int)voxel.x % CHUNK_SIZE, (int)voxel.y % CHUNK_SIZE, (int)voxel.z % CHUNK_SIZE};
-				// Vector3 local_pos = {voxel.x / CHUNK_SIZE, voxel.y / CHUNK_SIZE, voxel.z / CHUNK_SIZE};
-				svo_node_t* vox_node = svo_get_node(local_pos, chunk->blocks);
-				if (!id) {
-					// printf ("delete at : %0.0f, %0.0f, %0.0f\n", local_pos.x, local_pos.y, local_pos.z);
-					if (vox_node && vox_node->data) {
-						free(vox_node->data);
-						vox_node->data = NULL;
+				Vector3 local_pos = {
+					(int)fmodf(voxel.x, CHUNK_SIZE),
+					(int)fmodf(voxel.y, CHUNK_SIZE),
+					(int)fmodf(voxel.z, CHUNK_SIZE)
+				};
+				svo_node_t *vox_node = svo_get_node(local_pos, chunk->blocks);
+				if (vox_node && vox_node->data) {
+					if (last_empty_found) {
+						Vector3 place_voxel = last_empty_voxel;
+						Vector3 place_chunk_pos = {
+							floorf(place_voxel.x / CHUNK_SIZE),
+							floorf(place_voxel.y / CHUNK_SIZE),
+							floorf(place_voxel.z / CHUNK_SIZE)
+						};
+						svo_node_t *place_chunk_node = svo_get_node(place_chunk_pos, world->chunks);
+						if (is_chunk_valid(place_chunk_node)) {
+							chunk_t *place_chunk = place_chunk_node->data;
+							if (place_chunk->blocks) {
+								Vector3 local_place = {
+									(int)fmodf(place_voxel.x, CHUNK_SIZE),
+									(int)fmodf(place_voxel.y, CHUNK_SIZE),
+									(int)fmodf(place_voxel.z, CHUNK_SIZE)
+								};
+								svo_node_t *check = svo_get_node(local_place, place_chunk->blocks);
+								if (!(check && check->data)) {
+									voxel_t *new_voxel = calloc(1, sizeof(voxel_t));
+									new_voxel->block_id = id;
+									svo_insert(local_place, new_voxel, place_chunk->blocks);
+									update_chunk_mesh(place_chunk_pos, world);
+									update_chunk_render(place_chunk->mesh);
+								}
+							}
+						}
 					}
-					delete_node(vox_node);
+					return;
 				} else {
-					if (vox_node && vox_node->data) {
-						((voxel_t *)vox_node->data)->block_id = id;
-					} else {
-						voxel_t *vox = calloc(1, sizeof(voxel_t));
-						vox->block_id = id;
-						svo_insert(local_pos, vox, chunk->blocks);
-					}
+					last_empty_voxel = voxel;
+					last_empty_found = true;
 				}
-				update_chunk_mesh(chunk_pos, world);
-				update_chunk_render(chunk->mesh);
-				return;
 			}
 		}
 	}
-
 }
