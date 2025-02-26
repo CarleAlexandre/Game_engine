@@ -287,22 +287,6 @@ void	render_voxel_work(Shader shader, Matrix transform, world_t *world) {
 void	voxel_render(engine_t *engine, world_t *world) {
 	float camera_pos[3] = {engine->camera.position.x, engine->camera.position.y, engine->camera.position.z};
 	int screen_height = GetScreenHeight(), screen_width = GetScreenWidth();
-	static bool poly = false;
-
-	if (IsKeyPressed(KEY_F3)) {
-		printf("debug_render!\n");
-		if (!poly) {
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		} else {
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		}
-		poly = !poly;
-	}
-
-	if (IsKeyPressed(KEY_F5)) {
-		reload_shader(engine);
-		printf("reloaded shader\n");
-	}
 
 	BeginDrawing();
 	ClearBackground(BLACK);
@@ -322,17 +306,20 @@ void	voxel_render(engine_t *engine, world_t *world) {
 			DrawCubeWires(pos, 0.5, 0.5, 0.5, BLACK);
 		}
 
-		if (engine->debug == true) {
-			DrawBoundingBox(engine->player.bound, RED);
-			for (int i = 0; i <= 8; i++) {
-				for (int k = 0; k <= 8; k++) {
-					DrawLine3D((Vector3){0, i * 32, k * 32}, (Vector3){256,i * 32, k * 32}, RED);
-					DrawLine3D((Vector3){i * 32, 0, k * 32}, (Vector3){i * 32, 256, k * 32}, GREEN);
-					DrawLine3D((Vector3){i * 32, k * 32, 0}, (Vector3){i * 32, k * 32, 256}, BLUE);
-				}
-			}
-		}
+		// if (engine->debug == true) {
+		// 	DrawBoundingBox(engine->player.bound, RED);
+		// 	for (int i = 0; i <= 8; i++) {
+		// 		for (int k = 0; k <= 8; k++) {
+		// 			DrawLine3D((Vector3){0, i * 32, k * 32}, (Vector3){256,i * 32, k * 32}, RED);
+		// 			DrawLine3D((Vector3){i * 32, 0, k * 32}, (Vector3){i * 32, 256, k * 32}, GREEN);
+		// 			DrawLine3D((Vector3){i * 32, k * 32, 0}, (Vector3){i * 32, k * 32, 256}, BLUE);
+		// 		}
+		// 	}
+		// }
 	EndMode3D();
 	draw_ui(engine->player);
+	Vector3 forward = GetCameraForward(&engine->camera);
+	DrawText(TextFormat("x:%.1f y:%.1f z:%.1f\n", forward.x, forward.y, forward.z), 10, 200, 20, GREEN);
+	DrawText(TextFormat("x:%.0f y:%.0f z:%.0f\n", engine->camera.position.x, engine->camera.position.y, engine->camera.position.z), 10, 300, 20, GREEN);
 	EndDrawing();
 }

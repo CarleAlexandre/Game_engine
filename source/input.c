@@ -39,6 +39,28 @@ void	update_input(engine_t *engine, world_t *world) {
 		voxel_place_block(engine->camera, world, 5, 1);
 	}
 
+	static bool poly = false;
+
+	if (IsKeyPressed(KEY_F3)) {
+		printf("debug_render!\n");
+		if (!poly) {
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		} else {
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		}
+		poly = !poly;
+	}
+
+	if (IsKeyPressed(KEY_F4)) {
+		engine->debug = !engine->debug;
+	}
+
+	if (IsKeyPressed(KEY_F5)) {
+		reload_shader(engine);
+		printf("reloaded shader\n");
+	}
+
+
 	UpdateCameraPro(&engine->camera, step, (Vector3){(float)(delta.x * 0.2), (float)(delta.y * 0.2), 0}, 0);
 	if (step.x != 0 || step.y != 0 || step.z != 0 || delta.x != 0 || delta.y != 0) {
 		update_world_render(world, engine);

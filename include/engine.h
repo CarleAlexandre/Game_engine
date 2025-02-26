@@ -150,6 +150,12 @@ typedef enum {
 
 typedef uint64_t bitmask;
 
+typedef struct	s_chunk_builder_data {
+	bitmask	face[64];
+	bitmask	block_data[64][64];
+}	chunk_builder_data_t;
+
+
 typedef struct Plane {
 	Vector3 normal;
 	float distance;
