@@ -1,22 +1,21 @@
 
 #define MAX_QUEUE_SIZE 100
 
-typedef struct {
-    int data[MAX_QUEUE_SIZE];
-    unsigned int front;
-    unsigned int rear;
-    unsigned int size;
-    unsigned int max_size;
-} ArrayQueue;
+typedef struct s_queue{
+	int		data[MAX_QUEUE_SIZE];
+	unsigned int	front;
+	unsigned int	rear;
+	unsigned int	size;
+}	queue_t;
 
-void initQueue(ArrayQueue *q, int _max_size) {
+static void init_queue(queue_t *q) {
     q->front = 0;
     q->rear = 0;
     q->size = 0;
-    q->max_size = _max_size;
 }
 
-int enqueueArray(ArrayQueue *q, int value) {
+//push new value at end of queue
+static int push_queue(queue_t *q, int value) {
     if (q->size == MAX_QUEUE_SIZE) {
         return -1;
     }
@@ -26,7 +25,8 @@ int enqueueArray(ArrayQueue *q, int value) {
     return 0;
 }
 
-int dequeueArray(ArrayQueue *q, int *value) {
+//pop value at start of queue
+static int pop_queue(queue_t *q, int *value) {
     if (q->size == 0) {
         return -1;
     }

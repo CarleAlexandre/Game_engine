@@ -11,6 +11,7 @@
 # include <rcamera.h>
 
 # include "sparse_octree.h"
+# include "queue.h"
 //this currently segfault
 // # include "dynamic_array.h"
 
@@ -154,7 +155,6 @@ typedef struct	s_chunk_builder_data {
 	bitmask	face[64];
 	bitmask	block_data[64][64];
 }	chunk_builder_data_t;
-
 
 typedef struct Plane {
 	Vector3 normal;

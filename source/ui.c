@@ -2,7 +2,7 @@
 #define RAYGUI_IMPLEMENTATION
 #include <raygui.h>
 
-void draw_inventory(inventory_t inventory) {
+void	draw_inventory(inventory_t inventory) {
 	//row = 6 item,
 	Rectangle pos = {20, 20, 650, 400};
 	Rectangle bound = {0, 0, 600, (float)100 * (inventory.size / 6)};
@@ -14,14 +14,14 @@ void draw_inventory(inventory_t inventory) {
 	EndScissorMode();
 }
 
-void init_toolbar(tool_bar_t *tool_bar) {
+void	init_toolbar(tool_bar_t *tool_bar) {
 	tool_bar->pos1 = (Vector2){GetScreenWidth() - 140 + 20, GetScreenHeight() - 100 + 10};
 	tool_bar->pos2 = (Vector2){GetScreenWidth() - 140 + 80, GetScreenHeight() - 100 + 10};
 	tool_bar->topos1 = tool_bar->pos1;
 	tool_bar->topos2 = tool_bar->pos2;
 }
 
-void draw_toolbar(tool_bar_t *tool_bar) {
+void	draw_toolbar(tool_bar_t *tool_bar) {
 	Vector2 pos = (Vector2){GetScreenWidth() - 140, GetScreenHeight() - 100};
 	static bool gotoprev = false;
 	static bool gotonext = false;
@@ -66,12 +66,13 @@ void draw_toolbar(tool_bar_t *tool_bar) {
 	EndScissorMode();
 }
 
-void draw_ui(sv_player_t player) {
+void	draw_ui(sv_player_t player) {
 	if (player.stats.health < player.stats.max_health) {
 		DrawRectangle(30 + player.stats.health, 100, (player.stats.max_health - player.stats.health), 10, GRAY);
 	}
 	DrawRectangle(30, 100, player.stats.health, 10, RED);
-	DrawRectangle(GetScreenWidth() / 2 - 1, GetScreenHeight() / 2 - 1, 2, 2, RED);
+	DrawRectangle(GetScreenWidth() / 2 - 1, GetScreenHeight() / 2 - 1, 4, 4, BLACK);
+	DrawRectangle(GetScreenWidth() / 2 - 1, GetScreenHeight() / 2 - 1, 2, 2, WHITE);
 	//DrawTexture(texture[TEXTURE_CROSSAIR], GetScreenWidth(), GetScreenHeight(), WHITE);
 	draw_toolbar(&player.toolbar);
 	if (player.show_inventory) {
