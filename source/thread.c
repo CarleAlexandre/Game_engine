@@ -3,8 +3,6 @@
 #include <stdint.h>
 #include "queue.h"
 
-pthread_t	thread_mgr;
-
 queue_t		task_pool;
 pthread_mutex_t	task_pool_mtx;
 
@@ -50,6 +48,8 @@ int	check_task_status(unsigned int idx) {
 }
 
 void	init_thread_mgr() {
+	pthread_t	thread_mgr;
+
 	pthread_create(&thread_mgr, NULL, thread_mgr_function, NULL);
 	pthread_mutex_init(&task_pool_mtx, 0x00);
 	pthread_mutex_init(&thread_mgr_mtx, 0x00);
