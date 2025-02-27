@@ -31,7 +31,6 @@ const vec3 NORMALS[6] = vec3[](
 	vec3( 0.0,  0.0, -1.0)
 );
 
-// Corrected rotation matrices
 const mat3 ROTATIONS[6] = mat3[](
 	mat3(1,0,0, 0,0,-1, 0,1,0),
 	mat3(1,0,0, 0,0,1, 0,-1,0),
@@ -67,7 +66,6 @@ void main() {
 
 	vec3 rotated_aPos = ROTATIONS[face] * vPos;
 
-	// Final position calculation
 	vec3 world_pos = vox_pos + face_offset + chunk_pos + rotated_aPos;
 	gl_Position = matProjection * matView * matModel * vec4(world_pos, 1.0);
 

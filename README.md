@@ -51,3 +51,14 @@ mac os:
 - not supported for now
 
 ___
+
+## CREDIT
+
+	raylib
+	raygui
+	librg
+	fastNoiseLight
+	enet.h
+
+___
+
