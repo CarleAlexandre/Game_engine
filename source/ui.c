@@ -73,7 +73,7 @@ void	draw_ui(sv_player_t player) {
 	DrawRectangle(30, 100, player.stats.health, 10, RED);
 	DrawRectangle(GetScreenWidth() / 2 - 1, GetScreenHeight() / 2 - 1, 4, 4, BLACK);
 	DrawRectangle(GetScreenWidth() / 2 - 1, GetScreenHeight() / 2 - 1, 2, 2, WHITE);
-	//DrawTexture(texture[TEXTURE_CROSSAIR], GetScreenWidth(), GetScreenHeight(), WHITE);
+	// DrawTexture(texture[TEXTURE_CROSSAIR], GetScreenWidth(), GetScreenHeight(), WHITE);
 	draw_toolbar(&player.toolbar);
 	if (player.show_inventory) {
 		draw_inventory(player.inventory);

@@ -291,6 +291,7 @@ typedef struct s_chunk_mesh {
 typedef struct	s_chunk {
 	svo_t		*blocks;
 	chunk_mesh_t	*mesh;
+	bool		dirty_mesh;
 	Vector3		pos;//center of min or max ?????
 }	chunk_t;
 

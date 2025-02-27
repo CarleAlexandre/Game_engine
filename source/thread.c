@@ -1,7 +1,16 @@
 #include <pthread.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include "queue.h"
+
+static int	progress = 0;
+static bool	loaded = false;
+pthread_mutex_t	loading_mtx;
+
+//launch loading screen
+
+//end loading Screen
 
 queue_t		task_pool;
 pthread_mutex_t	task_pool_mtx;
@@ -53,7 +62,7 @@ void	init_thread_mgr() {
 	pthread_create(&thread_mgr, NULL, thread_mgr_function, NULL);
 	pthread_mutex_init(&task_pool_mtx, 0x00);
 	pthread_mutex_init(&thread_mgr_mtx, 0x00);
-	pthread_detach(thread_mgr);
+	// pthread_detach(thread_mgr);
 }
 
 void	close_thread_mgr() {
