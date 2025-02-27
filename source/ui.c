@@ -80,3 +80,11 @@ void	draw_ui(sv_player_t player) {
 	}
 	DrawFPS(10, 10);
 }
+
+void	main_menu() {
+
+}
+
+void	setting_menu() {
+	
+}
