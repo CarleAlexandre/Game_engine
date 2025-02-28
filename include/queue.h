@@ -6,7 +6,7 @@
 #define MAX_QUEUE_SIZE 100
 
 typedef struct	s_queue {
-	char		*data; // Dynamic byte buffer
+	void		*data; // Dynamic byte buffer
 	unsigned int	front;
 	unsigned int	rear;
 	unsigned int	size;

@@ -1,4 +1,5 @@
 #include <pthread.h>
+#include <time.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -6,12 +7,27 @@
 #include <string.h>
 #include "queue.h"
 
+#include <windows.h>
+
+void usleep(__int64 usec) 
+{ 
+    HANDLE timer; 
+    LARGE_INTEGER ft; 
+
+    ft.QuadPart = -(10*usec); // Convert to 100 nanosecond interval, negative value indicates relative time
+
+    timer = CreateWaitableTimer(NULL, TRUE, NULL); 
+    SetWaitableTimer(timer, &ft, 0, NULL, NULL, 0); 
+    WaitForSingleObject(timer, INFINITE); 
+    CloseHandle(timer); 
+}
+
 typedef struct	s_task {
-	void *(*func)(void *);
-	void *arg;
-	int id;
-	bool completed;
-	void *result;
+	void	*(*func)(void *);
+	void	*arg;
+	int	id;
+	bool	completed;
+	void	*result;
 }	task_t;
 
 static struct {
@@ -31,6 +47,8 @@ static struct {
 	
 	pthread_t	workers[32];
 }	thread_mgr;
+
+void	*worker_function(void *arg);
 
 /*
 	init thread_mgr and worker

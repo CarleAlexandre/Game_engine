@@ -8,14 +8,14 @@ flat in int	extra;
 
 out vec4 frag_color;
 
-const vec3 color[6] = vec3[]{
+const vec3 color[6] = vec3[](
 	vec3(0.5, 0.0, 0.0),
 	vec3(0.0, 0.5, 0.0),
 	vec3(0.2, 0.2, 0.5),
 	vec3(0.5, 0.5, 0.0),
 	vec3(0.5, 0.0, 0.5),
 	vec3(0.0, 0.5, 0.5)
-}
+);
 
 void main() {
 	if (block_id_out == 1) {
