@@ -10,6 +10,52 @@
 
 ## thread
 
+in c99 how does a struct is handled when accessing it's member from multiple thread, do i need a mutex for all of the struct or only for it's member ?
+
+like i have this struct :
+
+```c
+static struct {
+	queue_t		async_tasks;
+	pthread_mutex_t	async_mutex;
+
+	queue_t		sync_tasks;
+	pthread_mutex_t	sync_mutex;
+
+	queue_t		completed_tasks;
+
+	bool		running;
+	pthread_mutex_t	running;
+
+	int		next_task_id;
+	pthread_mutex_t	status_mtx;
+
+	pthread_t	workers[32];
+}    thread_mgr;
+```
+but should i use a mutex for the struct instead ? is it defined behavior or not ?
+
+answer:
+
+each member is a piece of memory.   a 'struct'  is not a 'real' thing..   it's just a conveneint way for us as programmers to group these related things.
+mutex is required for modifying any piece of memory ..   so accessing each item would require the use of a mutex.    but it's not very practical to have 10 mutexes.  so you have 1 and that serves the purpose of accessing any of them
+then there are exceptions for this on platforms like x86.. where WORD sized items can to read/wrote atomically. 
+think about changing or reading things as  a single transaction..    if the transaction requires more than 1 member..  you need a mutex.
+
+yes okay thanks i had a misconception about how struct work (i thinked of them as memory address with different data type contiguous in memory), but okay thanks, so  i can access different member at the same time, thanks for your great answer
+
+yes.. they do appear in memory next to each other..  but there is nothing in code or memory  that tells the cpu something is a struct
+NOUVEAU
+[4:47 pm]
+it stops being a struct once it's in binary/asm.
+
+it's up to you to decide which things you want to associate to a mutex.
+it's just very typical programmer/human that decides the things will be 'this struct'  or 'this namespace' or  these 3 int's.  or a complete subsystem.
+
+on x86?     you'll find anything on the same 64byte span of memory is going to have the most need for mutex. 
+
+this discussion is thanks to AJ the goat.
+
 ## Graphic
 
 

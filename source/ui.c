@@ -82,9 +82,16 @@ void	draw_ui(sv_player_t player) {
 }
 
 void	main_menu() {
-
+	//Solo;
+	//Multiplayer
+	//Setting
+	//leave
 }
 
 void	setting_menu() {
-	
+	//ui
+	//controle
+	//video
+	//gameplay
+	//back
 }
