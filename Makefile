@@ -1,105 +1,76 @@
-LIB = flib.a
+LIB		= HavenLib.a
 
-GAME = game
+SRC		+= $(wildcard $(SRC_DIR)ai/*.c)
+SRC		+= $(wildcard $(SRC_DIR)audio/*.c)
+SRC		+= $(wildcard $(SRC_DIR)core/*.c)
+SRC		+= $(wildcard $(SRC_DIR)debug/*.c)
+# SRC		+= $(wildcard $(SRC_DIR)networking/*.c)
+SRC		+= $(wildcard $(SRC_DIR)phyic/*.c)
+SRC		+= $(wildcard $(SRC_DIR)render/*.c)
+SRC		+= $(wildcard $(SRC_DIR)scene/*.c)
 
-EDITOR = editor
+OBJ		= $(SRC:$(SRC_DIR)%.c=$(OBJ_DIR)%.o)
 
-SERVER = server
+EXEC		= Haven Engine
 
-UNIT = unitest
+EXEC_SRC	= $(SRC_DIR)main.c
 
-SRC += $(wildcard source/*.c)
+EXEC_OBJ	= $(EXEC_SRC:%.c=%.o)
 
-GAME_SRC = main/game.c
 
-EDITOR_SRC = main/editor.c
+INCLUDE		= -I include
 
-SERVER_SRC = main/server.c
-
-UNIT_SRC = main/unitest.c
-
-OBJ = $(SRC:%.c=%.o)
-
-GAME_OBJ = $(GAME_SRC:%.c=%.o)
-
-EDITOR_OBJ = $(EDITOR_SRC:%.c=%.o)
-
-SERVER_OBJ = $(SERVER_SRC:%.c=%.o)
-
-UNIT_OBJ = $(UNIT_SRC:%.c=%.o)
-
-INCLUDE += -I include -I source
-
-BUILDDIR = build/
+BUILDDIR	= build/
+OBJ_DIR		= obj/
+SRC_DIR		= source/
 
 CC = gcc
-
 CFLAGS = -std=c99
 
 ifeq ($(OS), Windows_NT)
-CFLAGS += -I C:/mingw64/include
-LIBS += -lraylib -lopengl32 -lgdi32 -lwinmm -latomic
-endif
-ifeq ($(shell uname -s), Linux)
-CFLAGS += -fsanitize=address
-LIBS += -lasan -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+	INCLUDE += -I C:/mingw64/include
+	LIBS = -lraylib -lopengl32 -lgdi32 -lwinmm
+else ifeq ($(shell uname -s), Linux)
+	CFLAGS += -fsanitize=address
+	LIBS = -lasan -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 endif
 
-all: unit lib game editor server 
+all:		lib editor
 
 $(BUILDDIR)$(LIB) : $(OBJ)
 	mkdir -p $(BUILDDIR)
 	ar rcs -o $@ $(OBJ)
 
-$(BUILDDIR)$(GAME) : $(GAME_OBJ)
-	mkdir -p $(BUILDDIR)
-	$(CC) $(GAME_OBJ) $(BUILDDIR)$(LIB) $(LIBS) -o $@
-
-$(BUILDDIR)$(EDITOR) : $(EDITOR_OBJ)
-	mkdir -p $(BUILDDIR)
-	$(CC) $(EDITOR_OBJ) $(LIBS) -o $@ $(BUILDDIR)$(LIB)
-
-$(BUILDDIR)$(SERVER) : $(SERVER_OBJ)
-	mkdir -p $(BUILDDIR)
-	$(CC) $(SERVER_OBJ) $(LIBS) -o $@ $(BUILDDIR)$(LIB)
-
-$(BUILDDIR)$(UNIT) : $(UNIT_OBJ)
-	mkdir -p $(BUILDDIR)
-	$(CC) $(UNIT_OBJ) $(LIBS) -o $@
-
-$(OBJ): %.o : %.c
+$(OBJ): $(OBJ_DIR)%.o : $(SRC_DIR)%.c
+	mkdir -p $(OBJ_DIR)
+	mkdir -p $(OBJ_DIR)ai
+	mkdir -p $(OBJ_DIR)audio
+	mkdir -p $(OBJ_DIR)core
+	mkdir -p $(OBJ_DIR)debug
+	mkdir -p $(OBJ_DIR)networking
+	mkdir -p $(OBJ_DIR)phyic
+	mkdir -p $(OBJ_DIR)render
+	mkdir -p $(OBJ_DIR)scene
 	$(CC) $(CFLAGS) $(LIBS) ${INCLUDE} -c $< -o $@
 
-$(GAME_OBJ): %.o : %.c
+
+$(BUILDDIR)$(EXEC) : $(OBJ_DIR)$(EXEC_OBJ)
+	mkdir -p $(BUILDDIR)
+	$(CC) $(OBJ_DIR)$(EXEC_OBJ) $(BUILDDIR)$(LIB) $(LIBS) -o $@
+
+$(EXEC_OBJ): $(OBJ_DIR)%.o : $(SRC_DIR)%.c
+	mkdir -p $(OBJ_DIR)
 	$(CC) $(CFLAGS) ${INCLUDE} -c $< -o $@
 
-$(EDITOR_OBJ): %.o : %.c
-	$(CC) $(CFLAGS) ${INCLUDE} -c $< -o $@
 
-$(SERVER_OBJ): %.o : %.c
-	$(CC) $(CFLAGS) ${INCLUDE} -c $< -o $@
+lib:		$(BUILDDIR)${LIB}
 
-$(UNIT_OBJ): %.o : %.c
-	$(CC) $(CFLAGS) ${INCLUDE} -c $< -o $@
-
-lib: $(BUILDDIR)${LIB}
-
-game: $(BUILDDIR)$(GAME) $(BUILDDIR)${LIB}
-
-editor: $(BUILDDIR)$(EDITOR) $(BUILDDIR)${LIB}
-
-server: $(BUILDDIR)$(SERVER) $(BUILDDIR)${LIB}
-
-unit: $(BUILDDIR)$(UNIT)
+editor:		$(BUILDDIR)$(EXEC)
 
 clean:
 	rm -rf $(OBJ)
-	rm -rf $(GAME_OBJ)
-	rm -rf $(EDITOR_OBJ)
-	rm -rf $(SERVER_OBJ)
-	rm -rf $(UNIT_OBJ)
 
-fclean: clean
+fclean:		clean
 	rm -rf $(BUILDDIR)
 
-re: fclean all
+re:		fclean all

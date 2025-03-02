@@ -146,8 +146,8 @@ int	add_task_to_pool(void *(*func)(void *), void *arg, bool is_synced) {
 	return (task.id);
 }
 
-
-int	check_task_status(int task_id) {
+//not to rework as i just need to check if first data == id, then pop and return true else return false
+bool	check_task_status(int task_id) {
 	pthread_mutex_lock(&thread_mgr.status_mtx);
 
 	int *completed_ids = thread_mgr.completed_tasks.data;
@@ -156,13 +156,14 @@ int	check_task_status(int task_id) {
 			memmove(&completed_ids[i], &completed_ids[i+1], 
 				(thread_mgr.completed_tasks.size - i - 1) * sizeof(int));
 			thread_mgr.completed_tasks.size--;
+			// pop_queue(&thread_mgr.completed_tasks, task_id);
 			pthread_mutex_unlock(&thread_mgr.status_mtx);
-			return (1);
+			return (true);
 		}
 	}
 
 	pthread_mutex_unlock(&thread_mgr.status_mtx);
-	return (0);
+	return (false);
 }
 
 //raise stopping flag to all thread then wait for them to close
