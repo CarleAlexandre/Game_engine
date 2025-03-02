@@ -39,7 +39,8 @@ int main(void) {
 	//Load all sound,
 
 	HideCursor();
-
+	double time = GetTime();
+	
 	world_t *world = malloc(sizeof(world_t));
 
 	world->chunks = init_svo(8, 3);
@@ -51,11 +52,6 @@ int main(void) {
 	noise.fractal_type = FNL_FRACTAL_FBM;
 	noise.gain = 0.8;
 
-	// loadCubemap();
-
-	// goto end;
-
-	double time = GetTime();
 
 	for (int x = 0; x < 8; x++) {
 		for (int z = 0; z < 8; z++) {

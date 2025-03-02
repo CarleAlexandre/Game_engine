@@ -5,12 +5,11 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include "queue.h"
+#include <data_type/queue.h>
 
 #include <windows.h>
 
-void usleep(__int64 usec) 
-{ 
+void usleep(__int64 usec) {
     HANDLE timer; 
     LARGE_INTEGER ft; 
 
@@ -79,8 +78,8 @@ void	init_thread_mgr() {
 void	*worker_function(void *arg) {
 	(void)arg;
 
-	bool run = 1;
-	while (1) {
+	bool run = true;
+	while (run) {
 		task_t task;
 		bool found_task = false;
 
@@ -147,6 +146,7 @@ int	add_task_to_pool(void *(*func)(void *), void *arg, bool is_synced) {
 	return (task.id);
 }
 
+
 int	check_task_status(int task_id) {
 	pthread_mutex_lock(&thread_mgr.status_mtx);
 
@@ -166,7 +166,7 @@ int	check_task_status(int task_id) {
 }
 
 //raise stopping flag to all thread then wait for them to close
-void close_thread_mgr() {
+void	close_thread_mgr() {
 	pthread_mutex_lock(&thread_mgr.running_mtx);
 	thread_mgr.running = false;
 	pthread_mutex_unlock(&thread_mgr.running_mtx);

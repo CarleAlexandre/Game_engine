@@ -1,17 +1,20 @@
-#include <prototype.h>
+#include <engine.h>
 #define RAYGUI_IMPLEMENTATION
 #include <raygui.h>
 
-int	tool = 0;
-bool	saved = false;
-int	editor_mode = 0;
-bool	mode_enable = false;
-int	error = 0;
-Rectangle error_bound = (Rectangle){};
-Texture2D terrain;
-bool	update_noise = false;
+typedef enum {
+	map_edit_mod,
+	ui_edit_mod,
+	obj_edit_mod,
+	item_edit_mod
+}	edm_enum;
 
-fnl_state noise;
+int		tool = 0;
+bool		saved = false;
+bool		mode_enable = false;
+int		error = 0;
+Rectangle	error_bound = (Rectangle){};
+edm_enum	editor_mode = 0;
 
 void	startscreen() {
 	BeginDrawing();
@@ -37,28 +40,6 @@ void	right_bar() {
 	static Rectangle view;
 	GuiScrollPanel((Rectangle){GetScreenWidth() - 200, 30, 200, GetScreenHeight() - 30}, "Setting", (Rectangle){0, 0, 180, GetScreenHeight() - 60}, &scroll, &view);
 	BeginScissorMode(view.x, view.y, view.width, view.height);
-		if (editor_mode == 0) {
-			//DomainWarp Fractal
-			//DomainWarp
-			
-			//cellular
-			//fractal
-			GuiSlider((Rectangle){GetScreenWidth() - 180 + scroll.x, 250 + scroll.y, 100, 30}, "", "gain", &noise.gain, 0, 1);
-			
-			if (GuiDropdownBox((Rectangle){GetScreenWidth() - 180 + scroll.x, 200 + scroll.y, 100, 30}, "NONE;FBM;RIDGED;PINGPONG", (int *)&noise.fractal_type, fract)) {
-				fract = !fract;
-			}
-			
-			//general
-			GuiSlider((Rectangle){GetScreenWidth() - 180 + scroll.x, 150 + scroll.y, 100, 30}, "", "freq", &noise.frequency, 0, 0.01);
-
-			if (GuiDropdownBox((Rectangle){GetScreenWidth() - 180 + scroll.x, 100 + scroll.y, 100, 30}, "0;1;2;3;4;5;6", (int *)&noise.noise_type, noise_type)) {
-				noise_type = !noise_type;
-			}
-			if (GuiButton((Rectangle){GetScreenWidth() - 180 + scroll.x, 60 + scroll.y, 100, 30}, "Update")) {
-				update_noise = true;
-			}
-		}
 	EndScissorMode();
 }
 
@@ -74,7 +55,6 @@ void	map_editor() {
 
 	// BeginMode2D(cam);
 	// EndMode2D();
-	DrawTexture(terrain, 0, 0, WHITE);
 }
 
 void	item_editor() {
@@ -136,18 +116,14 @@ void	update_editor_input(bool *term_open) {
 
 int	main(void) {
 
-	InitWindow(1920, 1080, "UwUditor");
+	InitWindow(1920, 1080, "Haven Engine");
 
 	RenderTexture2D fbo;
 	GuiLoadStyle("include/style_terminal.rgs");
 	fbo = LoadRenderTexture(GetScreenWidth() - 400, GetScreenHeight() - 30);
-
-	noise = fnlCreateState();
 	bool show_term = false;
 
-	noise.fractal_type = FNL_FRACTAL_FBM;
-
-	terrain = gen_texture_noise(&noise);
+	init_thread_mgr();
 
 	SetTargetFPS(30);
 	// EnableEventWaiting();
@@ -161,28 +137,24 @@ int	main(void) {
 
 		BeginTextureMode(fbo);
 		switch (editor_mode) {
-			case (0): {
-				if (update_noise) {
-					UnloadTexture(terrain);
-					terrain = gen_texture_noise(&noise);
-					update_noise = false;
-				}
+			case (map_edit_mod): {
 				map_editor();
 				break;
 			}
-			case (2): {
+			case (item_edit_mod): {
 				item_editor();
 				break;
 			}
-			case (3): {
+			case (obj_edit_mod): {
 				obj_editor();
 				break;
 			}
-			case (1): {
+			case (ui_edit_mod): {
 				ui_editor();
 				break;
 			}
-			default:break;
+			default:
+				break;
 		}
 		EndTextureMode();
 
@@ -232,6 +204,8 @@ int	main(void) {
 
 		EndDrawing();
 	}
+
+	close_thread_mgr();
 
 	CloseWindow();
 	return 0;

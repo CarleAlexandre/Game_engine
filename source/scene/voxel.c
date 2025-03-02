@@ -1,12 +1,4 @@
-#include <prototype.h>
-
-face_data_t	pack_face_data(unsigned char pos[3], unsigned char face, unsigned char height, unsigned char width, unsigned short id) {
-	face_data_t data;
-
-	data.block_id = (id << 3 | face);
-	data.face_data = ((height << 24) | (width << 18) | (pos[2] << 12) | (pos[1] << 6) | pos[0]);
-	return (data);
-}
+#include <engine.h>
 
 Vector3	world_to_voxel(const Vector3 worldPos) {
 	return ((Vector3){floorf(worldPos.x * 2.0f), floorf(worldPos.y * 2.0f), floorf(worldPos.z * 2.0f)});
@@ -121,128 +113,9 @@ void	gen_chunk_greedymesh(chunk_t *current, world_t *world) {
 		
 }
 
-void	gen_chunk_mesh(chunk_t *current, world_t *world) {
-	for (char x = 0; x < CHUNK_SIZE; x++) {
-		for (char z = 0; z < CHUNK_SIZE; z++) {
-			for (char y = 0; y < CHUNK_SIZE; y++) {
-				Vector3 pos = {x, y, z};
-				
-				svo_node_t *node = svo_get_node(pos, current->blocks);
-				
-				if (!is_node_valid(node)) continue;
-				
-				for (int i = 0; i < 6; i++) {
-					svo_node_t *neighbor = get_neighbor_block(pos, i, current, world);
-					
-					if (!is_node_valid(neighbor)) {
-						char packed_pos[3] = {x, y, z};
-						face_data_t face = pack_face_data(packed_pos, i, 1, 1, 1);
-						
-						if (current->mesh->faces_count[i] < 4096) {
-							current->mesh->faces[i][current->mesh->faces_count[i]++] = face;
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-void	update_chunk_mesh(Vector3 pos, world_t *world) {
-	svo_node_t *node = svo_get_node(pos, world->chunks);
-	if (is_node_valid(node)) {
-		chunk_t *current_chunk = node->data;
-		if (!current_chunk->mesh) {
-			current_chunk->mesh = calloc(1, sizeof(chunk_mesh_t));
-		} else {
-			for (int i = 0; i < 6; i++) {
-				memset(&current_chunk->mesh->faces[i][0], 0, sizeof(face_data_t) * 4096);
-				current_chunk->mesh->faces_count[i] = 0;
-			}
-		}
-		gen_chunk_mesh(current_chunk, world);
-	}
-}
-
-void	gen_world_mesh(world_t *world, engine_t *engine) {
-	for (int x = 0; x < 8; x++) {
-		for (int z = 0; z < 8; z++) {
-			for (int y = 0; y < 8; y++) {
-				svo_node_t *node = svo_get_node((Vector3){x,y,z}, world->chunks);
-				if (is_node_valid(node)) {
-					chunk_t *current_chunk = node->data;
-					current_chunk->mesh = calloc(1, sizeof(chunk_mesh_t));
-					gen_chunk_mesh(current_chunk, world);
-				}
-			}
-		}
-	}
-}
-
-bool	is_chunk_visible(Vector3 chunk_pos, Camera camera) {
-	Matrix view = GetCameraViewMatrix(&camera);
-	Matrix proj = GetCameraProjectionMatrix(&camera, GetScreenHeight() / GetScreenWidth());
-	Matrix view_proj = MatrixMultiply(view, proj);
-
-	Frustum frustum;
-	ExtractFrustumFromMatrix(view_proj, &frustum);
-
-	BoundingBox chunk_box = {
-		.min = chunk_pos,
-		.max = {chunk_pos.x + CHUNK_SIZE * VOXEL_SIZE, chunk_pos.y + CHUNK_SIZE * VOXEL_SIZE, chunk_pos.z + CHUNK_SIZE * VOXEL_SIZE}
-	};
-	
-	return IsBoxInFrustum(chunk_box, frustum);
-}
-
-//check this every few frame;
-// also need to change data order at opposite from player to player pos, and skip not visible face when assembline the buffer
-void	update_world_render(world_t *world, engine_t *engine) {
-	if (world->rcount) {
-		for (int i = 0; i < 512; i++) {
-			world->rqueue[i] = NULL;
-		}
-		world->rcount = 0;
-	}
-	for (int x = 0; x < 8; x++) {
-		for (int z = 0; z < 8; z++) {
-			for (int y = 0; y < 8; y++) {
-				svo_node_t *node = svo_get_node((Vector3){x,y,z}, world->chunks);
-				if (is_node_valid(node)) {
-					chunk_t *current_chunk = node->data;
-					if (is_chunk_visible(current_chunk->pos, engine->camera) && current_chunk->mesh->faces_count) {
-						world->rqueue[world->rcount++] = current_chunk;
-					}
-				}
-			}
-		}
-	}
-}
-
-void	setup_world_render(world_t *world, engine_t *engine) {
-	if (world->rcount) {
-		for (int i = 0; i < 512; i++) {
-			world->rqueue[i] = NULL;
-		}
-		world->rcount = 0;
-	}
-	for (int x = 0; x < 8; x++) {
-		for (int z = 0; z < 8; z++) {
-			for (int y = 0; y < 8; y++) {
-				svo_node_t *node = svo_get_node((Vector3){x,y,z}, world->chunks);
-				if (is_node_valid(node)) {
-					chunk_t *current_chunk = node->data;
-					world->rqueue[world->rcount++] = current_chunk;
-				}
-			}
-		}
-	}
-}
-
 /*
 still not very good, but for debug issue good enough
 */
-
 bool	voxel_look_at(Camera3D camera, world_t *world, float max_range, Vector3 *position) {
 	Ray ray = GetScreenToWorldRay((Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f }, camera);
 	const float step = 0.01f;

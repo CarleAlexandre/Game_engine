@@ -60,7 +60,7 @@ Texture2D	gen_texture_noise(fnl_state *noise) {
 	return (text);
 }
 
-chunk_t **chunk_gen_height(int x_off, int z_off, int *size, fnl_state *noise) {
+chunk_t	**chunk_gen_height(int x_off, int z_off, int *size, fnl_state *noise) {
 	chunk_t **slice;
 
 	float value[64][64] = {0};
@@ -109,6 +109,6 @@ chunk_t **chunk_gen_height(int x_off, int z_off, int *size, fnl_state *noise) {
 	return (slice);
 }
 
-void gen_world() {
+void	gen_world() {
 	printf("Uruk The Mad God has Begun Creation\n");
 }

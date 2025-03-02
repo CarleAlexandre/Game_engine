@@ -1,73 +1,139 @@
-#include <prototype.h>
+#include <engine.h>
 
-const float	quad_vertices[] = {
+static const float	quad_vertices[] = {
 	0.0f, 0.0f, 0.0f, //bot_left
 	0.5f, 0.0f, 0.0f,//bot_right
 	0.0f, 0.5f, 0.0f,//top_left
 	0.5f, 0.5f, 0.0f //top_right
 };
 
-const uint32_t	quad_indices[] = {0, 1, 2, 3};
+static const uint32_t	quad_indices[] = {0, 1, 2, 3};
 
-void	ExtractFrustumFromMatrix(Matrix mat, Frustum *frustum) {
-	// Left plane
-	frustum->planes[0].normal.x = mat.m3 + mat.m0;
-	frustum->planes[0].normal.y = mat.m7 + mat.m4;
-	frustum->planes[0].normal.z = mat.m11 + mat.m8;
-	frustum->planes[0].distance = mat.m15 + mat.m12;
-    
-	// Right plane
-	frustum->planes[1].normal.x = mat.m3 - mat.m0;
-	frustum->planes[1].normal.y = mat.m7 - mat.m4;
-	frustum->planes[1].normal.z = mat.m11 - mat.m8;
-	frustum->planes[1].distance = mat.m15 - mat.m12;
-    
-	// Bottom plane
-	frustum->planes[2].normal.x = mat.m3 + mat.m1;
-	frustum->planes[2].normal.y = mat.m7 + mat.m5;
-	frustum->planes[2].normal.z = mat.m11 + mat.m9;
-	frustum->planes[2].distance = mat.m15 + mat.m13;
-    
-	// Top plane
-	frustum->planes[3].normal.x = mat.m3 - mat.m1;
-	frustum->planes[3].normal.y = mat.m7 - mat.m5;
-	frustum->planes[3].normal.z = mat.m11 - mat.m9;
-	frustum->planes[3].distance = mat.m15 - mat.m13;
-    
-	// Near plane
-	frustum->planes[4].normal.x = mat.m3 + mat.m2;
-	frustum->planes[4].normal.y = mat.m7 + mat.m6;
-	frustum->planes[4].normal.z = mat.m11 + mat.m10;
-	frustum->planes[4].distance = mat.m15 + mat.m14;
-    
-	// Far plane
-	frustum->planes[5].normal.x = mat.m3 - mat.m2;
-	frustum->planes[5].normal.y = mat.m7 - mat.m6;
-	frustum->planes[5].normal.z = mat.m11 - mat.m10;
-	frustum->planes[5].distance = mat.m15 - mat.m14;
-    
-	// Normalize all planes
-	for (int i = 0; i < 6; i++) {
-		float length = Vector3Length(frustum->planes[i].normal);
-		frustum->planes[i].normal = Vector3Normalize(frustum->planes[i].normal);
-		frustum->planes[i].distance /= length;
+face_data_t	pack_face_data(unsigned char pos[3], unsigned char face, unsigned char height, unsigned char width, unsigned short id) {
+	face_data_t data;
+
+	data.block_id = (id << 3 | face);
+	data.face_data = ((height << 24) | (width << 18) | (pos[2] << 12) | (pos[1] << 6) | pos[0]);
+	return (data);
+}
+
+bool	is_chunk_visible(Vector3 chunk_pos, Camera camera) {
+	Matrix view = GetCameraViewMatrix(&camera);
+	Matrix proj = GetCameraProjectionMatrix(&camera, GetScreenHeight() / GetScreenWidth());
+	Matrix view_proj = MatrixMultiply(view, proj);
+
+	Frustum frustum;
+	extract_frustum_from_matrix(view_proj, &frustum);
+
+	BoundingBox chunk_box = {
+		.min = chunk_pos,
+		.max = {chunk_pos.x + CHUNK_SIZE * VOXEL_SIZE, chunk_pos.y + CHUNK_SIZE * VOXEL_SIZE, chunk_pos.z + CHUNK_SIZE * VOXEL_SIZE}
+	};
+	
+	return is_box_in_frustum(chunk_box, frustum);
+}
+
+
+void	gen_chunk_mesh(chunk_t *current, world_t *world) {
+	for (char x = 0; x < CHUNK_SIZE; x++) {
+		for (char z = 0; z < CHUNK_SIZE; z++) {
+			for (char y = 0; y < CHUNK_SIZE; y++) {
+				Vector3 pos = {x, y, z};
+				
+				svo_node_t *node = svo_get_node(pos, current->blocks);
+				
+				if (!is_node_valid(node)) continue;
+				
+				for (int i = 0; i < 6; i++) {
+					svo_node_t *neighbor = get_neighbor_block(pos, i, current, world);
+					
+					if (!is_node_valid(neighbor)) {
+						char packed_pos[3] = {x, y, z};
+						face_data_t face = pack_face_data(packed_pos, i, 1, 1, 1);
+						
+						if (current->mesh->faces_count[i] < 4096) {
+							current->mesh->faces[i][current->mesh->faces_count[i]++] = face;
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
-bool	IsBoxInFrustum(BoundingBox box, Frustum frustum) {
-	for (int i = 0; i < 6; i++) {
-		Vector3 positive = box.min;
-		
-		if (frustum.planes[i].normal.x >= 0) positive.x = box.max.x;
-		if (frustum.planes[i].normal.y >= 0) positive.y = box.max.y;
-		if (frustum.planes[i].normal.z >= 0) positive.z = box.max.z;
-
-		float distance = Vector3DotProduct(frustum.planes[i].normal, positive) + 
-				frustum.planes[i].distance;
-				
-		if (distance < 0.01) return false;
+void	update_chunk_mesh(Vector3 pos, world_t *world) {
+	svo_node_t *node = svo_get_node(pos, world->chunks);
+	if (is_node_valid(node)) {
+		chunk_t *current_chunk = node->data;
+		if (!current_chunk->mesh) {
+			current_chunk->mesh = calloc(1, sizeof(chunk_mesh_t));
+		} else {
+			for (int i = 0; i < 6; i++) {
+				memset(&current_chunk->mesh->faces[i][0], 0, sizeof(face_data_t) * 4096);
+				current_chunk->mesh->faces_count[i] = 0;
+			}
+		}
+		gen_chunk_mesh(current_chunk, world);
 	}
-	return true;
+}
+
+void	gen_world_mesh(world_t *world, engine_t *engine) {
+	for (int x = 0; x < 8; x++) {
+		for (int z = 0; z < 8; z++) {
+			for (int y = 0; y < 8; y++) {
+				svo_node_t *node = svo_get_node((Vector3){x,y,z}, world->chunks);
+				if (is_node_valid(node)) {
+					chunk_t *current_chunk = node->data;
+					current_chunk->mesh = calloc(1, sizeof(chunk_mesh_t));
+					gen_chunk_mesh(current_chunk, world);
+				}
+			}
+		}
+	}
+}
+
+//check this every few frame;
+// also need to change data order at opposite from player to player pos, and skip not visible face when assembline the buffer
+void	update_world_render(world_t *world, engine_t *engine) {
+	if (world->rcount) {
+		for (int i = 0; i < 512; i++) {
+			world->rqueue[i] = NULL;
+		}
+		world->rcount = 0;
+	}
+	for (int x = 0; x < 8; x++) {
+		for (int z = 0; z < 8; z++) {
+			for (int y = 0; y < 8; y++) {
+				svo_node_t *node = svo_get_node((Vector3){x,y,z}, world->chunks);
+				if (is_node_valid(node)) {
+					chunk_t *current_chunk = node->data;
+					if (is_chunk_visible(current_chunk->pos, engine->camera) && current_chunk->mesh->faces_count) {
+						world->rqueue[world->rcount++] = current_chunk;
+					}
+				}
+			}
+		}
+	}
+}
+
+void	setup_world_render(world_t *world, engine_t *engine) {
+	if (world->rcount) {
+		for (int i = 0; i < 512; i++) {
+			world->rqueue[i] = NULL;
+		}
+		world->rcount = 0;
+	}
+	for (int x = 0; x < 8; x++) {
+		for (int z = 0; z < 8; z++) {
+			for (int y = 0; y < 8; y++) {
+				svo_node_t *node = svo_get_node((Vector3){x,y,z}, world->chunks);
+				if (is_node_valid(node)) {
+					chunk_t *current_chunk = node->data;
+					world->rqueue[world->rcount++] = current_chunk;
+				}
+			}
+		}
+	}
 }
 
 world_mesh_t	assemble_world_mesh(chunk_t *rqueue[512], unsigned int rcount) {
@@ -194,45 +260,6 @@ void	gen_chunk_render(chunk_mesh_t *mesh) {
 	rlSetVertexAttributeDivisor(2, 1);
 
 	rlDisableVertexArray();
-}
-
-gbuffer_t	loadGbuffer(int width, int height, Shader deffered_shader) {
-	gbuffer_t buffer = {0};
-
-	buffer.framebuffer = rlLoadFramebuffer();
-	if (!buffer.framebuffer) {
-		TraceLog(LOG_WARNING, "failed to create framebuffer");
-		exit(1);
-	}
-	rlEnableFramebuffer(buffer.framebuffer);
-	buffer.positionTexture = rlLoadTexture(NULL, width,height, RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32, 1);
-	buffer.normalTexture = rlLoadTexture(NULL, width,height, RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32, 1);
-	buffer.albedoSpecTexture = rlLoadTexture(NULL, width,height, RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, 1);
-	buffer.zTexture = rlLoadTexture(NULL, width,height, RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, 1);
-	buffer.depthRenderbuffer = rlLoadTextureDepth(width, height, true);
-	rlActiveDrawBuffers(4);
-
-	rlFramebufferAttach(buffer.framebuffer, buffer.positionTexture, RL_ATTACHMENT_COLOR_CHANNEL0, RL_ATTACHMENT_TEXTURE2D, 0);
-	rlFramebufferAttach(buffer.framebuffer, buffer.normalTexture, RL_ATTACHMENT_COLOR_CHANNEL1, RL_ATTACHMENT_TEXTURE2D, 0);
-	rlFramebufferAttach(buffer.framebuffer, buffer.albedoSpecTexture, RL_ATTACHMENT_COLOR_CHANNEL2, RL_ATTACHMENT_TEXTURE2D, 0);
-	rlFramebufferAttach(buffer.framebuffer, buffer.zTexture, RL_ATTACHMENT_COLOR_CHANNEL3, RL_ATTACHMENT_TEXTURE2D, 0);
-	rlFramebufferAttach(buffer.framebuffer, buffer.depthRenderbuffer, RL_ATTACHMENT_DEPTH, RL_ATTACHMENT_RENDERBUFFER, 0);
-
-	if (!rlFramebufferComplete(buffer.framebuffer)) {
-		TraceLog(LOG_WARNING, "Framebuffer is not complete");
-		exit(1);
-	}
-
-	rlEnableShader(deffered_shader.id);
-		rlSetUniformSampler(rlGetLocationUniform(deffered_shader.id, "gPosition"), 0);
-		rlSetUniformSampler(rlGetLocationUniform(deffered_shader.id, "gNormal"), 1);
-		rlSetUniformSampler(rlGetLocationUniform(deffered_shader.id, "gAlbedoSpec"), 2);
-		rlSetUniformSampler(rlGetLocationUniform(deffered_shader.id, "gZ"), 3);
-	rlDisableShader();
-
-	rlEnableDepthTest();
-	rlEnableBackfaceCulling();
-	return (buffer);
 }
 
 void	render_voxel_work(Shader shader, Matrix transform, world_t *world) {

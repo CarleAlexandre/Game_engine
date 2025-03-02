@@ -2,7 +2,7 @@
 # define ENGINE_HPP
 
 # include <glad.h>
-# include <ext/FastNoiseLite.h>
+# include <extern/FastNoiseLite.h>
 
 # define GRAPHICS_API_OPENGL_43
 # include <raylib.h>
@@ -10,9 +10,7 @@
 # include <raymath.h>
 # include <rcamera.h>
 
-# include "sparse_octree.h"
-//this currently segfault
-// # include "dynamic_array.h"
+# include "data_type/sparse_octree.h"
 
 # include <stdbool.h>
 # include <stdint.h>
@@ -41,7 +39,7 @@ typedef enum {
 	FACE_XP,
 	FACE_X,
 	FACE_ZP,
-	FACE_Z,
+	FACE_Z
 } FaceDirection;
 
 // typedef enum {
