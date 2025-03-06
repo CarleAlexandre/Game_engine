@@ -44,7 +44,7 @@ int	add_task_to_pool(void *(*func)(void *), void *arg, bool is_synced);
  * 
  * @param usec 
  */
-void	usleep(__int64 usec);
+void	hv_usleep(__int64 usec);
 
 
 

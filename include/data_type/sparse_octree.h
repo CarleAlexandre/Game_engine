@@ -8,19 +8,19 @@
 #include <raymath.h>
 
 typedef struct	s_svo_node {
-	bool		isleaf;
-	void		*data;
+	bool			isleaf;
+	void			*data;
 	struct s_svo_node	*children[8];
 }	svo_node_t;
 
-typedef	struct s_sparse_voxel_octree {
+typedef	struct	s_sparse_voxel_octree {
 	int		size;
 	int		element;
 	int		max_depth;
 	svo_node_t	*root;
 }	svo_t;
 
-static void delete_node(svo_node_t *node) {
+static void	delete_node(svo_node_t *node) {
 	if (!node) return;
 	if (!node->isleaf) {
 	    for (int i = 0; i < 8; i++) {
@@ -114,14 +114,14 @@ static svo_t	*init_svo(int size_, int max_depth_) {
 	return (svo);
 }
 
-static void delete_svo(svo_t *svo) {
+static void	delete_svo(svo_t *svo) {
 	if (svo) {
 	    delete_node(svo->root);
 	    free(svo);
 	}
 }
 
-static svo_node_t *svo_get_node(Vector3 point, svo_t *svo) {
+static svo_node_t	*svo_get_node(Vector3 point, svo_t *svo) {
 	if (!is_point_valid(point, svo)) return (NULL);
 	return (svo_get_node_impl(point, svo));
 }
@@ -133,6 +133,11 @@ static bool	svo_insert(Vector3 point, void *data, svo_t *svo) {
 	return (true);
 }
 
+static void	*svo_get_data(Vector3 point, svo_t *svo) {
+	svo_node_t *node = svo_get_node(point, svo);
+	if (node) return (node->data);
+	return (0x00);
+}
 
 static bool	is_node_valid(svo_node_t *node) {
 	return node && node->data;

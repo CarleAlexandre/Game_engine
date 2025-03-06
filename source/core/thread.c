@@ -9,7 +9,7 @@
 
 #include <windows.h>
 
-void usleep(__int64 usec) {
+void hv_usleep(__int64 usec) {
     HANDLE timer; 
     LARGE_INTEGER ft; 
 
