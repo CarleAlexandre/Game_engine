@@ -1,6 +1,6 @@
 LIB		= HavenLib.a
 
-SRC		+= $(wildcard $(SRC_DIR)ai/*.c)
+SRC		+= $(wildcard $(SRC_DIR)entity/*.c)
 SRC		+= $(wildcard $(SRC_DIR)audio/*.c)
 SRC		+= $(wildcard $(SRC_DIR)core/*.c)
 SRC		+= $(wildcard $(SRC_DIR)debug/*.c)
@@ -43,7 +43,7 @@ $(BUILDDIR)$(LIB) : $(OBJ)
 
 $(OBJ): $(OBJ_DIR)%.o : $(SRC_DIR)%.c
 	mkdir -p $(OBJ_DIR)
-	mkdir -p $(OBJ_DIR)ai
+	mkdir -p $(OBJ_DIR)entity
 	mkdir -p $(OBJ_DIR)audio
 	mkdir -p $(OBJ_DIR)core
 	mkdir -p $(OBJ_DIR)debug

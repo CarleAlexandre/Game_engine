@@ -32,7 +32,7 @@ t_token	*get_file_token(char *data, const char *delim) {
 	token[0].data = tok;
 
 	while (i < 1000) {
-		str = strtok_r(data, delim, &save);
+		str = strtok_r(0x00, delim, &save);
 		if (!str) break;
 		size = save - data;
 		tok = malloc(size + 1);
@@ -42,10 +42,11 @@ t_token	*get_file_token(char *data, const char *delim) {
 		token[0].data = tok;
 		i++;
 	}
-	t_token *ret = (t_token *)malloc(sizeof(t_token) * i);
+	t_token *ret = (t_token *)malloc(sizeof(t_token) * (i + 1));
 	for (int k = 0; k < i; k++) {
 		ret[k] = token[k];
 	}
+	ret[i].data = 0x00;
 	return (ret);
 }
 
