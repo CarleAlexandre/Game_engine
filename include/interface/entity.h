@@ -26,19 +26,38 @@ typedef struct	s_entity_animation {
 }	entity_animation_t;
 
 typedef struct	s_entity {
-	entity_stats_t*		stats;
-	entity_info_t*		info;
-	entity_animation_t*	anim;
+	entity_stats_t stats;
+	entity_info_t info;
+	entity_animation_t anim;
 }	entity_t;
 
 /**
- * @brief 
+ * @brief initialize entities dynamic array
  * 
  */
 void	init_entities(void);
 
-bool		add_entity();
-entity_t	*get_entity();
+/**
+ * @brief add entity to list
+ * 
+ * @param entity 
+ * @return uint32_t 
+ */
+uint32_t	add_entity(entity_t entity);
+
+/**
+ * @brief Get a copy of the entity
+ * 
+ * @param idx 
+ * @return entity_t 
+ */
+entity_t	get_entity(unsigned int idx);
+
+/**
+ * @brief delete entity at index idx
+ * 
+ * @param idx 
+ */
 void		del_entity(unsigned int idx);
 
 #endif
