@@ -173,16 +173,6 @@ typedef	struct s_file {
 	filetype_enum	type;
 }	file_t;
 
-typedef struct s_stats {
-	int	health;
-	int	max_health;
-}	stats_t;
-
-typedef struct s_player {
-	Vector3	pos;
-	BoundingBox	bound;
-}	player_t;
-
 typedef struct s_object {
 	Vector3	pos;
 	float	scale;

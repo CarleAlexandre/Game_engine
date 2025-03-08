@@ -1,5 +1,7 @@
-#ifndef ENTITY_SYSTEM
-# define ENTITY_SYSTEM
+#ifndef	ENTITY_IMPL
+# define ENTITY_IMPL
+
+//entity have pointer to copenent, when new entity, aloocate more space on needed copenent array and return pointer to set it into entity struct
 
 #include <stddef.h>
 #include <stdint.h>
@@ -30,15 +32,5 @@ typedef struct	s_entity {
 	entity_info_t*		info;
 	entity_animation_t*	anim;
 }	entity_t;
-
-/**
- * @brief 
- * 
- */
-void	init_entities(void);
-
-bool		add_entity();
-entity_t	*get_entity();
-void		del_entity(unsigned int idx);
 
 #endif
