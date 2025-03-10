@@ -1,5 +1,5 @@
-#ifndef CORE_H
-# define CORE_H
+#ifndef HAVEN_THREAD_H
+# define HAVEN_THREAD_H
 
 #include <stdbool.h>
 #include <stdint.h>

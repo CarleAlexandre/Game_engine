@@ -1,6 +1,15 @@
-#include <engine.h>
 
-gbuffer_t	load_gbuffer(int width, int height, unsigned int shader_id) {
+
+typedef struct s_gbuffer{
+	unsigned int	framebuffer;
+	unsigned int	positionTexture;
+	unsigned int	normalTexture;
+	unsigned int	albedoSpecTexture;
+	unsigned int	depthRenderbuffer;
+	unsigned int	zTexture;
+}	gbuffer_t;
+
+d_gbuffer(int width, int height, unsigned int shader_id) {
 	gbuffer_t buffer = {0};
 
 	buffer.framebuffer = rlLoadFramebuffer();

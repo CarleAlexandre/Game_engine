@@ -1,5 +1,5 @@
-#ifndef ENTITY_SYSTEM
-# define ENTITY_SYSTEM
+#ifndef HAVEN_ENTITY_H
+# define HAVEN_ENTITY_H
 
 #include <stddef.h>
 #include <stdint.h>

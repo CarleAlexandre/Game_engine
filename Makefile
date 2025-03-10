@@ -6,7 +6,9 @@ SRC		+= $(wildcard $(SRC_DIR)core/*.c)
 SRC		+= $(wildcard $(SRC_DIR)debug/*.c)
 # SRC		+= $(wildcard $(SRC_DIR)networking/*.c)
 SRC		+= $(wildcard $(SRC_DIR)phyic/*.c)
+SRC		+= $(wildcard $(SRC_DIR)item/*.c)
 SRC		+= $(wildcard $(SRC_DIR)render/*.c)
+SRC		+= $(wildcard $(SRC_DIR)voxel/*.c)
 SRC		+= $(wildcard $(SRC_DIR)scene/*.c)
 
 OBJ		= $(SRC:$(SRC_DIR)%.c=$(OBJ_DIR)%.o)
@@ -17,7 +19,6 @@ EXEC_SRC	= $(SRC_DIR)main.c
 
 EXEC_OBJ	= $(EXEC_SRC:%.c=%.o)
 
-
 INCLUDE		= -I include
 
 BUILDDIR	= build/
@@ -25,14 +26,14 @@ OBJ_DIR		= obj/
 SRC_DIR		= source/
 
 CC = gcc
-CFLAGS = -std=c99
+CFLAGS = -std=c99 -g
 
 ifeq ($(OS), Windows_NT)
 	INCLUDE += -I C:/mingw64/include
-	LIBS = -lraylib -lopengl32 -lgdi32 -lwinmm
+	LIBS = -lglfw -lvulkan -lgdi32 -lwinmm -lc
 else ifeq ($(shell uname -s), Linux)
 	CFLAGS += -fsanitize=address
-	LIBS = -lasan -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+	LIBS = -lasan -lglfw -lvulkan -lm -lpthread -ldl -lrt -lX11 -lc
 endif
 
 all:		lib editor
@@ -46,6 +47,8 @@ $(OBJ): $(OBJ_DIR)%.o : $(SRC_DIR)%.c
 	mkdir -p $(OBJ_DIR)entity
 	mkdir -p $(OBJ_DIR)audio
 	mkdir -p $(OBJ_DIR)core
+	mkdir -p $(OBJ_DIR)item
+	mkdir -p $(OBJ_DIR)voxel
 	mkdir -p $(OBJ_DIR)debug
 	mkdir -p $(OBJ_DIR)networking
 	mkdir -p $(OBJ_DIR)phyic

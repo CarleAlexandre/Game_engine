@@ -25,6 +25,8 @@ typedef struct	s_entity_info {
 
 typedef struct	s_entity_animation {
 //bones, mesh etc etc
+	int	size;
+	int	model_id;
 }	entity_animation_t;
 
 typedef struct	s_entity {
