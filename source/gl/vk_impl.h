@@ -1,9 +1,9 @@
 #ifndef VK_IMPL_H
 # define VK_IMPL_H
 
-# include <vulkan/vulkan.h>
-#define GLFW_INCLUDE_VULKAN
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+#include <vulkan/vulkan.h>
 
 # include <stddef.h>
 # include <stdint.h>
@@ -27,6 +27,5 @@ typedef struct s_swapchainsupportdetails {
 	uint32_t presentModesCount;
 	VkPresentModeKHR *presentModes;
 } swapChainSupportDetails;
-
 
 #endif

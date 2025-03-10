@@ -49,6 +49,19 @@ linux:
 mac os:
 
 - not supported for now
+___
+
+## DESIGN
+
+every function should be like this:
+
+	[haven]_[module]_[submodule]_[use]();
+
+	ex:
+
+	haven_alloc_pool_init();
+	or
+	haven_thread_mgr_init();
 
 ___
 

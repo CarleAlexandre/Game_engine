@@ -5,4 +5,9 @@
 #include <glfw/glfw3.h>
 #include <glad.h>
 
+# include <stddef.h>
+# include <stdint.h>
+# include <stdbool.h>
+# include <stdlib.h>
+
 #endif

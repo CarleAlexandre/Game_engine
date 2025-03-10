@@ -1,25 +1,10 @@
 #include <pthread.h>
-#include <time.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <data_type/queue.h>
-
-#include <windows.h>
-
-void hv_usleep(__int64 usec) {
-    HANDLE timer; 
-    LARGE_INTEGER ft; 
-
-    ft.QuadPart = -(10*usec); // Convert to 100 nanosecond interval, negative value indicates relative time
-
-    timer = CreateWaitableTimer(NULL, TRUE, NULL); 
-    SetWaitableTimer(timer, &ft, 0, NULL, NULL, 0); 
-    WaitForSingleObject(timer, INFINITE); 
-    CloseHandle(timer); 
-}
 
 typedef struct	s_task {
 	void	*(*func)(void *);
@@ -47,35 +32,12 @@ static struct {
 	pthread_t	workers[32];
 }	thread_mgr;
 
-void	*worker_function(void *arg);
-
-/*
-	init thread_mgr and worker
-*/
-void	init_thread_mgr() {
-	init_queue(&thread_mgr.async_tasks, sizeof(task_t));
-	init_queue(&thread_mgr.sync_tasks, sizeof(task_t));
-	init_queue(&thread_mgr.completed_tasks, sizeof(int));
-
-	pthread_mutex_init(&thread_mgr.async_mutex, NULL);
-	pthread_mutex_init(&thread_mgr.sync_mutex, NULL);
-	pthread_mutex_init(&thread_mgr.status_mtx, NULL);
-	pthread_mutex_init(&thread_mgr.running_mtx, NULL);
-
-	thread_mgr.running = true;
-	thread_mgr.next_task_id = 1;
-
-	for (int i = 0; i < 32; i++) {
-		pthread_create(&thread_mgr.workers[i], NULL, worker_function, NULL);
-	}
-}
-
 /* 
 	worker function
 	need to be careful with waiting usleep could be too long or short
 
 */
-void	*worker_function(void *arg) {
+static void	*worker_function(void *arg) {
 	(void)arg;
 
 	bool run = true;
@@ -121,7 +83,7 @@ void	*worker_function(void *arg) {
 /*
 	add task to pool, data inside arg should be used as input and output
 */
-int	add_task_to_pool(void *(*func)(void *), void *arg, bool is_synced) {
+int	haven_thread_task_add(void *(*func)(void *), void *arg, bool is_synced) {
 	task_t task = {
 		.func = func,
 		.arg = arg,
@@ -147,7 +109,7 @@ int	add_task_to_pool(void *(*func)(void *), void *arg, bool is_synced) {
 }
 
 //not to rework as i just need to check if first data == id, then pop and return true else return false
-bool	check_task_status(int task_id) {
+bool	haven_thread_task_status(int task_id) {
 	pthread_mutex_lock(&thread_mgr.status_mtx);
 
 	int *completed_ids = thread_mgr.completed_tasks.data;
@@ -166,8 +128,29 @@ bool	check_task_status(int task_id) {
 	return (false);
 }
 
+/*
+	init thread_mgr and worker
+*/
+void	haven_thread_mgr_init() {
+	init_queue(&thread_mgr.async_tasks, sizeof(task_t));
+	init_queue(&thread_mgr.sync_tasks, sizeof(task_t));
+	init_queue(&thread_mgr.completed_tasks, sizeof(int));
+
+	pthread_mutex_init(&thread_mgr.async_mutex, NULL);
+	pthread_mutex_init(&thread_mgr.sync_mutex, NULL);
+	pthread_mutex_init(&thread_mgr.status_mtx, NULL);
+	pthread_mutex_init(&thread_mgr.running_mtx, NULL);
+
+	thread_mgr.running = true;
+	thread_mgr.next_task_id = 1;
+
+	for (int i = 0; i < 32; i++) {
+		pthread_create(&thread_mgr.workers[i], NULL, worker_function, NULL);
+	}
+}
+
 //raise stopping flag to all thread then wait for them to close
-void	close_thread_mgr() {
+void	haven_thread_mgr_close() {
 	pthread_mutex_lock(&thread_mgr.running_mtx);
 	thread_mgr.running = false;
 	pthread_mutex_unlock(&thread_mgr.running_mtx);
