@@ -1,5 +1,12 @@
 #include "interface/haven_core.h"
 
+// #define CR_HOST
+// #include <extern/cr.h>
+
+void	hot_reload_game() {
+
+}
+
 int main(int ac, char *av[]) {
 	haven_thread_mgr_init();
 	

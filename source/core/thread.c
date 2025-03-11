@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <data_type/queue.h>
+#include <interface/haven_time.h>
 
 typedef struct	s_task {
 	void	*(*func)(void *);
@@ -45,14 +46,12 @@ static void	*worker_function(void *arg) {
 		task_t task;
 		bool found_task = false;
 
-		// Check sync tasks first
 		pthread_mutex_lock(&thread_mgr.sync_mutex);
 		if (pop_queue(&thread_mgr.sync_tasks, &task) == 0) {
 			found_task = true;
 		}
 		pthread_mutex_unlock(&thread_mgr.sync_mutex);
 
-		// If no sync task, check async tasks
 		if (!found_task) {
 			pthread_mutex_lock(&thread_mgr.async_mutex);
 			if (pop_queue(&thread_mgr.async_tasks, &task) == 0) {
@@ -62,16 +61,13 @@ static void	*worker_function(void *arg) {
 		}
 
 		if (found_task) {
-			// Execute task
 			task.result = task.func(task.arg);
 			
-			// Mark task as completed
 			pthread_mutex_lock(&thread_mgr.status_mtx);
 			push_queue(&thread_mgr.completed_tasks, &task.id);
 			pthread_mutex_unlock(&thread_mgr.status_mtx);
 		} else {
-			// Sleep briefly to prevent busy waiting need to adjust if needed
-			usleep(1000);
+			haven_time_usleep(1000);
 		}
 		pthread_mutex_lock(&thread_mgr.running_mtx);
 		run = thread_mgr.running;
@@ -149,7 +145,9 @@ void	haven_thread_mgr_init() {
 	}
 }
 
-//raise stopping flag to all thread then wait for them to close
+/*
+	raise stopping flag to all thread then wait for them to close
+*/
 void	haven_thread_mgr_close() {
 	pthread_mutex_lock(&thread_mgr.running_mtx);
 	thread_mgr.running = false;
