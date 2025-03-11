@@ -10,4 +10,7 @@
 # include <stdbool.h>
 # include <stdlib.h>
 
+#include <interface/haven_io.h>
+#include <interface/haven_time.h>
+
 #endif

@@ -1,9 +1,10 @@
 #include "io_impl.h"
 
-char	*file_read(const char* filename) {
-	FILE *file;
-	char data[BUFFER_SIZE];
-	char *ret_buffer = 0x00;
+char	*haven_file_read(const char* filename) {
+	return (0x00);
+	FILE	*file = {0};
+	char	data[BUFFER_SIZE] = {0};
+	char	*ret_buffer = 0x00;
 
 	file = fopen(filename, "r");
 	fread(data, 1, BUFFER_SIZE, file);
@@ -11,41 +12,14 @@ char	*file_read(const char* filename) {
 	return (ret_buffer);
 }
 
-void	file_write() {
-}
-
-void	file_get_header() {
-
-}
-
-char	*file_load(const char *filename) {
-
-}
-
-void	file_unload(char *data) {
-
-}
-
-int	file_save(const char *data, size_t data_length, const char *filename, bool append) {
+void	haven_file_write(const char *data, size_t data_length, const char *filename, bool append) {
 	FILE *file = {0};
 	
 	file = fopen(filename, append ? "a" : "w");
-	if (!fwrite(file, 1, data_length, data))
-		return (-1);
+	fwrite(file, 1, data_length, data);
 	fclose(file);
-	return (0);
 }
 
-/*
-for terminal use
-static FILE	*term_in;
-static FILE	*term_out;
-
-void	term_read() {
-	term_out = fdopen(1, "w");
+int	haven_cmd_log(const char *stat, const char *desc, const int line) {
+	return (printf("%s : %s. %i", stat, desc, line));
 }
-
-void	term_write() {
-	term_in = fdopen(0, "r");
-}
-*/
