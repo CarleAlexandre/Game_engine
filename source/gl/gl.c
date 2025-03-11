@@ -207,5 +207,5 @@ void	haven_opengl_shader_begin(GLuint shader_id) {
 }
 
 void	haven_opengl_shader_end() {
-
+	glUseProgram(0);
 }
