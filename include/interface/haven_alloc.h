@@ -12,16 +12,23 @@
 // Memory System Core
 // ================================================================
 
-
-typedef struct {
-	size_t	total_allocated;
-	size_t	total_freed;
-	uint32_t	allocation_count;
-}	HavenMemoryStats;
-
+/**
+ * @brief 
+ * 
+ */
 void	haven_memory_system_init();
+
+/**
+ * @brief 
+ * 
+ */
 void	haven_memory_system_shutdown();
-HavenMemoryStats	haven_memory_system_stats();
+
+/**
+ * @brief 
+ * 
+ */
+void	haven_memory_system_print();
 
 // ================================================================
 // Stack Allocator (Temporary/Fast)
@@ -44,23 +51,56 @@ void	*haven_stack_alloc(size_t size, size_t alignment);
 void	haven_stack_reset(void);
 
 // ================================================================
-// Pool Allocator (Fixed-Size Objects)
+// Pool Allocator (Fixed-Size Objects) WIP
 // ================================================================
+
+/**
+ * @brief 
+ * 
+ */
 typedef struct {
-    uint8_t* memory;
-    size_t object_size;
-    size_t alignment;
-    uint32_t capacity;
-    void* free_list;
+	size_t		object_size;
+	size_t		alignment;
+	uint8_t*	memory;
+	void*		free_list;
+	uint32_t	capacity;
 } HavenPoolAllocator;
 
-HavenPoolAllocator* haven_pool_create(size_t object_size, size_t alignment, uint32_t capacity);
-void* haven_pool_alloc(HavenPoolAllocator* allocator);
-void haven_pool_free(HavenPoolAllocator* allocator, void* ptr);
-void haven_pool_destroy(HavenPoolAllocator* allocator);
+/**
+ * @brief create a pool object, with initial capacity
+ * 
+ * @param object_size 
+ * @param alignment 
+ * @param capacity 
+ * @return HavenPoolAllocator* 
+ */
+HavenPoolAllocator*	haven_pool_create(size_t object_size, size_t alignment, uint32_t capacity);
+
+/**
+ * @brief 
+ * 
+ * @param allocator 
+ */
+void	haven_pool_destroy(HavenPoolAllocator* allocator);
+
+/**
+ * @brief 
+ * 
+ * @param allocator 
+ * @return void* 
+ */
+void*	haven_pool_alloc(HavenPoolAllocator* allocator);
+
+/**
+ * @brief 
+ * 
+ * @param allocator 
+ * @param ptr 
+ */
+void	haven_pool_free(HavenPoolAllocator* allocator, void* ptr);
 
 // ================================================================
-// Free-List Allocator (Dynamic-Sized)
+// Free-List Allocator (Dynamic-Sized) WIP
 // ================================================================
 typedef struct {
     uint8_t* memory;
@@ -68,10 +108,17 @@ typedef struct {
     void* head;
 } HavenFreeListAllocator;
 
+/**
+ * @brief 
+ * 
+ * @param size 
+ * @return HavenFreeListAllocator* 
+ */
 HavenFreeListAllocator* haven_freelist_create(size_t size);
+void haven_freelist_destroy(HavenFreeListAllocator* allocator);
+
 void* haven_freelist_alloc(HavenFreeListAllocator* allocator, size_t size, size_t alignment);
 void haven_freelist_free(HavenFreeListAllocator* allocator, void* ptr);
-void haven_freelist_destroy(HavenFreeListAllocator* allocator);
 
 // ================================================================
 // Vulkan/OpenGL Aware Allocators
