@@ -5,5 +5,6 @@
 #include "haven_thread.h"
 #include "haven_math.h"
 #include "haven_io.h"
+#include "haven_time.h"
 
 #endif
