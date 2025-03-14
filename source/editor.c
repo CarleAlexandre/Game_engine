@@ -116,10 +116,11 @@ void	update_editor_input(bool *term_open) {
 
 int	main(void) {
 
+	SetWindowState(FLAG_BORDERLESS_WINDOWED_MODE | FLAG_WINDOW_RESIZABLE);
 	InitWindow(1920, 1080, "Haven Engine");
 
 	RenderTexture2D fbo;
-	GuiLoadStyle("include/style_terminal.rgs");
+	GuiLoadStyle("assets/style_terminal.rgs");
 	fbo = LoadRenderTexture(GetScreenWidth() - 400, GetScreenHeight() - 30);
 	bool show_term = false;
 

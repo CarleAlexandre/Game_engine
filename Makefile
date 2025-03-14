@@ -1,79 +1,79 @@
-LIB		= HavenLib.a
-
-SRC		+= $(wildcard $(SRC_DIR)entity/*.c)
-SRC		+= $(wildcard $(SRC_DIR)audio/*.c)
-SRC		+= $(wildcard $(SRC_DIR)core/*.c)
-SRC		+= $(wildcard $(SRC_DIR)debug/*.c)
-# SRC		+= $(wildcard $(SRC_DIR)networking/*.c)
-SRC		+= $(wildcard $(SRC_DIR)phyic/*.c)
-SRC		+= $(wildcard $(SRC_DIR)item/*.c)
-SRC		+= $(wildcard $(SRC_DIR)render/*.c)
-SRC		+= $(wildcard $(SRC_DIR)voxel/*.c)
-SRC		+= $(wildcard $(SRC_DIR)scene/*.c)
-
-OBJ		= $(SRC:$(SRC_DIR)%.c=$(OBJ_DIR)%.o)
-
-EXEC		= Haven Engine
-
-EXEC_SRC	= $(SRC_DIR)main.c
-
-EXEC_OBJ	= $(EXEC_SRC:%.c=%.o)
-
-INCLUDE		= -I include
-
-BUILDDIR	= build/
-OBJ_DIR		= obj/
-SRC_DIR		= source/
-
+# Compiler and flags
 CC = gcc
 CFLAGS = -std=c99 -g
+LDFLAGS = 
 
+# Directories
+BUILDDIR = build/
+OBJ_DIR = obj/
+SRC_DIR = source/
+
+# Library
+LIB = HavenLib.a
+
+# Sources and objects for the library
+SRC = $(wildcard $(SRC_DIR)entity/*.c) \
+      $(wildcard $(SRC_DIR)audio/*.c) \
+      $(wildcard $(SRC_DIR)core/*.c) \
+      $(wildcard $(SRC_DIR)debug/*.c) \
+      $(wildcard $(SRC_DIR)physics/*.c) \
+      $(wildcard $(SRC_DIR)item/*.c) \
+      $(wildcard $(SRC_DIR)render/*.c) \
+      $(wildcard $(SRC_DIR)scene/*.c)
+OBJ = $(SRC:$(SRC_DIR)%.c=$(OBJ_DIR)%.o)
+
+# Executables
+EXEC = Game
+EDITOR = HavenEditor  # Removed space to avoid issues
+
+EXEC_SRC = $(SRC_DIR)main.c
+EDITOR_SRC = $(SRC_DIR)editor.c
+
+EXEC_OBJ = $(EXEC_SRC:$(SRC_DIR)%.c=$(OBJ_DIR)%.o)
+EDITOR_OBJ = $(EDITOR_SRC:$(SRC_DIR)%.c=$(OBJ_DIR)%.o)
+
+# Includes and libraries
+INCLUDE = -Iinclude
+
+# Platform-specific configurations
 ifeq ($(OS), Windows_NT)
-	INCLUDE += -I C:/mingw64/include
-	LIBS = -lglfw -lvulkan -lgdi32 -lwinmm -lc
+    INCLUDE += -IC:/mingw64/include
+    LIBS = -lglfw -lvulkan -lraylib -lgl -lgdi32 -lwinmm
 else ifeq ($(shell uname -s), Linux)
-	CFLAGS += -fsanitize=address
-	LIBS = -lasan -lglfw -lvulkan -lm -lpthread -ldl -lrt -lX11 -lc
+    CFLAGS += -fsanitize=address
+    LDFLAGS += -fsanitize=address
+    LIBS = -lglfw -lvulkan -lm -lpthread -ldl -lrt -lX11
 endif
 
-all:		lib editor
+# Default target
+all: lib $(EXEC) $(EDITOR)
+.PHONY: all lib $(EXEC) $(EDITOR) clean fclean re
 
-$(BUILDDIR)$(LIB) : $(OBJ)
-	mkdir -p $(BUILDDIR)
-	ar rcs -o $@ $(OBJ)
+# Pattern rule for object files
+$(OBJ_DIR)%.o: $(SRC_DIR)%.c
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
-$(OBJ): $(OBJ_DIR)%.o : $(SRC_DIR)%.c
-	mkdir -p $(OBJ_DIR)
-	mkdir -p $(OBJ_DIR)entity
-	mkdir -p $(OBJ_DIR)audio
-	mkdir -p $(OBJ_DIR)core
-	mkdir -p $(OBJ_DIR)item
-	mkdir -p $(OBJ_DIR)voxel
-	mkdir -p $(OBJ_DIR)debug
-	mkdir -p $(OBJ_DIR)networking
-	mkdir -p $(OBJ_DIR)phyic
-	mkdir -p $(OBJ_DIR)render
-	mkdir -p $(OBJ_DIR)scene
-	$(CC) $(CFLAGS) $(LIBS) ${INCLUDE} -c $< -o $@
+# Static library
+$(BUILDDIR)$(LIB): $(OBJ)
+	@mkdir -p $(BUILDDIR)
+	ar rcs $@ $^
 
+# Game executable
+$(EXEC): $(EXEC_OBJ) $(BUILDDIR)$(LIB)
+	@mkdir -p $(BUILDDIR)
+	$(CC) $(LDFLAGS) $^ $(LIBS) -o $(BUILDDIR)$@
 
-$(BUILDDIR)$(EXEC) : $(OBJ_DIR)$(EXEC_OBJ)
-	mkdir -p $(BUILDDIR)
-	$(CC) $(OBJ_DIR)$(EXEC_OBJ) $(BUILDDIR)$(LIB) $(LIBS) -o $@
+# Editor executable
+$(EDITOR): $(EDITOR_OBJ) $(BUILDDIR)$(LIB)
+	@mkdir -p $(BUILDDIR)
+	$(CC) $(LDFLAGS) $^ $(LIBS) -o $(BUILDDIR)$@
 
-$(EXEC_OBJ): $(OBJ_DIR)%.o : $(SRC_DIR)%.c
-	mkdir -p $(OBJ_DIR)
-	$(CC) $(CFLAGS) ${INCLUDE} -c $< -o $@
-
-
-lib:		$(BUILDDIR)${LIB}
-
-editor:		$(BUILDDIR)$(EXEC)
-
+# Cleanup
 clean:
-	rm -rf $(OBJ)
+	rm -rf $(OBJ_DIR)
 
-fclean:		clean
+fclean: clean
 	rm -rf $(BUILDDIR)
 
-re:		fclean all
+re: fclean all

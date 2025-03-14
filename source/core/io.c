@@ -16,7 +16,7 @@ void	haven_file_write(const char *data, size_t data_length, const char *filename
 	FILE *file = {0};
 	
 	file = fopen(filename, append ? "a" : "w");
-	fwrite(file, 1, data_length, data);
+	fwrite(data, 1, data_length, file);
 	fclose(file);
 }
 

@@ -164,30 +164,4 @@ typedef struct s_projectile {
 	int	lifespan;
 }	projectile_t;
 
-typedef struct	player_info_s {
-	bool			show_inventory;
-	Vector3			pos;
-	tool_bar_t		toolbar;
-	inventory_t		inventory;
-	unsigned long long	uid;
-}	player_info_t;
-
-/*
-	VOXEL
-*/
-
-/*
-	ENGINE
-*/
-
-
-typedef struct s_engine {
-	Shader		shader[8];
-	Camera3D	camera;
-	gbuffer_t	gbuffer;
-	bool		debug;
-	sv_player_t	player;
-	Model		skybox;
-}	engine_t;
-
 #endif
