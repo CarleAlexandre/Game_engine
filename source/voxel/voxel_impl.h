@@ -1,7 +1,11 @@
 #ifndef VOXEL_IMPL
 # define VOXEL_IMPL
 
+#include <raylib.h>
+#include <raymath.h>
 #include <stdint.h>
+#include <FastNoiseLite.h>
+#include <rcamera.h>
 
 # define VOXEL_SIZE 0.5
 # define CHUNK_SIZE 64

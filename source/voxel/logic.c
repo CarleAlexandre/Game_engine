@@ -1,4 +1,4 @@
-#include <engine.h>
+#include "voxel_impl.h"
 
 Vector3	world_to_voxel(const Vector3 worldPos) {
 	return ((Vector3){floorf(worldPos.x * 2.0f), floorf(worldPos.y * 2.0f), floorf(worldPos.z * 2.0f)});

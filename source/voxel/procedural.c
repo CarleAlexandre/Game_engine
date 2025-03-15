@@ -1,5 +1,6 @@
 #define FNL_IMPL
-#include <engine.h>
+
+#include "voxel_impl.h"
 #include <stdio.h>
 
 void	island_mask(Image *input) {
