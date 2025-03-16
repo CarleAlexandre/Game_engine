@@ -9,9 +9,9 @@
 #include <math.h>
 
 typedef struct	haven_octree_node_s {
-	bool			isleaf;
-	void			*data;
-	haven_octree_node_t	*children[8];
+	bool				isleaf;
+	void				*data;
+	struct haven_octree_node_s	*children[8];
 }	haven_octree_node_t;
 
 typedef	struct	haven_octree_s {
@@ -233,7 +233,7 @@ void	haven_darray_destroy(haven_darray_t* array);
  */
 void	haven_darray_range_remove(haven_darray_t* array, unsigned int start, unsigned int end);
 
-/**
+/*
  * @brief 
  * 
  * @param array 
@@ -241,7 +241,7 @@ void	haven_darray_range_remove(haven_darray_t* array, unsigned int start, unsign
  * @param src_end 
  * @param dst 
  */
-void	haven_darray_range_move(haven_darray_t* array, unsigned int src_start, unsigned int src_end, unsigned int dst);
+//void	haven_darray_range_move(haven_darray_t* array, unsigned int src_start, unsigned int src_end, unsigned int dst);
 
 /**
  * @brief 

@@ -1,4 +1,5 @@
-#include <engine.h>
+
+#include <raylib.h>
 #define RAYGUI_IMPLEMENTATION
 #include <raygui.h>
 
@@ -24,13 +25,13 @@ void	startscreen() {
 // ui
 
 void	top_bar() {
-	GuiStatusBar((Rectangle){0, 0, GetScreenWidth(), 30}, "");
+	GuiStatusBar((Rectangle){0, 0, (float)GetScreenWidth(), 30}, "");
 	if (GuiDropdownBox((Rectangle){0, 0, 120, 30}, "map;item;obj;ui", &editor_mode, mode_enable))
 		mode_enable = !mode_enable;
 }
 
 void	left_bar() {
-	GuiDummyRec((Rectangle){0, 30, 200, GetScreenHeight() - 30}, "Debug");
+	GuiDummyRec((Rectangle){0, 30, 200, (float)GetScreenHeight() - 30}, "Debug");
 }
 
 void	right_bar() {
@@ -38,8 +39,8 @@ void	right_bar() {
 	static bool noise_type = false;
 	static Vector2 scroll;
 	static Rectangle view;
-	GuiScrollPanel((Rectangle){GetScreenWidth() - 200, 30, 200, GetScreenHeight() - 30}, "Setting", (Rectangle){0, 0, 180, GetScreenHeight() - 60}, &scroll, &view);
-	BeginScissorMode(view.x, view.y, view.width, view.height);
+	GuiScrollPanel((Rectangle){(float)GetScreenWidth() - 200, 30, 200, (float)GetScreenHeight() - 30}, "Setting", (Rectangle){0, 0, 180, (float)GetScreenHeight() - 60}, &scroll, &view);
+	BeginScissorMode((int)view.x, (int)view.y, (int)view.width, (int)view.height);
 	EndScissorMode();
 }
 

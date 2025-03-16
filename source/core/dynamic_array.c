@@ -1,3 +1,5 @@
+
+# include <stdint.h>
 # include <stdlib.h>
 # include <string.h>
 # include <assert.h>
@@ -11,21 +13,22 @@
  * 
  */
 typedef struct haven_darray_s {
-	void*		data;
-	unsigned int	size;// Number of elements in the array
-	unsigned int	capacity;// Total capacity of the array (in bytes)
-	unsigned char	data_size;// Size of each element (in bytes)
+	char	data_size;// Size of each element (in bytes)
+	void*	data;
+	size_t	size;// Number of elements in the array
+	size_t	capacity;// Total capacity of the array (in bytes)
+	size_t	alignement;//Alignment requirement (must be a power of two)
 }	haven_darray_t;
 
-void	haven_darray_add(haven_darray_t *array, void *element) {
+void	haven_darray_add(haven_darray_t *array, const void *element) {
 	if ((array->size + 1) * array->data_size >= array->capacity) {
-		unsigned int new_capacity = (unsigned int)(array->capacity * ALLOC_STEP);
-		void *tmp = malloc(new_capacity);
+		const uint32_t new_capacity = (unsigned int)(array->capacity * ALLOC_STEP);
+		void *tmp = _aligned_malloc(new_capacity, array->alignement);
 		assert(tmp);
 
 		memcpy(tmp, array->data, array->size * array->data_size);
 
-		free(array->data);
+		_aligned_free(array->data);
 		array->data = tmp;
 		array->capacity = new_capacity;
 	}
@@ -34,7 +37,7 @@ void	haven_darray_add(haven_darray_t *array, void *element) {
 	array->size++;
 }
 
-void	haven_darray_del(haven_darray_t *array, unsigned int idx) {
+void	haven_darray_del(haven_darray_t *array, const unsigned int idx) {
 	if (idx >= array->size) return;
 
 	memmove((unsigned char *)array->data + idx * array->data_size,
@@ -43,13 +46,13 @@ void	haven_darray_del(haven_darray_t *array, unsigned int idx) {
 	array->size--;
 
 	if (array->size * array->data_size < array->capacity * 0.5 && array->capacity > 8 * array->data_size) {
-		unsigned int new_capacity = (unsigned int)(array->capacity * 0.5);
-		void *tmp = malloc(new_capacity);
+		const uint32_t new_capacity = (unsigned int)(array->capacity * 0.5);
+		void *tmp = _aligned_malloc(new_capacity, array->alignement);
 		assert(tmp);
 
 		memcpy(tmp, array->data, array->size * array->data_size);
 
-		free(array->data);
+		_aligned_free(array->data);
 		array->data = tmp;
 		array->capacity = new_capacity;
 	}
@@ -60,32 +63,32 @@ void	haven_darray_clear(haven_darray_t *array) {
 	array->size = 0;
 }
 
-haven_darray_t*	init_dyn_array(unsigned char data_size) {
+haven_darray_t*	init_dyn_array(const char data_size, const size_t alignement) {
 	haven_darray_t* array = (haven_darray_t *)malloc(sizeof(haven_darray_t));
 	assert(array);
 
-	array->data = malloc(data_size * 8);
+	array->data = _aligned_malloc(data_size * 8, array->alignement);
 	assert(array->data);
 
 	array->capacity = data_size * 8;
 	array->data_size = data_size;
 	array->size = 0;
 
-	dyn_clear(array);
+	haven_darray_clear(array);
 	return array;
 }
 
 void	haven_darray_destroy(haven_darray_t* array) {
-	free(array->data);
+	_aligned_free(array->data);
 	free(array);
 }
 
-void	haven_darray_range_remove(haven_darray_t* array, unsigned int start, unsigned int end) {
+void	haven_darray_range_remove(haven_darray_t* array, const uint32_t start, const uint32_t end) {
 	if (start >= array->size || end >= array->size || start > end) {
 	    return;
 	}
 
-	unsigned int num_elements_to_remove = end - start + 1;
+	const uint32_t num_elements_to_remove = end - start + 1;
 	memmove(
 		(unsigned char *)array->data + start * array->data_size,
 		(unsigned char *)array->data + (end + 1) * array->data_size,
@@ -94,36 +97,37 @@ void	haven_darray_range_remove(haven_darray_t* array, unsigned int start, unsign
 	array->size -= num_elements_to_remove;
 
 	if (array->size * array->data_size < array->capacity * 0.5 && array->capacity > 8 * array->data_size) {
-		unsigned int new_capacity = (unsigned int)(array->capacity * 0.5);
-		void *tmp = malloc(new_capacity);
+		const uint32_t new_capacity = (unsigned int)(array->capacity * 0.5);
+		void *tmp = _aligned_malloc(new_capacity, array->alignement);
 		assert(tmp);
 
 		memcpy(tmp, array->data, array->size * array->data_size);
 
-		free(array->data);
+		_aligned_free(array->data);
 		array->data = tmp;
 		array->capacity = new_capacity;
 	}
 }
 
-void	haven_darray_range_move(haven_darray_t* array, unsigned int src_start, unsigned int src_end, unsigned int dst) {
+/*
+void	haven_darray_range_move(const haven_darray_t* array, const uint32_t src_start, const uint32_t src_end, const uint32_t dst) {
 	if (src_start >= array->size || src_end >= array->size || src_start > src_end || dst >= array->size) {
 		return;
 	}
 
-	unsigned int num_elements = src_end - src_start + 1;
+	const uint32_t num_elements = src_end - src_start + 1;
 
-	void *temp = malloc(num_elements * array->data_size);
+	void *temp = _aligned_malloc(num_elements * array->data_size, array->alignement);
 	assert(temp);
 
 	memcpy(temp, (unsigned char *)array->data + src_start * array->data_size, num_elements * array->data_size);
 
 	if (dst < src_start) {
-	memmove(
-		(unsigned char *)array->data + (dst + num_elements) * array->data_size,
-		(unsigned char *)array->data + dst * array->data_size,
-		(src_start - dst) * array->data_size
-	);
+		memmove(
+			(unsigned char *)array->data + (dst + num_elements) * array->data_size,
+			(unsigned char *)array->data + dst * array->data_size,
+			(src_start - dst) * array->data_size
+		);
 	} else if (dst > src_end) {
 		memmove(
 			(unsigned char *)array->data + src_start * array->data_size,
@@ -134,14 +138,16 @@ void	haven_darray_range_move(haven_darray_t* array, unsigned int src_start, unsi
 
 	memcpy((unsigned char *)array->data + dst * array->data_size, temp, num_elements * array->data_size);
 
-	free(temp);
+	_aligned_free(temp);
 }
+*/
 
-void	haven_darray_sort(haven_darray_t *array, int (*comparator)(const void *, const void *)) {
+void	haven_darray_sort(const haven_darray_t *array, int (*comparator)(const void *, const void *)) {
 	qsort(array->data, array->size, array->data_size, comparator);
 }
 
 //return a pointer to data idx;
-void*	haven_darray_get(haven_darray_t *array,unsigned int idx) {
-	return ((array->data + idx * array->data_size));
+void*	haven_darray_get(const haven_darray_t *array, const uint32_t idx) {
+	void *ret = (unsigned char *)array->data + (idx * array->data_size);
+	return (ret);
 }

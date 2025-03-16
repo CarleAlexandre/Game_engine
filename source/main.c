@@ -1,4 +1,4 @@
-#include "interface/haven_core.h"
+#include "haven/haven_core.h"
 
 #include <raylib.h>
 #define RAYGUI_IMPLEMENTATION
@@ -8,7 +8,7 @@ void	hot_reload_game() {
 
 }
 
-int main(int ac, char *av[]) {
+int main(const int ac, char *av[]) {
 	haven_memory_system_init();
 	haven_thread_mgr_init();
 	haven_time_init();
@@ -20,7 +20,12 @@ int main(int ac, char *av[]) {
 	HideCursor();
 	SetTargetFPS(ac == 2 ? atoi(av[1]) : 60);
 
-	while (!WindowShouldClose) {
+	while (!WindowShouldClose()) {
+		ClearBackground(RAYWHITE);
+
+		BeginDrawing();
+			DrawFPS(10, 10);
+		EndDrawing();
 
 		haven_time_update();
 		haven_stack_reset();

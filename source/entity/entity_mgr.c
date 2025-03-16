@@ -1,8 +1,9 @@
 #include "entity_impl.h"
-#include <data_type/dynamic_array.h>
+#include <haven/haven_type.h>
 #include <pthread.h>
+#include <string.h>
 
-dyn_array_t	*entities_array;
+haven_darray_t	*entities_array;
 pthread_mutex_t	entities_mtx;
 
 void	init_entities(void) {
@@ -12,8 +13,9 @@ void	init_entities(void) {
 
 uint32_t	add_entity(entity_t entity) {
 	pthread_mutex_lock(&entities_mtx);
-	dyn_add_elem(entities_array, (char *)&entity);
+	haven_darray_add(entities_array, (char *)&entity);
 	pthread_mutex_unlock(&entities_mtx);
+	return 0;
 }
 
 // should only copy enity not hold pointer for thread safety
@@ -21,7 +23,7 @@ entity_t	get_entity(unsigned int idx) {
 	entity_t ret;
 
 	pthread_mutex_lock(&entities_mtx);
-	entity_t *current = (entity_t *)dyn_get(entities_array, idx);
+	entity_t *current = (entity_t *)haven_darray_get(entities_array, idx);
 	memmove(&ret, current, sizeof(entity_t));
 	pthread_mutex_unlock(&entities_mtx);
 
@@ -30,6 +32,6 @@ entity_t	get_entity(unsigned int idx) {
 
 void	del_entity(unsigned int idx) {
 	pthread_mutex_lock(&entities_mtx);
-	dyn_del_elem(entities_array, idx);
+	haven_darray_del(entities_array, idx);
 	pthread_mutex_unlock(&entities_mtx);
 }

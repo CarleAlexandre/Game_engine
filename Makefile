@@ -1,6 +1,6 @@
 # Compiler and flags
 CC = gcc
-CFLAGS = -std=c99 -g
+CFLAGS = -std=c99 -g -Wall
 LDFLAGS = 
 
 # Directories

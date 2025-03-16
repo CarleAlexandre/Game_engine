@@ -4,8 +4,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <data_type/queue.h>
-#include <interface/haven_time.h>
+#include <haven/haven_type.h>
+#include <haven/haven_time.h>
 
 typedef struct	s_task {
 	void	*(*func)(void *);
@@ -16,10 +16,10 @@ typedef struct	s_task {
 }	task_t;
 
 static struct {
-	queue_t		async_tasks;
+	haven_squeue_t	async_tasks;
 	pthread_mutex_t	async_mutex;
 	
-	queue_t		sync_tasks;
+	haven_squeue_t	sync_tasks;
 	pthread_mutex_t sync_mutex;
 
 	
@@ -27,7 +27,7 @@ static struct {
 	pthread_mutex_t	running_mtx;
 	
 	int		next_task_id;
-	queue_t		completed_tasks;
+	haven_squeue_t	completed_tasks;
 	pthread_mutex_t	status_mtx;
 	
 	pthread_t	workers[32];
@@ -47,14 +47,14 @@ static void	*worker_function(void *arg) {
 		bool found_task = false;
 
 		pthread_mutex_lock(&thread_mgr.sync_mutex);
-		if (pop_queue(&thread_mgr.sync_tasks, &task) == 0) {
+		if (haven_squeue_pop(&thread_mgr.sync_tasks, &task) == 0) {
 			found_task = true;
 		}
 		pthread_mutex_unlock(&thread_mgr.sync_mutex);
 
 		if (!found_task) {
 			pthread_mutex_lock(&thread_mgr.async_mutex);
-			if (pop_queue(&thread_mgr.async_tasks, &task) == 0) {
+			if (haven_squeue_pop(&thread_mgr.async_tasks, &task) == 0) {
 				found_task = true;
 			}
 			pthread_mutex_unlock(&thread_mgr.async_mutex);
@@ -64,7 +64,7 @@ static void	*worker_function(void *arg) {
 			task.result = task.func(task.arg);
 			
 			pthread_mutex_lock(&thread_mgr.status_mtx);
-			push_queue(&thread_mgr.completed_tasks, &task.id);
+			haven_squeue_push(&thread_mgr.completed_tasks, &task.id);
 			pthread_mutex_unlock(&thread_mgr.status_mtx);
 		} else {
 			haven_time_usleep(1000);
@@ -93,11 +93,11 @@ int	haven_thread_task_add(void *(*func)(void *), void *arg, bool is_synced) {
 
 	if (is_synced) {
 		pthread_mutex_lock(&thread_mgr.sync_mutex);
-		push_queue(&thread_mgr.sync_tasks, &task);
+		haven_squeue_push(&thread_mgr.sync_tasks, &task);
 		pthread_mutex_unlock(&thread_mgr.sync_mutex);
 	} else {
 		pthread_mutex_lock(&thread_mgr.async_mutex);
-		push_queue(&thread_mgr.async_tasks, &task);
+		haven_squeue_push(&thread_mgr.async_tasks, &task);
 		pthread_mutex_unlock(&thread_mgr.async_mutex);
 	}
 
@@ -128,9 +128,9 @@ bool	haven_thread_task_status(int task_id) {
 	init thread_mgr and worker
 */
 void	haven_thread_mgr_init() {
-	init_queue(&thread_mgr.async_tasks, sizeof(task_t));
-	init_queue(&thread_mgr.sync_tasks, sizeof(task_t));
-	init_queue(&thread_mgr.completed_tasks, sizeof(int));
+	haven_squeue_init(&thread_mgr.async_tasks, sizeof(task_t));
+	haven_squeue_init(&thread_mgr.sync_tasks, sizeof(task_t));
+	haven_squeue_init(&thread_mgr.completed_tasks, sizeof(int));
 
 	pthread_mutex_init(&thread_mgr.async_mutex, NULL);
 	pthread_mutex_init(&thread_mgr.sync_mutex, NULL);
@@ -157,9 +157,9 @@ void	haven_thread_mgr_close() {
 		pthread_join(thread_mgr.workers[i], NULL);
 	}
 
-	cleanup_queue(&thread_mgr.async_tasks);
-	cleanup_queue(&thread_mgr.sync_tasks);
-	cleanup_queue(&thread_mgr.completed_tasks);
+	haven_squeue_destroy(&thread_mgr.async_tasks);
+	haven_squeue_destroy(&thread_mgr.sync_tasks);
+	haven_squeue_destroy(&thread_mgr.completed_tasks);
 
 	pthread_mutex_destroy(&thread_mgr.async_mutex);
 	pthread_mutex_destroy(&thread_mgr.sync_mutex);

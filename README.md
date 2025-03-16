@@ -49,6 +49,7 @@ linux:
 mac os:
 
 - not supported for now
+
 ___
 
 ## DESIGN
@@ -75,3 +76,12 @@ ___
 
 ___
 
+## TODO:
+
+ - setup d'un ide avec d3ebvugger (gdb)
+
+ - allocateur pour data_type (bump allocator pour dyn _ array ? )
+
+ - dynamic array (gestion de l'alignement memoire)
+
+___
