@@ -1,4 +1,5 @@
 #include <raygui.h>
+#include <stdlib.h>
 
 // void	draw_inventory(inventory_t inventory) {
 // 	//row = 6 item,
@@ -84,6 +85,35 @@ void	main_menu() {
 	//Multiplayer
 	//Setting
 	//leave
+    Rectangle screen = {0, 0, GetScreenWidth(), GetScreenHeight()};
+    Rectangle panel = {screen.width/2 - 150, screen.height/2 - 200, 300, 400};
+    
+    DrawRectangleRec(screen, DARKGRAY);
+    DrawRectangleRec(panel, LIGHTGRAY);
+    
+    // Title
+    DrawText("HAVEN", panel.x + 85, panel.y + 20, 40, BLACK);
+    
+    // Menu buttons
+    Vector2 buttonSize = {200, 40};
+    float startY = panel.y + 120;
+    float spacing = 60;
+    
+    if (GuiButton((Rectangle){panel.x + 50, startY, buttonSize.x, buttonSize.y}, "SOLO")) {
+        // Handle solo button press
+    }
+    
+    if (GuiButton((Rectangle){panel.x + 50, startY + spacing, buttonSize.x, buttonSize.y}, "MULTIPLAYER")) {
+        // Handle multiplayer button press  
+    }
+    
+    if (GuiButton((Rectangle){panel.x + 50, startY + spacing * 2, buttonSize.x, buttonSize.y}, "SETTINGS")) {
+        // Handle settings button press
+    }
+    
+    if (GuiButton((Rectangle){panel.x + 50, startY + spacing * 3, buttonSize.x, buttonSize.y}, "EXIT")) {
+        // Handle exit button press
+    }
 }
 
 void	setting_menu() {
@@ -92,4 +122,54 @@ void	setting_menu() {
 	//video
 	//gameplay
 	//back
+    Rectangle screen = {0, 0, GetScreenWidth(), GetScreenHeight()};
+    Rectangle panel = {screen.width/2 - 200, screen.height/2 - 250, 400, 500};
+    
+    DrawRectangleRec(screen, DARKGRAY);
+    DrawRectangleRec(panel, LIGHTGRAY);
+    
+    // Title
+    DrawText("SETTINGS", panel.x + 120, panel.y + 20, 40, BLACK);
+    
+    // Settings panels
+    Vector2 buttonSize = {300, 40};
+    float startY = panel.y + 100;
+    float spacing = 50;
+    
+    // UI Settings
+    DrawText("UI SETTINGS", panel.x + 20, startY, 20, BLACK);
+    GuiSlider((Rectangle){panel.x + 150, startY, buttonSize.x/2, 20}, "UI Scale:", NULL, 0.5f, 0.1f, 2.0f);
+    
+    // Controls
+    DrawText("CONTROLS", panel.x + 20, startY + spacing, 20, BLACK);
+    if (GuiButton((Rectangle){panel.x + 150, startY + spacing, buttonSize.x/2, 20}, "Rebind Keys")) {
+        // Handle key rebinding
+    }
+    
+    // Video Settings
+    DrawText("VIDEO", panel.x + 20, startY + spacing * 2, 20, BLACK);
+    GuiComboBox((Rectangle){panel.x + 150, startY + spacing * 2, buttonSize.x/2, 20}, "Low;Medium;High", 1);
+    
+    // Resolution
+    DrawText("RESOLUTION", panel.x + 20, startY + spacing * 3, 20, BLACK);
+    GuiComboBox((Rectangle){panel.x + 150, startY + spacing * 3, buttonSize.x/2, 20}, "800x600;1280x720;1920x1080", 1);
+    
+    // Fullscreen Toggle
+    DrawText("FULLSCREEN", panel.x + 20, startY + spacing * 4, 20, BLACK);
+    GuiCheckBox((Rectangle){panel.x + 150, startY + spacing * 4, 20, 20}, NULL, false);
+    
+    // Volume Controls
+    DrawText("MASTER VOLUME", panel.x + 20, startY + spacing * 5, 20, BLACK);
+    GuiSlider((Rectangle){panel.x + 150, startY + spacing * 5, buttonSize.x/2, 20}, NULL, NULL, 0.7f, 0.0f, 1.0f);
+    
+    DrawText("MUSIC", panel.x + 20, startY + spacing * 6, 20, BLACK);
+    GuiSlider((Rectangle){panel.x + 150, startY + spacing * 6, buttonSize.x/2, 20}, NULL, NULL, 0.5f, 0.0f, 1.0f);
+    
+    DrawText("SFX", panel.x + 20, startY + spacing * 7, 20, BLACK);
+    GuiSlider((Rectangle){panel.x + 150, startY + spacing * 7, buttonSize.x/2, 20}, NULL, NULL, 0.6f, 0.0f, 1.0f);
+    
+    // Back Button
+    if (GuiButton((Rectangle){panel.x + panel.width - 110, panel.y + panel.height - 40, 100, 30}, "BACK")) {
+        // Handle back button press
+    }
 }
