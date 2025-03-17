@@ -151,3 +151,106 @@ void*	haven_darray_get(const haven_darray_t *array, const uint32_t idx) {
 	void *ret = (unsigned char *)array->data + (idx * array->data_size);
 	return (ret);
 }
+
+
+void	haven_darray_foreach(haven_darray_t *array, void (*callback)(void *)) {
+	for (uint32_t i = 0; i < array->size; i++) {
+		callback(haven_darray_get(array, i));
+	}
+}
+
+#ifdef HAVEN_UNIT_TEST
+
+#include <assert.h>
+
+static void test_darray_init() {
+	haven_darray_t array;
+	haven_darray_init(&array, sizeof(int), 4, 8);
+	
+	assert(array.data != NULL);
+	assert(array.size == 0);
+	assert(array.capacity == 8);
+	assert(array.data_size == sizeof(int));
+	assert(array.alignement == 4);
+	
+	haven_darray_free(&array);
+}
+
+static void test_darray_push() {
+	haven_darray_t array;
+	haven_darray_init(&array, sizeof(int), 4, 2);
+	
+	int values[] = {1, 2, 3, 4};
+	
+	// Test pushing within initial capacity
+	haven_darray_push(&array, &values[0]);
+	haven_darray_push(&array, &values[1]);
+	assert(array.size == 2);
+	assert(array.capacity == 2);
+	
+	// Test capacity doubling
+	haven_darray_push(&array, &values[2]);
+	assert(array.size == 3);
+	assert(array.capacity == 4);
+	
+	// Verify values
+	int *data = array.data;
+	assert(data[0] == 1);
+	assert(data[1] == 2);
+	assert(data[2] == 3);
+	
+	haven_darray_free(&array);
+}
+
+static void test_darray_pop() {
+	haven_darray_t array;
+	haven_darray_init(&array, sizeof(int), 4, 4);
+	
+	int values[] = {1, 2, 3};
+	for (int i = 0; i < 3; i++) {
+		haven_darray_push(&array, &values[i]);
+	}
+	
+	int popped;
+	haven_darray_pop(&array, &popped);
+	assert(popped == 3);
+	assert(array.size == 2);
+	
+	haven_darray_free(&array);
+}
+
+static void test_darray_sort() {
+	haven_darray_t array;
+	haven_darray_init(&array, sizeof(int), 4, 4);
+	
+	int values[] = {3, 1, 4, 2};
+	for (int i = 0; i < 4; i++) {
+		haven_darray_push(&array, &values[i]);
+	}
+	
+	int compare(const void *a, const void *b) {
+		return (*(int*)a - *(int*)b);
+	}
+	
+	haven_darray_sort(&array, compare);
+	
+	int *data = array.data;
+	assert(data[0] == 1);
+	assert(data[1] == 2); 
+	assert(data[2] == 3);
+	assert(data[3] == 4);
+	
+	haven_darray_free(&array);
+}
+
+void haven_darray_run_tests() {
+	test_darray_init();
+	test_darray_push();
+	test_darray_pop();
+	test_darray_sort();
+	printf("All dynamic array tests passed!\n");
+}
+
+#endif // HAVEN_UNIT_TEST
+
+	

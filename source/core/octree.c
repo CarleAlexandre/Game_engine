@@ -1,10 +1,15 @@
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <cglm/cglm.h>
 #include <math.h>
+
+// Pre-calculated lookup table for child indices based on point position
+static const uint8_t CHILD_INDEX_TABLE[8][3] = {
+    {0, 0, 0}, {1, 0, 0}, {0, 1, 0}, {1, 1, 0},
+    {0, 0, 1}, {1, 0, 1}, {0, 1, 1}, {1, 1, 1}
+};
 
 typedef struct	haven_octree_node_s {
 	bool			isleaf;
@@ -17,6 +22,7 @@ typedef	struct	haven_octree_s {
 	int			element;
 	int			max_depth;
 	haven_octree_node_t	*root;
+	float			*node_sizes;  // Pre-calculated node sizes for each depth
 }	haven_octree_t;
 
 static bool	is_point_valid(vec3 point, haven_octree_t *svo) {
@@ -38,6 +44,7 @@ void	haven_octree_node_delete(haven_octree_node_t *node) {
 void	delete_svo(haven_octree_t *svo) {
 	if (svo) {
 		haven_octree_node_delete(svo->root);
+		free(svo->node_sizes);
 		free(svo);
 	}
 }
@@ -49,10 +56,44 @@ haven_octree_t	*init_svo(int _size, int _depth) {
 	svo->max_depth = _depth;
 	svo->root = NULL;
 	svo->element = 0;
+	
+	// Pre-calculate node sizes for each depth level
+	svo->node_sizes = (float *)malloc(sizeof(float) * (_depth + 1));
+	for (int i = 0; i <= _depth; i++) {
+		svo->node_sizes[i] = _size / (float)(1 << i);
+	}
+	
 	return (svo);
 }
 
-static void	haven_octree_insert_implementation(haven_octree_t *svo, haven_octree_node_t **node, vec3 point, void *data, int position[3], int depth) {
+void	*haven_octree_get(vec3 point, haven_octree_t *svo) {
+	if (!is_point_valid(point, svo)) return NULL;
+	
+	haven_octree_node_t *current = svo->root;
+	int depth = 0;
+	uint32_t position = 0;  // Pack x,y,z into a single 32-bit integer
+	
+	while (current && depth < svo->max_depth) {
+		// Convert point to integer coordinates within current node
+		float node_size = svo->node_sizes[depth];
+		uint32_t x = (uint32_t)((point[0] - (position & 0xFF) * node_size) / node_size);
+		uint32_t y = (uint32_t)((point[1] - ((position >> 8) & 0xFF) * node_size) / node_size);
+		uint32_t z = (uint32_t)((point[2] - ((position >> 16) & 0xFF) * node_size) / node_size);
+		
+		// Calculate child index using bit operations
+		uint8_t child_index = (x & 1) | ((y & 1) << 1) | ((z & 1) << 2);
+		
+		// Update position for next level
+		position = (position << 3) | child_index;
+		
+		current = current->children[child_index];
+		depth++;
+	}
+	
+	return (current && depth == svo->max_depth) ? current->data : NULL;
+}
+
+static void	haven_octree_insert_implementation(haven_octree_t *svo, haven_octree_node_t **node, vec3 point, void *data, uint32_t position, int depth) {
 	if (!*node) {
 	    *node = (haven_octree_node_t *)malloc(sizeof(haven_octree_node_t));
 	    (*node)->isleaf = false;
@@ -68,62 +109,24 @@ static void	haven_octree_insert_implementation(haven_octree_t *svo, haven_octree
 	    return;
 	}
     
-	float node_size = svo->size / (float)(1 << depth);
-	float mid_x = position[0] * node_size + node_size / 2.0f;
-	float mid_y = position[1] * node_size + node_size / 2.0f;
-	float mid_z = position[2] * node_size + node_size / 2.0f;
-    
-	int child_position[3] = {
-	    (point[0] >= mid_x),
-	    (point[1] >= mid_y),
-	    (point[2] >= mid_z)
-	};
-    
-	int child_index = (child_position[0] << 0) | (child_position[1] << 1) | (child_position[2] << 2);
-    
-	int new_position[3] = {
-	    (position[0] << 1) | child_position[0],
-	    (position[1] << 1) | child_position[1],
-	    (position[2] << 1) | child_position[2]
-	};
+	float node_size = svo->node_sizes[depth];
+	uint32_t x = (uint32_t)((point[0] - (position & 0xFF) * node_size) / node_size);
+	uint32_t y = (uint32_t)((point[1] - ((position >> 8) & 0xFF) * node_size) / node_size);
+	uint32_t z = (uint32_t)((point[2] - ((position >> 16) & 0xFF) * node_size) / node_size);
+	
+	uint8_t child_index = (x & 1) | ((y & 1) << 1) | ((z & 1) << 2);
+	uint32_t new_position = (position << 3) | child_index;
     
 	haven_octree_insert_implementation(svo, &(*node)->children[child_index], point, data, new_position, depth + 1);
 }
 
 bool	haven_octree_insert(haven_octree_t *svo, vec3 point, void *data) {
 	if (!is_point_valid(point, svo)) return (false);
-	// if (!svo_get_node(point, svo)) svo->element++;
-		//need to change
-	haven_octree_insert_implementation(svo, &svo->root, point, data, (int [3]){0, 0, 0}, 0);
-	return (true);
-}
-
-
-void	*haven_octree_get(vec3 point, haven_octree_t *svo) {
-	haven_octree_node_t *current = svo->root;
-	int depth = 0;
-	int position[3] = {0, 0, 0};
-	float node_size = svo->size;
-    
-	while (current && depth < svo->max_depth) {
-	    float mid_x = position[0] * node_size + node_size / 2.0f;
-	    float mid_y = position[1] * node_size + node_size / 2.0f;
-	    float mid_z = position[2] * node_size + node_size / 2.0f;
-    
-	    int child_x = (point[0] >= mid_x);
-	    int child_y = (point[1] >= mid_y);
-	    int child_z = (point[2] >= mid_z);
-    
-	    int child_index = (child_x << 0) | (child_y << 1) | (child_z << 2);
-    
-	    position[0] = (position[0] << 1) | child_x;
-	    position[1] = (position[1] << 1) | child_y;
-	    position[2] = (position[2] << 1) | child_z;
-    
-	    current = current->children[child_index];
-	    depth++;
-	    node_size /= 2.0f;
+	
+	if (!haven_octree_get(point, svo)) {
+		svo->element++;
 	}
-    
-	return (current && depth == svo->max_depth) ? current : NULL;
+	
+	haven_octree_insert_implementation(svo, &svo->root, point, data, 0, 0);
+	return (true);
 }
