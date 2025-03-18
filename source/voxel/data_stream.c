@@ -32,8 +32,8 @@ haven_octree_t *grid_to_octree(const unsigned char *grid, int size, int x, int y
 
     // Base case: single voxel or uniform region
     if (current_size == 1) {
-        node->value = grid[x + y * size + z * size * size];
-        node->is_leaf = true;
+        node->data = grid[x + y * size + z * size * size];
+        node->isleaf = true;
         return node;
     }
 
@@ -53,13 +53,13 @@ haven_octree_t *grid_to_octree(const unsigned char *grid, int size, int x, int y
     }
 
     if (uniform) {
-        node->value = first_value;
-        node->is_leaf = true;
+        node->data = first_value;
+        node->isleaf = true;
         return node;
     }
 
     // Subdivide non-uniform regions
-    node->is_leaf = false;
+    node->isleaf = false;
     for (int i = 0; i < 8; i++) {
         int new_x = x + (i & 4 ? half : 0);
         int new_y = y + (i & 2 ? half : 0);
@@ -74,12 +74,12 @@ haven_octree_t *grid_to_octree(const unsigned char *grid, int size, int x, int y
 void octree_to_grid(haven_octree_node_t *node, unsigned char *grid, int size, int x, int y, int z, int current_size) {
     if (!node || !grid) return;
 
-    if (node->is_leaf) {
+    if (node->isleaf) {
         // Fill the entire region with the node's value
         for (int dy = 0; dy < current_size; dy++) {
             for (int dx = 0; dx < current_size; dx++) {
                 for (int dz = 0; dz < current_size; dz++) {
-                    grid[(x + dx) + (y + dy) * size + (z + dz) * size * size] = node->value;
+                    grid[(x + dx) + (y + dy) * size + (z + dz) * size * size] = node->data;
                 }
             }
         }
@@ -285,6 +285,3 @@ unsigned char *get_chunk_data(ChunkCache *cache, int x, int y, int z,
     
     return NULL;
 }
-
-
-

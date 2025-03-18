@@ -73,7 +73,12 @@ bool	haven_octree_insert(haven_octree_t *svo, vec3 point, void *data);
  */
 void	*haven_octree_get(vec3 point, haven_octree_t *svo);
 
-
+/**
+ * @brief 
+ * 
+ * @return haven_octree_node_t* 
+ */
+haven_octree_node_t	*haven_octree_node_create(void);
 
 /**
  * @brief static queue data structure

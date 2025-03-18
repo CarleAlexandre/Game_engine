@@ -15,11 +15,11 @@ LIB = HavenLib.a
 SRC = $(wildcard $(SRC_DIR)entity/*.c) \
       $(wildcard $(SRC_DIR)audio/*.c) \
       $(wildcard $(SRC_DIR)core/*.c) \
-      $(wildcard $(SRC_DIR)debug/*.c) \
       $(wildcard $(SRC_DIR)physics/*.c) \
       $(wildcard $(SRC_DIR)item/*.c) \
       $(wildcard $(SRC_DIR)render/*.c) \
       $(wildcard $(SRC_DIR)scene/*.c)
+
 OBJ = $(SRC:$(SRC_DIR)%.c=$(OBJ_DIR)%.o)
 
 # Executables
@@ -38,16 +38,15 @@ INCLUDE = -Iinclude
 # Platform-specific configurations
 ifeq ($(OS), Windows_NT)
     INCLUDE += -IC:/mingw64/include
-    LIBS = -lglfw -lvulkan -lraylib -lgl -lgdi32 -lwinmm
+    LIBS = -lglfw -lvulkan -lraylib -lgl -lgdi32 -lwinmm -lc
 else ifeq ($(shell uname -s), Linux)
     CFLAGS += -fsanitize=address
     LDFLAGS += -fsanitize=address
-    LIBS = -lglfw -lvulkan -lm -lpthread -ldl -lrt -lX11
+    LIBS = -lglfw -lvulkan -lm -lpthread -ldl -lrt -lX11 -lc
 endif
 
 # Default target
 all: lib $(EXEC) $(EDITOR)
-.PHONY: all lib $(EXEC) $(EDITOR) clean fclean re
 
 # Pattern rule for object files
 $(OBJ_DIR)%.o: $(SRC_DIR)%.c
@@ -69,6 +68,26 @@ $(EDITOR): $(EDITOR_OBJ) $(BUILDDIR)$(LIB)
 	@mkdir -p $(BUILDDIR)
 	$(CC) $(LDFLAGS) $^ $(LIBS) -o $(BUILDDIR)$@
 
+# Dynamic library target
+dynamic: CFLAGS += -fPIC
+dynamic: LDFLAGS += -shared
+ifeq ($(OS), Windows_NT)
+    dynamic: $(BUILDDIR)$(LIB:.a=.dll)
+else
+    dynamic: $(BUILDDIR)$(LIB:.a=.so)
+endif
+
+# Windows DLL
+$(BUILDDIR)$(LIB:.a=.dll): $(OBJ)
+	@mkdir -p $(BUILDDIR)
+	$(CC) $(LDFLAGS) $^ $(LIBS) -o $@
+
+# Unix shared object
+$(BUILDDIR)$(LIB:.a=.so): $(OBJ)
+	@mkdir -p $(BUILDDIR)
+	$(CC) $(LDFLAGS) $^ $(LIBS) -o $@
+
+
 # Cleanup
 clean:
 	rm -rf $(OBJ_DIR)
@@ -76,4 +95,4 @@ clean:
 fclean: clean
 	rm -rf $(BUILDDIR)
 
-re: fclean all
+.PHONY: all lib $(EXEC) $(EDITOR) clean fclean re dynamic

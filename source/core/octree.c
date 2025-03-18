@@ -130,3 +130,17 @@ bool	haven_octree_insert(haven_octree_t *svo, vec3 point, void *data) {
 	haven_octree_insert_implementation(svo, &svo->root, point, data, 0, 0);
 	return (true);
 }
+
+haven_octree_node_t	*haven_octree_node_create(void) {
+	haven_octree_node_t *node = (haven_octree_node_t *)malloc(sizeof(haven_octree_node_t));
+	if (!node) return NULL;
+	node->isleaf = false;
+	node->data = NULL;
+
+	for (int i = 0; i < 8; i++) {
+		node->children[i] = NULL;
+	}
+
+	return (node);
+}
+
