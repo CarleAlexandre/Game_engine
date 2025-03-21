@@ -1,4 +1,6 @@
-
+#include <raylib.h>
+#include <rlgl.h>
+#include <stdlib.h>
 
 typedef struct s_gbuffer{
 	unsigned int	framebuffer;
@@ -9,7 +11,7 @@ typedef struct s_gbuffer{
 	unsigned int	zTexture;
 }	gbuffer_t;
 
-d_gbuffer(int width, int height, unsigned int shader_id) {
+gbuffer_t create_buffer(int width, int height, unsigned int shader_id) {
 	gbuffer_t buffer = {0};
 
 	buffer.framebuffer = rlLoadFramebuffer();

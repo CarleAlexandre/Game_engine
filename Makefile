@@ -24,7 +24,7 @@ OBJ = $(SRC:$(SRC_DIR)%.c=$(OBJ_DIR)%.o)
 
 # Executables
 EXEC = Game
-EDITOR = HavenEditor  # Removed space to avoid issues
+EDITOR = HavenEditor
 
 EXEC_SRC = $(SRC_DIR)main.c
 EDITOR_SRC = $(SRC_DIR)editor.c

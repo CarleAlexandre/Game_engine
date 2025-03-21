@@ -29,6 +29,7 @@ typedef	struct s_inventory {
 
 typedef struct s_tool_bar{
 	int	current_item;
+	item_t	item[9];
 }	tool_bar_t;
 
 #endif

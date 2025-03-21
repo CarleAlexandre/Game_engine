@@ -2,6 +2,7 @@
 #include <raylib.h>
 #define RAYGUI_IMPLEMENTATION
 #include <raygui.h>
+#include <haven/haven_io.h>
 
 typedef enum {
 	map_edit_mod,
@@ -169,37 +170,37 @@ int	main(void) {
 			right_bar();
 			left_bar();
 
-			switch (error) {
-				case (error_file_not_found): {
-					int result = GuiMessageBox(error_bound, "#152#ERROR!", "this file doesn't exist!!", "OK");
-					if (result == 1) {
-						error = error_dummy;
-					}
-					break;
-				}
-				case (error_file_empty): {
-					int result = GuiMessageBox(error_bound, "#152#ERROR!", "Name Empty!!", "OK");
-					if (result == 1) {
-						error = error_dummy;
-					}
-					break;
-				}
-				case (error_file_corrupted): {
-					int result = GuiMessageBox(error_bound, "#152#ERROR!", "this file is corrupted!!", "OK");
-					if (result == 1) {
-						error = error_dummy;
-					}
-					break;
-				}
-				case (error_file_exist): {
-					int result = GuiMessageBox(error_bound, "#152#ERROR!", "this filename already exist!!", "OK");
-					if (result == 1) {
-						error = error_dummy;
-					}
-					break;
-				}
-				default:break;
-			}
+			// switch (error) {
+			// 	case (error_file_not_found): {
+			// 		int result = GuiMessageBox(error_bound, "#152#ERROR!", "this file doesn't exist!!", "OK");
+			// 		if (result == 1) {
+			// 			error = error_dummy;
+			// 		}
+			// 		break;
+			// 	}
+			// 	case (error_file_empty): {
+			// 		int result = GuiMessageBox(error_bound, "#152#ERROR!", "Name Empty!!", "OK");
+			// 		if (result == 1) {
+			// 			error = error_dummy;
+			// 		}
+			// 		break;
+			// 	}
+			// 	case (error_file_corrupted): {
+			// 		int result = GuiMessageBox(error_bound, "#152#ERROR!", "this file is corrupted!!", "OK");
+			// 		if (result == 1) {
+			// 			error = error_dummy;
+			// 		}
+			// 		break;
+			// 	}
+			// 	case (error_file_exist): {
+			// 		int result = GuiMessageBox(error_bound, "#152#ERROR!", "this filename already exist!!", "OK");
+			// 		if (result == 1) {
+			// 			error = error_dummy;
+			// 		}
+			// 		break;
+			// 	}
+			// 	default:break;
+			// }
 
 			drop_down_terminal(show_term);
 			top_bar();

@@ -10,8 +10,6 @@
 # include <raymath.h>
 # include <rcamera.h>
 
-# include "data_type/sparse_octree.h"
-
 # include <stdbool.h>
 # include <stdint.h>
 # include <stddef.h>
@@ -30,7 +28,6 @@
 /* 
 	TYPEDEF
 */
-
 
 typedef enum {
 	DEFERRED_POSITION,
@@ -136,7 +133,6 @@ typedef enum {
 	DATA STRUCT
 */
 
-
 typedef struct Plane {
 	Vector3 normal;
 	float distance;
@@ -145,23 +141,5 @@ typedef struct Plane {
 typedef struct Frustum {
 	Plane planes[6];
 } Frustum;
-
-typedef struct s_token {
-	int	id;
-	char	*data;
-} t_token;
-
-typedef	struct s_file {
-	unsigned char	*data;
-	int		size;
-	filetype_enum	type;
-}	file_t;
-
-typedef struct s_projectile {
-	Ray	shot;
-	float	mass;
-	int	model_id;
-	int	lifespan;
-}	projectile_t;
 
 #endif
