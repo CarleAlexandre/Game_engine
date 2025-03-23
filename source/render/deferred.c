@@ -9,6 +9,8 @@ typedef struct s_gbuffer{
 	unsigned int	albedoSpecTexture;
 	unsigned int	depthRenderbuffer;
 	unsigned int	zTexture;
+	unsigned int	width;
+	unsigned int	height;
 }	gbuffer_t;
 
 gbuffer_t create_buffer(int width, int height, unsigned int shader_id) {
@@ -46,7 +48,56 @@ gbuffer_t create_buffer(int width, int height, unsigned int shader_id) {
 		rlSetUniformSampler(rlGetLocationUniform(shader_id, "gZ"), 3);
 	rlDisableShader();
 
-	rlEnableDepthTest();
-	rlEnableBackfaceCulling();
 	return (buffer);
+}
+
+void	begin_gbuffer_drawing(const gbuffer_t gbuffer, const Camera3D camera, const Shader gbuffershader) {
+	rlEnableFramebuffer(gbuffer.framebuffer);
+	rlClearColor(0, 0, 0, 0);
+	rlClearScreenBuffers();
+		
+	rlDisableColorBlend();
+	BeginMode3D(camera);
+	rlEnableShader(gbuffershader.id);		
+}
+
+void	end_gbuffer_drawing() {
+	rlDisableShader();
+	EndMode3D();
+
+	rlEnableColorBlend();
+	rlDisableFramebuffer();
+	rlClearScreenBuffers();
+}
+
+void	gbuffer_rendering(const gbuffer_t gbuffer, const Camera3D camera, const Shader deferredshader) {
+	BeginMode3D(camera); {
+		rlDisableColorBlend();
+                rlEnableShader(deferredshader.id); {
+
+			// Bind our g-buffer textures
+			// We are binding them to locations that we earlier set in sampler2D uniforms `gPosition`, `gNormal`,
+			// and `gAlbedoSpec`
+			rlActiveTextureSlot(0);
+			rlEnableTexture(gbuffer.positionTexture);
+			rlActiveTextureSlot(1);
+			rlEnableTexture(gbuffer.normalTexture);
+			rlActiveTextureSlot(2);
+			rlEnableTexture(gbuffer.albedoSpecTexture);
+			rlActiveTextureSlot(3);
+			rlEnableTexture(gbuffer.zTexture);
+			
+			// Finally, we draw a fullscreen quad to our default framebuffer
+			// This will now be shaded using our deferred shader
+			rlLoadDrawQuad();
+		}
+		rlDisableShader();
+		rlEnableColorBlend();
+	} EndMode3D();
+		
+	// As a last step, we now copy over the depth buffer from our g-buffer to the default framebuffer.
+	rlBindFramebuffer(RL_READ_FRAMEBUFFER, gbuffer.framebuffer);
+	rlBindFramebuffer(RL_DRAW_FRAMEBUFFER, 0);
+	rlBlitFramebuffer(0, 0, gbuffer.width, gbuffer.height, 0, 0, gbuffer.width, gbuffer.height, 0x00000100);//0x00000100 -> GL_DEPTH_BUFFER_BIT
+	rlDisableFramebuffer();
 }

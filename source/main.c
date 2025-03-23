@@ -20,19 +20,27 @@ int main(const int ac, char *av[]) {
 	HideCursor();
 	SetTargetFPS(ac == 2 ? atoi(av[1]) : 60);
 
-	while (!WindowShouldClose()) {
-		ClearBackground(RAYWHITE);
+	rlEnableDepthTest();
+	rlEnableBackfaceCulling();
 
-		BeginDrawing();
+	while (!WindowShouldClose()) {
+
+		//update_input
+
+		//begin 3d scene rendering for deffered rendering
+
+		BeginDrawing(); {
+			ClearBackground(RAYWHITE);
+			
+			
 			DrawFPS(10, 10);
-		EndDrawing();
+		} EndDrawing();
 
 		haven_time_update();
 		haven_stack_reset();
 	}
 	
 	ShowCursor();
-
 	haven_thread_mgr_close();
 	haven_memory_system_shutdown();
 	CloseWindow();
