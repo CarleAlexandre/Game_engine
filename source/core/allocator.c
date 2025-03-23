@@ -57,7 +57,7 @@ void	haven_memory_system_shutdown() {
 }
 
 void	haven_memory_system_print() {
-	printf("allocation_count: %i , total_allocated: %.2f Mb, total_freed: %.2f Mb",
+	printf("allocation_count: %i , total_allocated: %.2lld Mb, total_freed: %.2lld Mb",
 		stats.allocation_count, stats.total_allocated / 1048576, stats.total_freed / 1048576);
 }
 
@@ -108,7 +108,7 @@ pool_allocator_t *haven_pool_create(size_t block_size, size_t count, size_t alig
     pool->alignment = alignment;
     
     // Allocate aligned memory for the pool
-    pool->memory = aligned_alloc(alignment, pool->pool_size);
+    pool->memory = _aligned_malloc(alignment, pool->pool_size);
     pool->free_list = NULL;
     
     // Initialize the free list

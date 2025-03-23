@@ -12,9 +12,9 @@ static const uint8_t CHILD_INDEX_TABLE[8][3] = {
 };
 
 typedef struct	haven_octree_node_s {
-	bool			isleaf;
-	void			*data;
-	haven_octree_node_t	*children[8];
+	bool				isleaf;
+	void				*data;
+	struct haven_octree_node_s	*children[8];
 }	haven_octree_node_t;
 
 typedef	struct	haven_octree_s {

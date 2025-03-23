@@ -4,8 +4,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <haven/haven_type.h>
-#include <haven/haven_time.h>
+#include <engine/core/type.h>
+#include <engine/core/time.h>
 
 typedef struct	s_task {
 	void	*(*func)(void *);

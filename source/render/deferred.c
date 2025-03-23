@@ -1,5 +1,6 @@
 #include <raylib.h>
 #include <rlgl.h>
+#include <raymath.h>
 #include <stdlib.h>
 
 typedef struct s_gbuffer{
@@ -13,7 +14,7 @@ typedef struct s_gbuffer{
 	unsigned int	height;
 }	gbuffer_t;
 
-gbuffer_t create_buffer(int width, int height, unsigned int shader_id) {
+gbuffer_t	haven_gbuffer_init(int width, int height, unsigned int shader_id) {
 	gbuffer_t buffer = {0};
 
 	buffer.framebuffer = rlLoadFramebuffer();
@@ -51,7 +52,7 @@ gbuffer_t create_buffer(int width, int height, unsigned int shader_id) {
 	return (buffer);
 }
 
-void	begin_gbuffer_drawing(const gbuffer_t gbuffer, const Camera3D camera, const Shader gbuffershader) {
+void	haven_gbuffer_start_draw(const gbuffer_t gbuffer, const Camera3D camera, const Shader gbuffershader) {
 	rlEnableFramebuffer(gbuffer.framebuffer);
 	rlClearColor(0, 0, 0, 0);
 	rlClearScreenBuffers();
@@ -61,7 +62,7 @@ void	begin_gbuffer_drawing(const gbuffer_t gbuffer, const Camera3D camera, const
 	rlEnableShader(gbuffershader.id);		
 }
 
-void	end_gbuffer_drawing() {
+void	haven_gbuffer_end_draw() {
 	rlDisableShader();
 	EndMode3D();
 
@@ -70,7 +71,7 @@ void	end_gbuffer_drawing() {
 	rlClearScreenBuffers();
 }
 
-void	gbuffer_rendering(const gbuffer_t gbuffer, const Camera3D camera, const Shader deferredshader) {
+void	haven_gbuffer_rendering(const gbuffer_t gbuffer, const Camera3D camera, const Shader deferredshader) {
 	BeginMode3D(camera); {
 		rlDisableColorBlend();
                 rlEnableShader(deferredshader.id); {
@@ -100,4 +101,12 @@ void	gbuffer_rendering(const gbuffer_t gbuffer, const Camera3D camera, const Sha
 	rlBindFramebuffer(RL_DRAW_FRAMEBUFFER, 0);
 	rlBlitFramebuffer(0, 0, gbuffer.width, gbuffer.height, 0, 0, gbuffer.width, gbuffer.height, 0x00000100);//0x00000100 -> GL_DEPTH_BUFFER_BIT
 	rlDisableFramebuffer();
+}
+
+void	haven_gbuffer_texture_render(const unsigned int texture_id, const unsigned int width, const unsigned int height) {
+	DrawTextureRec((Texture2D){
+		.id = texture_id,
+		.width = width,
+		.height = height,
+	}, (Rectangle) {0, 0, width, -height}, Vector2Zero(), WHITE);
 }

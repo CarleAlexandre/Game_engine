@@ -24,16 +24,6 @@ typedef	struct	haven_octree_s {
 /**
  * @brief 
  * 
- * @param point 
- * @param svo 
- * @return true 
- * @return false 
- */
-static bool	is_point_valid(vec3 point, haven_octree_t *svo);
-
-/**
- * @brief 
- * 
  * @param node 
  */
 void	haven_octree_node_delete(haven_octree_node_t *node);
