@@ -14,7 +14,7 @@ typedef struct s_gbuffer{
 	unsigned int	height;
 }	gbuffer_t;
 
-gbuffer_t	haven_gbuffer_init(int width, int height, unsigned int shader_id) {
+gbuffer_t	haven_gbuffer_init(int width, int height) {
 	gbuffer_t buffer = {0};
 
 	buffer.framebuffer = rlLoadFramebuffer();
@@ -24,32 +24,39 @@ gbuffer_t	haven_gbuffer_init(int width, int height, unsigned int shader_id) {
 	}
 
 	rlEnableFramebuffer(buffer.framebuffer);
-	buffer.positionTexture = rlLoadTexture(NULL, width,height, RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32, 1);
-	buffer.normalTexture = rlLoadTexture(NULL, width,height, RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32, 1);
+	buffer.positionTexture = rlLoadTexture(NULL, width,height, RL_PIXELFORMAT_UNCOMPRESSED_R16G16B16, 1);
+	buffer.normalTexture = rlLoadTexture(NULL, width,height, RL_PIXELFORMAT_UNCOMPRESSED_R16G16B16, 1);
 	buffer.albedoSpecTexture = rlLoadTexture(NULL, width,height, RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, 1);
 	buffer.zTexture = rlLoadTexture(NULL, width,height, RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, 1);
-	buffer.depthRenderbuffer = rlLoadTextureDepth(width, height, true);
 	rlActiveDrawBuffers(4);
-
+	
 	rlFramebufferAttach(buffer.framebuffer, buffer.positionTexture, RL_ATTACHMENT_COLOR_CHANNEL0, RL_ATTACHMENT_TEXTURE2D, 0);
 	rlFramebufferAttach(buffer.framebuffer, buffer.normalTexture, RL_ATTACHMENT_COLOR_CHANNEL1, RL_ATTACHMENT_TEXTURE2D, 0);
 	rlFramebufferAttach(buffer.framebuffer, buffer.albedoSpecTexture, RL_ATTACHMENT_COLOR_CHANNEL2, RL_ATTACHMENT_TEXTURE2D, 0);
 	rlFramebufferAttach(buffer.framebuffer, buffer.zTexture, RL_ATTACHMENT_COLOR_CHANNEL3, RL_ATTACHMENT_TEXTURE2D, 0);
-	rlFramebufferAttach(buffer.framebuffer, buffer.depthRenderbuffer, RL_ATTACHMENT_DEPTH, RL_ATTACHMENT_RENDERBUFFER, 0);
 
+	buffer.depthRenderbuffer = rlLoadTextureDepth(width, height, true);
+	rlFramebufferAttach(buffer.framebuffer, buffer.depthRenderbuffer, RL_ATTACHMENT_DEPTH, RL_ATTACHMENT_RENDERBUFFER, 0);
+	
 	if (!rlFramebufferComplete(buffer.framebuffer)) {
 		TraceLog(LOG_WARNING, "Framebuffer is not complete");
 		exit(1);
 	}
 
-	rlEnableShader(shader_id);
-		rlSetUniformSampler(rlGetLocationUniform(shader_id, "gPosition"), 0);
-		rlSetUniformSampler(rlGetLocationUniform(shader_id, "gNormal"), 1);
-		rlSetUniformSampler(rlGetLocationUniform(shader_id, "gAlbedoSpec"), 2);
-		rlSetUniformSampler(rlGetLocationUniform(shader_id, "gZ"), 3);
-	rlDisableShader();
-
 	return (buffer);
+}
+
+void	haven_deferred_set_loc(Shader shader) {
+	rlEnableShader(shader.id);
+		int tex_unit_posistion = 0;
+		int tex_unit_normal = 1;
+		int tex_unit_albedospec = 2;
+		int tex_unit_z = 3;
+		SetShaderValue(shader, rlGetLocationUniform(shader.id, "gPosition"), &tex_unit_posistion, RL_SHADER_UNIFORM_SAMPLER2D);
+		SetShaderValue(shader, rlGetLocationUniform(shader.id, "gNormal"), &tex_unit_normal, RL_SHADER_UNIFORM_SAMPLER2D);
+		SetShaderValue(shader, rlGetLocationUniform(shader.id, "gAlbedoSpec"), &tex_unit_albedospec, RL_SHADER_UNIFORM_SAMPLER2D);
+		SetShaderValue(shader, rlGetLocationUniform(shader.id, "gZ"), &tex_unit_z, RL_SHADER_UNIFORM_SAMPLER2D);
+	rlDisableShader();
 }
 
 void	haven_gbuffer_start_draw(const gbuffer_t gbuffer, const Camera3D camera, const Shader gbuffershader) {
@@ -78,7 +85,7 @@ void	haven_gbuffer_rendering(const gbuffer_t gbuffer, const Camera3D camera, con
 
 			// Bind our g-buffer textures
 			// We are binding them to locations that we earlier set in sampler2D uniforms `gPosition`, `gNormal`,
-			// and `gAlbedoSpec`
+			// `gAlbedoSpec` and gZ
 			rlActiveTextureSlot(0);
 			rlEnableTexture(gbuffer.positionTexture);
 			rlActiveTextureSlot(1);

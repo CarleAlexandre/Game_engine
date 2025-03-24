@@ -55,6 +55,13 @@ void	haven_gbuffer_start_draw(const gbuffer_t gbuffer, const Camera3D camera, co
  * @param shader_id 
  * @return gbuffer_t 
  */
-gbuffer_t	haven_gbuffer_init(const int width, const int height, const unsigned int shader_id);
+gbuffer_t	haven_gbuffer_init(const int width, const int height);
+
+/**
+ * @brief 
+ * 
+ * @param shader 
+ */
+void	haven_deferred_set_loc(Shader shader);
 
 #endif

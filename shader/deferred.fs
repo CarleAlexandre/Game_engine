@@ -29,7 +29,7 @@ void main() {
 	vec3 normal = texture(gNormal, texCoord).rgb;
 	vec3 albedo = texture(gAlbedoSpec, texCoord).rgb;
 	float specular = texture(gAlbedoSpec, texCoord).a;
-	vec3 depth = texture(gZ, texCoord).rgb;
+	//vec3 depth = texture(gZ, texCoord).rgb;
 
 	vec3 ambient = albedo * vec3(0.1f);
 	vec3 viewDirection = normalize(viewPosition - fragPosition);

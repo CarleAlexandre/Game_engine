@@ -95,4 +95,6 @@ clean:
 fclean: clean
 	rm -rf $(BUILDDIR)
 
+re:	fclean all
+
 .PHONY: all lib $(EXEC) $(EDITOR) clean fclean re dynamic
