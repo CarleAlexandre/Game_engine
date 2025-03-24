@@ -2,18 +2,26 @@
 #define RAYGUI_IMPLEMENTATION
 #include <raygui.h>
 
-
-void	hot_reload_game() {
-
-}
+typedef enum {
+	ENGINE_STATE_GAME,
+	ENGINE_STATE_MENU1,
+	ENGINE_STATE_MENU2,
+	ENGINE_STATE_MENU3,
+	ENGINE_STATE_MENU4,
+	ENGINE_STATE_MENU5,
+	ENGINE_STATE_MENU6,
+	ENGINE_STATE_MENU7
+}	engine_state_enum;
 
 struct {
-	deferred_mode_enum deferred_mode;
-	Camera3D camera;
 	Shader	*shader;
 	gbuffer_t gbuffer;
 	unsigned int width;
 	unsigned int height;
+	Font font;
+	int engine_state;
+	Camera3D camera;
+	deferred_mode_enum deferred_mode;
 }	ctx;
 
 int main(const int ac, char *av[]) {
@@ -25,6 +33,8 @@ int main(const int ac, char *av[]) {
 	ctx.width = 1920;
 
 	ctx.deferred_mode = DEFERRED_SHADING;
+
+	ctx.engine_state = ENGINE_STATE_MENU1;
 
 	ctx.camera = (Camera3D){0};
 	ctx.camera.position = (Vector3){ 2.0f, 3.0f, 2.0f };    // Camera position
@@ -39,6 +49,9 @@ int main(const int ac, char *av[]) {
 
 	ctx.shader = game_shader_load();
 
+	ctx.font = LoadFont("assets/not_free/PirataOne-Regular.ttf");
+	GuiSetFont(ctx.font);
+
 	HideCursor();
 	SetTargetFPS(ac == 2 ? atoi(av[1]) : 60);
 
@@ -50,82 +63,43 @@ int main(const int ac, char *av[]) {
 	
 	rlEnableDepthTest();
 	rlEnableBackfaceCulling();
-
-	bool pause = false;
-
-
+	
 	while (!WindowShouldClose()) {
-
-		while (pause) {
-			haven_time_usleep(1000);
-			if (IsKeyPressed(KEY_SPACE)) {
-				pause = !pause;
-			}
-		}
 		
 		if (IsKeyPressed(KEY_Q)) {
 			ctx.deferred_mode++;
 			ctx.deferred_mode %= 5;
 		}
-		
-		UpdateCamera(&ctx.camera, CAMERA_FREE);
-		
-		float camerapos[3] = {ctx.camera.position.x, ctx.camera.position.y, ctx.camera.position.z};
-		
-		SetShaderValue(ctx.shader[SHADER_DEFERRED], ctx.shader[SHADER_DEFERRED].locs[SHADER_LOC_VECTOR_VIEW], camerapos, SHADER_UNIFORM_VEC3);
-	
-		SetMousePosition(ctx.width * 0.5, ctx.height * 0.5);
-		//update_input
-
-		//launch all thread task
-
-		//wait all thread task
-		
-		BeginDrawing(); {
-			haven_gbuffer_start_draw(ctx.gbuffer, ctx.camera, ctx.shader[SHADER_GBUFFER]);
-			//drawDeferred scene here
-
-			DrawModel(cube, Vector3Zero(), 1.0f, WHITE);
-
-			haven_gbuffer_end_draw();
-
-			switch (ctx.deferred_mode){
-				case (DEFERRED_SHADING) : {
-					haven_gbuffer_rendering(ctx.gbuffer, ctx.camera, ctx.shader[SHADER_DEFERRED]);
-					BeginMode3D(ctx.camera); {
-
-						rlEnableShader(rlGetShaderIdDefault());
-
-						DrawCube((Vector3){10, 10, 10}, 10, 10, 10, RED);
-
-						rlDisableShader();
-					}EndMode3D();
-					break;
-				}
-				case (DEFERRED_POSITION) : {
-					haven_gbuffer_texture_render(ctx.gbuffer.positionTexture, ctx.gbuffer.width, ctx.gbuffer.height);
-					break;
-				}
-				case (DEFERRED_NORMAL) : {
-					haven_gbuffer_texture_render(ctx.gbuffer.normalTexture, ctx.gbuffer.width, ctx.gbuffer.height);
-					break;
-				}
-				case (DEFERRED_ALBEDO) : {
-					haven_gbuffer_texture_render(ctx.gbuffer.albedoSpecTexture, ctx.gbuffer.width, ctx.gbuffer.height);
-					break;
-				}
-				case (DEFERRED_ZBUFFER) : {
-					haven_gbuffer_texture_render(ctx.gbuffer.zTexture, ctx.gbuffer.width, ctx.gbuffer.height);
-					break;
-				}
-				
-				default:{
-					break;
-				}
+		switch (ctx.engine_state) {
+			case (ENGINE_STATE_GAME): {
+				scene_render(cube, &ctx.camera, ctx.gbuffer, ctx.shader, ctx.deferred_mode);
+				break;
 			}
-			
-			DrawFPS(10, 10);
-		} EndDrawing();
+			case (ENGINE_STATE_MENU1): {
+				break;
+			}
+			case (ENGINE_STATE_MENU2): {
+				break;
+			}
+			case (ENGINE_STATE_MENU3): {
+				break;
+			}
+			case (ENGINE_STATE_MENU4): {
+				break;
+			}
+			case (ENGINE_STATE_MENU5): {
+				break;
+			}
+			case (ENGINE_STATE_MENU6): {
+				break;
+			}
+			case (ENGINE_STATE_MENU7): {
+				break;
+			}
+			default:{
+				break;
+			}
+		}
 
 		haven_time_update();
 		haven_stack_reset();

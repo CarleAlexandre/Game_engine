@@ -6,3 +6,4 @@ build/*
 *.out
 .cache/*
 *.cignore
+assets/not_free
