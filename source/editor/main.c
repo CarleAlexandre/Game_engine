@@ -2,7 +2,8 @@
 #include <raylib.h>
 #define RAYGUI_IMPLEMENTATION
 #include <raygui.h>
-#include <haven/haven_io.h>
+#include <engine/core/utils.h>
+#include <engine/core/thread.h>
 
 typedef enum {
 	map_edit_mod,
@@ -16,7 +17,7 @@ bool		saved = false;
 bool		mode_enable = false;
 int		error = 0;
 Rectangle	error_bound = (Rectangle){};
-edm_enum	editor_mode = 0;
+int		editor_mode = 0;
 
 void	startscreen() {
 	BeginDrawing();
@@ -118,15 +119,15 @@ void	update_editor_input(bool *term_open) {
 
 int	main(void) {
 
-	SetWindowState(FLAG_BORDERLESS_WINDOWED_MODE | FLAG_WINDOW_RESIZABLE);
 	InitWindow(1920, 1080, "Haven Engine");
+	SetWindowState(FLAG_BORDERLESS_WINDOWED_MODE | FLAG_WINDOW_RESIZABLE);
 
 	RenderTexture2D fbo;
 	GuiLoadStyle("assets/style_terminal.rgs");
 	fbo = LoadRenderTexture(GetScreenWidth() - 400, GetScreenHeight() - 30);
 	bool show_term = false;
 
-	init_thread_mgr();
+	haven_thread_mgr_init();
 
 	SetTargetFPS(30);
 	// EnableEventWaiting();
@@ -208,7 +209,7 @@ int	main(void) {
 		EndDrawing();
 	}
 
-	close_thread_mgr();
+	haven_thread_mgr_close();
 
 	CloseWindow();
 	return 0;

@@ -57,7 +57,7 @@ void	haven_memory_system_shutdown() {
 }
 
 void	haven_memory_system_print() {
-	printf("allocation_count: %i , total_allocated: %.2lld Mb, total_freed: %.2lld Mb",
+	printf("INFO: allocation_count: %i , total_allocated: %.2lld Mb, total_freed: %.2lld Mb\n",
 		stats.allocation_count, stats.total_allocated / 1048576, stats.total_freed / 1048576);
 }
 
@@ -84,7 +84,6 @@ void	haven_stack_reset(void) {
 // ================================================================
 // Pool Allocator (Fixed-Size Objects)
 // ================================================================
-
 
 typedef struct pool_block_s {
     struct pool_block_s *next;
