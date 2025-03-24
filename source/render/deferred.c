@@ -4,18 +4,23 @@
 #include <stdlib.h>
 
 typedef struct s_gbuffer{
+	//framebuffer
 	unsigned int	framebuffer;
+	unsigned int	depthRenderbuffer;
+	//texture	
 	unsigned int	positionTexture;
 	unsigned int	normalTexture;
 	unsigned int	albedoSpecTexture;
-	unsigned int	depthRenderbuffer;
 	unsigned int	zTexture;
+	//format
 	unsigned int	width;
 	unsigned int	height;
 }	gbuffer_t;
 
 gbuffer_t	haven_gbuffer_init(int width, int height) {
 	gbuffer_t buffer = {0};
+	buffer.height = height;
+	buffer.width = width;
 
 	buffer.framebuffer = rlLoadFramebuffer();
 	if (!buffer.framebuffer) {
@@ -28,15 +33,15 @@ gbuffer_t	haven_gbuffer_init(int width, int height) {
 	buffer.normalTexture = rlLoadTexture(NULL, width,height, RL_PIXELFORMAT_UNCOMPRESSED_R16G16B16, 1);
 	buffer.albedoSpecTexture = rlLoadTexture(NULL, width,height, RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, 1);
 	buffer.zTexture = rlLoadTexture(NULL, width,height, RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, 1);
+	buffer.depthRenderbuffer = rlLoadTextureDepth(width, height, true);
 	rlActiveDrawBuffers(4);
 	
 	rlFramebufferAttach(buffer.framebuffer, buffer.positionTexture, RL_ATTACHMENT_COLOR_CHANNEL0, RL_ATTACHMENT_TEXTURE2D, 0);
 	rlFramebufferAttach(buffer.framebuffer, buffer.normalTexture, RL_ATTACHMENT_COLOR_CHANNEL1, RL_ATTACHMENT_TEXTURE2D, 0);
 	rlFramebufferAttach(buffer.framebuffer, buffer.albedoSpecTexture, RL_ATTACHMENT_COLOR_CHANNEL2, RL_ATTACHMENT_TEXTURE2D, 0);
 	rlFramebufferAttach(buffer.framebuffer, buffer.zTexture, RL_ATTACHMENT_COLOR_CHANNEL3, RL_ATTACHMENT_TEXTURE2D, 0);
-
-	buffer.depthRenderbuffer = rlLoadTextureDepth(width, height, true);
 	rlFramebufferAttach(buffer.framebuffer, buffer.depthRenderbuffer, RL_ATTACHMENT_DEPTH, RL_ATTACHMENT_RENDERBUFFER, 0);
+
 	
 	if (!rlFramebufferComplete(buffer.framebuffer)) {
 		TraceLog(LOG_WARNING, "Framebuffer is not complete");
@@ -114,6 +119,6 @@ void	haven_gbuffer_texture_render(const unsigned int texture_id, const unsigned 
 	DrawTextureRec((Texture2D){
 		.id = texture_id,
 		.width = width,
-		.height = height,
-	}, (Rectangle) {0, 0, width, -height}, Vector2Zero(), WHITE);
+		.height = -height,
+	}, (Rectangle) {0, 0, width, -height}, Vector2Zero(), RAYWHITE);
 }

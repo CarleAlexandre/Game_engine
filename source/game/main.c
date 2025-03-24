@@ -35,7 +35,7 @@ int main(const int ac, char *av[]) {
 
 	haven_memory_system_print();
 	InitWindow(ctx.width, ctx.height, "World of Haven : Chaos dungeons");
-	SetWindowState(FLAG_BORDERLESS_WINDOWED_MODE | FLAG_WINDOW_RESIZABLE);
+	SetWindowState(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_UNDECORATED);
 
 	ctx.shader = game_shader_load();
 
@@ -53,11 +53,8 @@ int main(const int ac, char *av[]) {
 
 	bool pause = false;
 
-	while (!WindowShouldClose()) {
 
-		if (IsKeyPressed(KEY_SPACE)) {
-			pause = !pause;
-		}
+	while (!WindowShouldClose()) {
 
 		while (pause) {
 			haven_time_usleep(1000);
@@ -65,17 +62,19 @@ int main(const int ac, char *av[]) {
 				pause = !pause;
 			}
 		}
-
+		
 		if (IsKeyPressed(KEY_Q)) {
 			ctx.deferred_mode++;
 			ctx.deferred_mode %= 5;
 		}
-
+		
 		UpdateCamera(&ctx.camera, CAMERA_FREE);
-
+		
 		float camerapos[3] = {ctx.camera.position.x, ctx.camera.position.y, ctx.camera.position.z};
-
+		
 		SetShaderValue(ctx.shader[SHADER_DEFERRED], ctx.shader[SHADER_DEFERRED].locs[SHADER_LOC_VECTOR_VIEW], camerapos, SHADER_UNIFORM_VEC3);
+	
+		SetMousePosition(ctx.width * 0.5, ctx.height * 0.5);
 		//update_input
 
 		//launch all thread task
