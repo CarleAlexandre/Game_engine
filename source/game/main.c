@@ -44,12 +44,16 @@ int main(const int ac, char *av[]) {
 	ctx.camera.projection = CAMERA_PERSPECTIVE;             // Camera projection type(Camera3D) {
 
 	haven_memory_system_print();
+	InitAudioDevice();
+	assert(IsAudioDeviceReady());
+
 	InitWindow(ctx.width, ctx.height, "World of Haven : Chaos dungeons");
+	assert(IsWindowReady());
 	SetWindowState(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_UNDECORATED);
 
 	ctx.shader = game_shader_load();
 
-	ctx.font = LoadFont("assets/not_free/Monster_hunter.ttf");
+	ctx.font = LoadFont("assets/Monster_hunter.ttf");
 
 	SetTargetFPS(ac == 2 ? atoi(av[1]) : 60);
 
@@ -59,12 +63,22 @@ int main(const int ac, char *av[]) {
 	Model cube = LoadModelFromMesh(GenMeshCube(2.0f, 2.0f, 2.0f));
 	cube.materials[0].shader = ctx.shader[SHADER_GBUFFER];
 	
+	FilePathList sounds_files = {0};
+	sounds_files = LoadDirectoryFiles("assets/not_free/sound");
+	haven_sound_init((const char**)sounds_files.paths, sounds_files.count);
+	UnloadDirectoryFiles(sounds_files);
+
+	FilePathList music_files = {0};
+	music_files = LoadDirectoryFiles("assets/not_free/music");
+	haven_music_init((const char**)music_files.paths, music_files.count);
+	UnloadDirectoryFiles(music_files);
+
 	rlEnableDepthTest();
 	rlEnableBackfaceCulling();
 	
 	while (!WindowShouldClose()) {
 		if (IsKeyPressed(KEY_SPACE)) {
-			ctx.engine_state = ENGINE_STATE_GAME;
+			haven_sound_play(1);
 		}
 		if (IsKeyPressed(KEY_Q)) {
 			ctx.deferred_mode++;
@@ -142,11 +156,14 @@ int main(const int ac, char *av[]) {
 				break;
 			}
 		}
-
+		haven_music_update();
 		haven_time_update();
 		haven_stack_reset();
 	}
 	close:
+	haven_music_close();
+	haven_sound_close();
+	CloseAudioDevice();
 	game_shader_unload(ctx.shader);
 	ShowCursor();
 	haven_thread_mgr_close();

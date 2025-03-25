@@ -3,6 +3,7 @@
 
 #include "engine/core.h"
 #include "engine/render.h"
+#include "engine/audio.h"
 
 #include <raylib.h>
 #include <rlgl.h>

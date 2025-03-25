@@ -1,4 +1,6 @@
 #include "game.h"
+#define RAYGUI_IMPLEMENTATION
+#include <raygui.h>
 
 int	game_menu_start(void) {
 	if (GuiButton((Rectangle){20, 100, 200, 50}, "Offline")) {
