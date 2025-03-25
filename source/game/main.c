@@ -1,12 +1,10 @@
 #include "game.h"
-#define RAYGUI_IMPLEMENTATION
-#include <raygui.h>
 
 typedef enum {
 	ENGINE_STATE_GAME,
-	ENGINE_STATE_MENU1,
-	ENGINE_STATE_MENU2,
-	ENGINE_STATE_MENU3,
+	ENGINE_STATE_MENU_START,
+	ENGINE_STATE_LOADING_SCREEN,
+	ENGINE_STATE_MENU_SETTING,
 	ENGINE_STATE_MENU4,
 	ENGINE_STATE_MENU5,
 	ENGINE_STATE_MENU6,
@@ -14,14 +12,16 @@ typedef enum {
 }	engine_state_enum;
 
 struct {
-	Shader	*shader;
-	gbuffer_t gbuffer;
-	unsigned int width;
-	unsigned int height;
-	Font font;
-	int engine_state;
-	Camera3D camera;
-	deferred_mode_enum deferred_mode;
+	bool		exit_window;
+	bool		exit_request;
+	int		engine_state;
+	int		deferred_mode;
+	unsigned int	width;
+	unsigned int	height;
+	Shader		*shader;
+	gbuffer_t	gbuffer;
+	Font		font;
+	Camera3D	camera;
 }	ctx;
 
 int main(const int ac, char *av[]) {
@@ -34,7 +34,7 @@ int main(const int ac, char *av[]) {
 
 	ctx.deferred_mode = DEFERRED_SHADING;
 
-	ctx.engine_state = ENGINE_STATE_MENU1;
+	ctx.engine_state = ENGINE_STATE_LOADING_SCREEN;
 
 	ctx.camera = (Camera3D){0};
 	ctx.camera.position = (Vector3){ 2.0f, 3.0f, 2.0f };    // Camera position
@@ -49,10 +49,8 @@ int main(const int ac, char *av[]) {
 
 	ctx.shader = game_shader_load();
 
-	ctx.font = LoadFont("assets/not_free/PirataOne-Regular.ttf");
-	GuiSetFont(ctx.font);
+	ctx.font = LoadFont("assets/not_free/Monster_hunter.ttf");
 
-	HideCursor();
 	SetTargetFPS(ac == 2 ? atoi(av[1]) : 60);
 
 	ctx.gbuffer = haven_gbuffer_init(ctx.width, ctx.height);
@@ -65,7 +63,9 @@ int main(const int ac, char *av[]) {
 	rlEnableBackfaceCulling();
 	
 	while (!WindowShouldClose()) {
-		
+		if (IsKeyPressed(KEY_SPACE)) {
+			ctx.engine_state = ENGINE_STATE_GAME;
+		}
 		if (IsKeyPressed(KEY_Q)) {
 			ctx.deferred_mode++;
 			ctx.deferred_mode %= 5;
@@ -75,25 +75,67 @@ int main(const int ac, char *av[]) {
 				scene_render(cube, &ctx.camera, ctx.gbuffer, ctx.shader, ctx.deferred_mode);
 				break;
 			}
-			case (ENGINE_STATE_MENU1): {
+			case (ENGINE_STATE_MENU_START): {
+				BeginDrawing();
+				ClearBackground(BLACK);
+				switch (game_menu_start()) {
+					case (1): {
+						ctx.engine_state = ENGINE_STATE_GAME;
+						HideCursor();
+						break;
+					}
+					case (2): {
+						ctx.engine_state = ENGINE_STATE_GAME;
+						HideCursor();
+						break;
+					}
+					case (3): {
+						ctx.engine_state = ENGINE_STATE_MENU_SETTING;
+						break;
+					}
+					case (4): {
+						goto close;
+						break;
+					}
+					default:break;
+				}
+				EndDrawing();
 				break;
 			}
-			case (ENGINE_STATE_MENU2): {
+			case (ENGINE_STATE_LOADING_SCREEN): {
+				game_loading_screen();
+				ctx.engine_state = ENGINE_STATE_MENU_START;
 				break;
 			}
-			case (ENGINE_STATE_MENU3): {
+			case (ENGINE_STATE_MENU_SETTING): {
+				BeginDrawing();
+				ClearBackground(BLACK);
+				//setting
+				EndDrawing();
 				break;
 			}
 			case (ENGINE_STATE_MENU4): {
+				BeginDrawing();
+				ClearBackground(BLACK);
+				EndDrawing();
 				break;
 			}
 			case (ENGINE_STATE_MENU5): {
+				BeginDrawing();
+				ClearBackground(BLACK);
+				EndDrawing();
 				break;
 			}
 			case (ENGINE_STATE_MENU6): {
+				BeginDrawing();
+				ClearBackground(BLACK);
+				EndDrawing();
 				break;
 			}
 			case (ENGINE_STATE_MENU7): {
+				BeginDrawing();
+				ClearBackground(BLACK);
+				EndDrawing();
 				break;
 			}
 			default:{
@@ -104,7 +146,7 @@ int main(const int ac, char *av[]) {
 		haven_time_update();
 		haven_stack_reset();
 	}
-
+	close:
 	game_shader_unload(ctx.shader);
 	ShowCursor();
 	haven_thread_mgr_close();
