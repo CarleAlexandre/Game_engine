@@ -47,10 +47,11 @@ int main(const int ac, char *av[]) {
 	InitAudioDevice();
 	assert(IsAudioDeviceReady());
 
+	SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_WINDOW_UNDECORATED | FLAG_WINDOW_RESIZABLE);//need to see if it work
 	InitWindow(ctx.width, ctx.height, "World of Haven : Chaos dungeons");
 	assert(IsWindowReady());
-	SetWindowState(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_UNDECORATED);
-
+	rlEnableSmoothLines();//need to see if it work
+	
 	ctx.shader = game_shader_load();
 
 	ctx.font = LoadFont("assets/Monster_hunter.ttf");
