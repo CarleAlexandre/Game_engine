@@ -10,7 +10,7 @@
 //button texture should be at least of 64x64 with 32x64 for each frame
 
 #define BUTTON_TEX_WIDTH 64
-#define BUTTON_TEX_HEIGHT 32
+#define BUTTON_TEX_HEIGHT 31
 
 typedef enum {
 	BUTTON_DEFAULT = 0,
