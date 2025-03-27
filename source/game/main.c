@@ -22,6 +22,8 @@ struct {
 	gbuffer_t	gbuffer;
 	Font		font;
 	Camera3D	camera;
+	Texture2D	*textures;
+	unsigned int	textures_size;
 }	ctx;
 
 int main(const int ac, char *av[]) {
@@ -74,6 +76,17 @@ int main(const int ac, char *av[]) {
 	haven_music_init((const char**)music_files.paths, music_files.count);
 	UnloadDirectoryFiles(music_files);
 
+	FilePathList texture_files = {0};
+	texture_files = LoadDirectoryFiles("assets/textures");
+	ctx.textures = malloc(sizeof(Texture2D) * texture_files.count);
+	for (int i = 0; i < texture_files.count; i++) {
+		ctx.textures[i] = LoadTexture(texture_files.paths[i]);
+	}
+	ctx.textures_size = texture_files.count;
+	UnloadDirectoryFiles(texture_files);
+
+	game_menu_start_init();
+
 	rlEnableDepthTest();
 	rlEnableBackfaceCulling();
 	
@@ -91,9 +104,10 @@ int main(const int ac, char *av[]) {
 				break;
 			}
 			case (ENGINE_STATE_MENU_START): {
+				
 				BeginDrawing();
 				ClearBackground(BLACK);
-				switch (game_menu_start()) {
+				switch (game_menu_start_update()) {
 					case (1): {
 						ctx.engine_state = ENGINE_STATE_GAME;
 						HideCursor();
@@ -114,6 +128,7 @@ int main(const int ac, char *av[]) {
 					}
 					default:break;
 				}
+				game_menu_start_render(ctx.textures, ctx.font);
 				EndDrawing();
 				break;
 			}
@@ -162,6 +177,11 @@ int main(const int ac, char *av[]) {
 		haven_stack_reset();
 	}
 	close:
+
+	game_menu_start_clear();
+	for (int i = 0; i < ctx.textures_size; i++) {
+		UnloadTexture(ctx.textures[i]);
+	}
 	haven_music_close();
 	haven_sound_close();
 	CloseAudioDevice();
