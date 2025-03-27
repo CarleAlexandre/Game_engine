@@ -64,4 +64,11 @@ gbuffer_t	haven_gbuffer_init(const int width, const int height);
  */
 void	haven_deferred_set_loc(Shader shader);
 
+/**
+ * @brief 
+ * 
+ * @return Model 
+ */
+Model	haven_skybox_create(const Shader skybox_shader);
+
 #endif

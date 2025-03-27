@@ -52,7 +52,7 @@ typedef enum {
 
 Shader	*game_shader_load(void);
 void	game_shader_unload(Shader *shader);
-void	scene_render(const Model cube, Camera3D *camera, const gbuffer_t gbuffer, const Shader shader[MAX_SHADER], int deferred_mode);
+void	scene_render(const Model skybox, Camera3D *camera, const gbuffer_t gbuffer, const Shader shader[MAX_SHADER], int deferred_mode);
 
 void	game_loading_screen(void);
 

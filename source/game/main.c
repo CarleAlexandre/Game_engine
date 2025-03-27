@@ -63,8 +63,7 @@ int main(const int ac, char *av[]) {
 	ctx.gbuffer = haven_gbuffer_init(ctx.width, ctx.height);
 	haven_deferred_set_loc(ctx.shader[SHADER_DEFERRED]);
 	
-	Model cube = LoadModelFromMesh(GenMeshCube(2.0f, 2.0f, 2.0f));
-	cube.materials[0].shader = ctx.shader[SHADER_GBUFFER];
+	Model cube = haven_skybox_create(ctx.shader[SHADER_SKYBOX]);
 	
 	FilePathList sounds_files = {0};
 	sounds_files = LoadDirectoryFiles("assets/not_free/sound");

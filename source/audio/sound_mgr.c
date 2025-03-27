@@ -61,5 +61,4 @@ void	haven_sound_close(void) {
 	for (int i = 0; i < atlas.size; i++) {
 		UnloadSound(atlas.sound[i]);
 	}
-	CloseAudioDevice();
 }

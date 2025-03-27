@@ -52,5 +52,4 @@ void	haven_music_close(void) {
 	for (int i = 0; i < atlas.size; i++) {
 		UnloadMusicStream(atlas.music[i]);
 	}
-	CloseAudioDevice();
 }

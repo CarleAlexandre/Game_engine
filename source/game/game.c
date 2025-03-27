@@ -1,6 +1,6 @@
 #include "game.h"
 
-void	scene_render(const Model cube, Camera3D *camera, const gbuffer_t gbuffer, const Shader shader[MAX_SHADER], int deferred_mode) {
+void	scene_render(const Model skybox, Camera3D *camera, const gbuffer_t gbuffer, const Shader shader[MAX_SHADER], int deferred_mode) {
 	UpdateCamera(camera, CAMERA_FREE);	
 	float camerapos[3] = {camera->position.x, camera->position.y, camera->position.z};
 	SetShaderValue(shader[SHADER_DEFERRED], shader[SHADER_DEFERRED].locs[SHADER_LOC_VECTOR_VIEW], camerapos, SHADER_UNIFORM_VEC3);
@@ -9,17 +9,19 @@ void	scene_render(const Model cube, Camera3D *camera, const gbuffer_t gbuffer, c
 	BeginDrawing(); {
 		haven_gbuffer_start_draw(gbuffer, *camera, shader[SHADER_GBUFFER]); {
 			//drawDeferred scene here
-			DrawModel(cube, Vector3Zero(), 1.0f, WHITE);
 		}haven_gbuffer_end_draw();
 		switch (deferred_mode){
 			case (DEFERRED_SHADING) : {
 				haven_gbuffer_rendering(gbuffer, *camera, shader[SHADER_DEFERRED]);
 				BeginMode3D(*camera); {
-
+					rlDisableBackfaceCulling();
+					rlDisableDepthMask();
+					DrawModel(skybox, Vector3Zero(), 1.0f, WHITE);
+					rlEnableBackfaceCulling();
+					rlEnableDepthMask();	
+					
 					rlEnableShader(rlGetShaderIdDefault());
-
 					DrawCube((Vector3){10, 10, 10}, 10, 10, 10, RED);
-
 					rlDisableShader();
 				}EndMode3D();
 				break;
