@@ -90,13 +90,13 @@ int main(const int ac, char *av[]) {
 	rlEnableBackfaceCulling();
 	
 	while (!WindowShouldClose()) {
-		if (IsKeyPressed(KEY_SPACE)) {
-			haven_sound_play(1);
-		}
-		if (IsKeyPressed(KEY_Q)) {
-			ctx.deferred_mode++;
-			ctx.deferred_mode %= 5;
-		}
+		// if (IsKeyPressed(KEY_SPACE)) {
+		// 	haven_sound_play(1);
+		// }
+		// if (IsKeyPressed(KEY_Q)) {
+		// 	ctx.deferred_mode++;
+		// 	ctx.deferred_mode %= 5;
+		// }
 		switch (ctx.engine_state) {
 			case (ENGINE_STATE_GAME): {
 				scene_render(cube, &ctx.camera, ctx.gbuffer, ctx.shader, ctx.deferred_mode);
