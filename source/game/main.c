@@ -34,7 +34,7 @@ int main(const int ac, char *av[]) {
 
 	ctx.deferred_mode = DEFERRED_SHADING;
 
-	ctx.engine_state = ENGINE_STATE_LOADING_SCREEN;
+	ctx.engine_state = ENGINE_STATE_MENU_START;
 
 	ctx.camera = (Camera3D){0};
 	ctx.camera.position = (Vector3){ 2.0f, 3.0f, 2.0f };    // Camera position

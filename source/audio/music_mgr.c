@@ -5,9 +5,9 @@
 static struct {
 	unsigned int	size;
 	Music		*music;
-}	atlas;
+}	atlas = {0};
 
-static Music	current;
+static Music	current = {0};
 
 #define MAX_TIME_WITHOUT_MUSIC 10
 
@@ -39,7 +39,7 @@ void	haven_music_update(void) {
 	if (!IsMusicStreamPlaying(current)) {
 		value += GetFrameTime();
 		if (value >= MAX_TIME_WITHOUT_MUSIC) {
-			int rand = GetRandomValue(0, atlas.size);
+			int rand = GetRandomValue(0, atlas.size - 1);
 			current = atlas.music[rand];
 			PlayMusicStream(current);
 			value = 0.0;
