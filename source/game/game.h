@@ -32,7 +32,6 @@ typedef enum {
 
 typedef enum {
 	TEXTURE_GUI_BUTTON,
-	TEXTURE_SKYBOX,
 }	texture_name_enum;
 
 // typedef enum {

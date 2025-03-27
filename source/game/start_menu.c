@@ -15,8 +15,8 @@ void	game_menu_start_init(void) {
 int	game_menu_start_update() {
 	Vector2 mouse_pos = GetMousePosition();
 	for (int i = 0; i <  BUTTON_NUMBER; i++) {
-		if (haven_gui_button_logic(button[i], mouse_pos)) {
-			haven_sound_play(SOUND_MENU_CLICK1);
+		if (haven_gui_button_logic(button[i], mouse_pos, haven_sound_play, SOUND_MENU_CLICK1)) {
+			haven_sound_play(SOUND_MENU_CLICK2);
 			return (i + 1);
 		}
 	}

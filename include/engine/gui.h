@@ -41,7 +41,7 @@ void	haven_gui_button_delete(haven_gui_button *button);
  * @return true 
  * @return false 
  */
-bool	haven_gui_button_logic(haven_gui_button *button, Vector2 mouse_pos);
+bool	haven_gui_button_logic(haven_gui_button *button, Vector2 mouse_pos, bool (*hover_action)(unsigned int), unsigned int arg);
 
 /**
  * @brief button_drawing

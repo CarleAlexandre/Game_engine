@@ -46,11 +46,14 @@ void	haven_gui_button_delete(haven_gui_button *button) {
 	free(button);
 }
 
-bool	haven_gui_button_logic(haven_gui_button *button, Vector2 mouse_pos) {
+bool	haven_gui_button_logic(haven_gui_button *button, Vector2 mouse_pos, bool (*hover_action)(unsigned int), unsigned int arg) {
 	if (BUTTON_DOWN != button->state) {
 		if (CheckCollisionPointRec(mouse_pos, button->bound)) {
 			button->collision = true;
-			button->state = BUTTON_HOVER;
+			if (BUTTON_HOVER != button->state) {
+				button->state = BUTTON_HOVER;
+				hover_action(arg);
+			}
 		} else {
 			button->collision = false;
 			button->state = BUTTON_DEFAULT;

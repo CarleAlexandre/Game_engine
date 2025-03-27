@@ -11,7 +11,7 @@ typedef enum {
 	ENGINE_STATE_MENU7
 }	engine_state_enum;
 
-struct {
+static struct {
 	bool		exit_window;
 	bool		exit_request;
 	int		engine_state;
@@ -36,7 +36,7 @@ int main(const int ac, char *av[]) {
 
 	ctx.deferred_mode = DEFERRED_SHADING;
 
-	ctx.engine_state = ENGINE_STATE_MENU_START;
+	ctx.engine_state = ENGINE_STATE_LOADING_SCREEN;
 
 	ctx.camera = (Camera3D){0};
 	ctx.camera.position = (Vector3){ 2.0f, 3.0f, 2.0f };    // Camera position
@@ -66,7 +66,7 @@ int main(const int ac, char *av[]) {
 	Model cube = haven_skybox_create(ctx.shader[SHADER_SKYBOX]);
 	
 	FilePathList sounds_files = {0};
-	sounds_files = LoadDirectoryFiles("assets/not_free/sound");
+	sounds_files = LoadDirectoryFiles("assets/sound");
 	haven_sound_init((const char**)sounds_files.paths, sounds_files.count);
 	UnloadDirectoryFiles(sounds_files);
 
