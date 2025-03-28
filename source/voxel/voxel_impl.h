@@ -1,32 +1,31 @@
 #ifndef VOXEL_IMPL
 # define VOXEL_IMPL
 
+#include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdlib.h>
+
 #include <raylib.h>
 #include <raymath.h>
-#include <stdint.h>
-#include <FastNoiseLite.h>
 #include <rcamera.h>
 
 # define VOXEL_SIZE 0.5
 # define CHUNK_SIZE 64
 
 typedef enum {
-	FACE_YP,
-	FACE_Y,
-	FACE_XP,
-	FACE_X,
-	FACE_ZP,
-	FACE_Z
-} FaceDirection;
-
-typedef uint64_t bitmask;
+	XN,
+	XP,
+	YN,
+	YP,
+	ZN,
+	ZP,
+}	direction_enum;
 
 typedef struct	s_chunk_builder_data {
-	bitmask	face[CHUNK_SIZE];
-	bitmask	block_data[CHUNK_SIZE][CHUNK_SIZE];
+	uint64_t	face[CHUNK_SIZE];
+	uint64_t	block_data[CHUNK_SIZE][CHUNK_SIZE];
 }	chunk_builder_data_t;
-
-
 
 typedef struct	s_face_data {
 	int		block_id;

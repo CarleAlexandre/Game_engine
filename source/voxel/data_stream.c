@@ -3,7 +3,6 @@
 #include <string.h>
 #include <time.h>
 #include <stdbool.h>
-#include "haven/haven_type.h"
 
 #define MAX_CHUNK_CACHE 1024
 #define RLE_MARKER 0xFF
