@@ -10,6 +10,8 @@
 #include <raymath.h>
 #include <rcamera.h>
 
+#include "engine/core/type.h"
+
 # define VOXEL_SIZE 0.5
 # define CHUNK_SIZE 64
 
@@ -56,7 +58,7 @@ typedef struct s_chunk_mesh {
 }	chunk_mesh_t;
 
 typedef struct	s_chunk {
-	svo_t		*blocks;
+	haven_octree_t	*blocks;
 	chunk_mesh_t	*mesh;
 	bool		dirty_mesh;
 	Vector3		pos;//center of min or max ?????
@@ -79,7 +81,7 @@ typedef struct s_world_mesh {
 }	world_mesh_t;
 
 typedef struct	s_world {
-	svo_t		*chunks;
+	haven_octree_t	*chunks;
 	Vector3		dim;
 
 	world_mesh_t	mesh;
