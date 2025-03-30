@@ -10,13 +10,15 @@
 #include <rcamera.h>
 // #include "extern/rlights.h"
 
+#define NUMBER_FACE 6
+
 typedef struct Plane {
 	Vector3 normal;
 	float distance;
 } Plane;
     
 typedef struct Frustum {
-	Plane planes[6];
+	Plane planes[NUMBER_FACE];
 } Frustum;
 
 typedef  struct {
@@ -47,8 +49,9 @@ typedef struct voxel_mesh {
 	uint32_t	vbo;
 	uint32_t	ebo;
 	uint32_t	ibo;
-	quad_data	faces[6][4096];
-	unsigned int	faces_count[6];
+	quad_data	faces[NUMBER_FACE][4096];
+	unsigned int	faces_count[NUMBER_FACE];
+	Texture2D	face_texture;
 }	voxel_mesh;
 
 #endif
