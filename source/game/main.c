@@ -35,15 +35,14 @@ int main(const int ac, char *av[]) {
 	ctx.width = 1920;
 
 	ctx.deferred_mode = DEFERRED_SHADING;
-
 	ctx.engine_state = ENGINE_STATE_LOADING_SCREEN;
 
 	ctx.camera = (Camera3D){0};
-	ctx.camera.position = (Vector3){ 2.0f, 3.0f, 2.0f };    // Camera position
-	ctx.camera.target = (Vector3){ 0.0f, 1.0f, 0.0f };      // Camera looking at point
-	ctx.camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };          // Camera up vector (rotation towards target)
-	ctx.camera.fovy = 45.0f;                                // Camera field-of-view Y
-	ctx.camera.projection = CAMERA_PERSPECTIVE;             // Camera projection type(Camera3D) {
+	ctx.camera.position = (Vector3){ 2.0f, 3.0f, 2.0f };// Camera position
+	ctx.camera.target = (Vector3){ 0.0f, 1.0f, 0.0f };  // Camera looking at point
+	ctx.camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };      // Camera up vector (rotation towards target)
+	ctx.camera.fovy = 45.0f;                            // Camera field-of-view Y
+	ctx.camera.projection = CAMERA_PERSPECTIVE;         // Camera projection type(Camera3D) {
 
 	haven_memory_system_print();
 	InitAudioDevice();
@@ -90,13 +89,6 @@ int main(const int ac, char *av[]) {
 	rlEnableBackfaceCulling();
 	
 	while (!WindowShouldClose()) {
-		// if (IsKeyPressed(KEY_SPACE)) {
-		// 	haven_sound_play(1);
-		// }
-		// if (IsKeyPressed(KEY_Q)) {
-		// 	ctx.deferred_mode++;
-		// 	ctx.deferred_mode %= 5;
-		// }
 		switch (ctx.engine_state) {
 			case (ENGINE_STATE_GAME): {
 				scene_render(cube, &ctx.camera, ctx.gbuffer, ctx.shader, ctx.deferred_mode);
@@ -171,7 +163,7 @@ int main(const int ac, char *av[]) {
 				break;
 			}
 		}
-		haven_music_update();
+		// haven_music_update();
 		haven_time_update();
 		haven_stack_reset();
 	}

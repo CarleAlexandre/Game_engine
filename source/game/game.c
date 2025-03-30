@@ -6,10 +6,12 @@ void	scene_render(const Model skybox, Camera3D *camera, const gbuffer_t gbuffer,
 	SetShaderValue(shader[SHADER_DEFERRED], shader[SHADER_DEFERRED].locs[SHADER_LOC_VECTOR_VIEW], camerapos, SHADER_UNIFORM_VEC3);
 	SetMousePosition(GetScreenWidth() * 0.5, GetScreenHeight() * 0.5);
 
+	//update all light;
+
 	BeginDrawing(); {
 		haven_gbuffer_start_draw(gbuffer, *camera, shader[SHADER_GBUFFER]); {
 			//drawDeferred scene here
-		}haven_gbuffer_end_draw();
+		} haven_gbuffer_end_draw();
 		switch (deferred_mode){
 			case (DEFERRED_SHADING) : {
 				haven_gbuffer_rendering(gbuffer, *camera, shader[SHADER_DEFERRED]);
@@ -20,9 +22,9 @@ void	scene_render(const Model skybox, Camera3D *camera, const gbuffer_t gbuffer,
 					rlEnableBackfaceCulling();
 					rlEnableDepthMask();	
 					
-					rlEnableShader(rlGetShaderIdDefault());
-					DrawCube((Vector3){10, 10, 10}, 10, 10, 10, RED);
-					rlDisableShader();
+					rlEnableShader(rlGetShaderIdDefault()); {
+						DrawCube((Vector3){10, 10, 10}, 10, 10, 10, RED);
+					} rlDisableShader();
 				}EndMode3D();
 				break;
 			}

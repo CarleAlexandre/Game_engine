@@ -24,7 +24,6 @@
 
 # define GRAY_VALUE(c) ((float)(c.r + c.g + c.b)/3.0f)
 
-
 /* 
 	TYPEDEF
 */
@@ -38,7 +37,7 @@ typedef enum {
 } deferred_mode;
 
 typedef enum {
-	item_est,
+	item_test,
 }	item_identifier;
 
 typedef enum {
@@ -132,14 +131,5 @@ typedef enum {
 /* 
 	DATA STRUCT
 */
-
-typedef struct Plane {
-	Vector3 normal;
-	float distance;
-} Plane;
-    
-typedef struct Frustum {
-	Plane planes[6];
-} Frustum;
 
 #endif

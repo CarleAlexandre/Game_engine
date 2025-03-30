@@ -1,7 +1,4 @@
-#include <raylib.h>
-#include <rlgl.h>
-#include <raymath.h>
-#include <stdlib.h>
+#include "render_impl.h"
 
 typedef struct s_gbuffer{
 	//framebuffer

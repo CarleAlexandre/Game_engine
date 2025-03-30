@@ -1,16 +1,14 @@
 #include <stdbool.h>
-#include <stdlib.h>
 #include <assert.h>
-#include <raylib.h>
-#define RAYLIB_IMPLEMENTATION
-#include <raygui.h>
-#include <raymath.h>
 #include <string.h>
 
-//button texture should be at least of 64x64 with 32x64 for each frame
+#include "render_impl.h"
+
+#define RAYLIB_IMPLEMENTATION
+#include <raygui.h>
 
 #define BUTTON_TEX_WIDTH 64
-#define BUTTON_TEX_HEIGHT 31
+#define BUTTON_TEX_HEIGHT 32
 
 typedef enum {
 	BUTTON_DEFAULT = 0,
@@ -77,7 +75,7 @@ bool	haven_gui_button_logic(haven_gui_button *button, Vector2 mouse_pos, bool (*
 
 void	haven_gui_button_draw(haven_gui_button *button, const Texture2D *texture, const Font font) {
 	DrawTexturePro(texture[button->texture_id],
-		(Rectangle){0, BUTTON_TEX_HEIGHT * button->state, BUTTON_TEX_WIDTH, BUTTON_TEX_HEIGHT},
+		(Rectangle){0, (BUTTON_TEX_HEIGHT - 1) * button->state, BUTTON_TEX_WIDTH, BUTTON_TEX_HEIGHT},
 		button->bound, (Vector2){0, 0}, 0, WHITE);
 	DrawTextEx(font, button->str,
 		Vector2AddValue((Vector2){button->bound.x, button->bound.y}, 5),
