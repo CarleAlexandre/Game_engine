@@ -15,13 +15,12 @@ static const uint32_t	quad_indices[] = {
 };
 
 quad_data haven_quad_pack(unsigned char pos[3], unsigned char face, unsigned char height, unsigned char width, unsigned short id) {
-	quad_data	data;
+	quad_data data;
 	data.render = false;
 	data.element = (id << 3 | face);
 	data.face_data = ((height << 24) | (width << 18) | (pos[2] << 12) | (pos[1] << 6) | pos[0]);
 	return (data);
 }
-
 
 void	haven_quad_mesh(voxel_mesh *mesh) {
 	int total_size = 0;

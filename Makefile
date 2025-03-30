@@ -97,4 +97,7 @@ fclean: clean
 
 re:	fclean all
 
+debug:
+	gdb ./build/Game.exe
+
 .PHONY: all lib $(EXEC) $(EDITOR) clean fclean re dynamic
