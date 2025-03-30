@@ -46,7 +46,6 @@ void	haven_quad_mesh(voxel_mesh *mesh) {
 	rlEnableVertexAttribute(0);
 
 	mesh->ebo = rlLoadVertexBufferElement(quad_indices, sizeof(quad_indices), false);
-
 	mesh->ibo = rlLoadVertexBuffer(buffer, total_size * sizeof(quad_data), true);
 
 	rlSetVertexAttribute(1, 1, RL_FLOAT, false, sizeof(quad_data), offsetof(quad_data, face_data));

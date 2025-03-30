@@ -27,6 +27,7 @@ bool	point_intersect(Vector3 point, BoundingBox box) {
 Vector3	get_vector_intersect(BoundingBox a, BoundingBox b) {
 	Vector3 vec;
 
+	
 	return(vec);
 }
 
