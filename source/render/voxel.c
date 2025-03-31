@@ -23,16 +23,16 @@ void	voxel_texture_write() {
 
 }
 
-Texture2D	voxel_texture_create() {
-	Texture2D texture = (Texture2D){
-		.format = RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8,
-		.width = CHUNK_RESOLUTION * CHUNK_RESOLUTION,
-		.height = CHUNK_RESOLUTION,
-		.id = 0,
+Texture2D	voxel_texture_create(void *data) {
+	Image image = {	
+		.data = data,
+		.width = 5792,
+		.height = 5792,
+		.format = PIXELFORMAT_UNCOMPRESSED_R32,
 		.mipmaps = 1,
 	};
 
-	texture.id = rlLoadTexture(0x00, SQRT_CHUNK, SQRT_CHUNK, RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8, 1);
-	assert(IsTextureValid(texture));
+	Texture2D vox_texture = LoadTextureFromImage(image);
+	assert(IsTextureValid(vox_texture));
 	//now i can save and load it after chunk changed
 }
