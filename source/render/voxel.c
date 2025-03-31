@@ -2,7 +2,7 @@
 
 #define CHUNK_RESOLUTION 1024
 #define CHUNK_SIZE (CHUNK_RESOLUTION * CHUNK_RESOLUTION * CHUNK_RESOLUTION)
-#define SQRT_CHUNK 32768
+#define SQRT_CHUNK 32768 //too big for opengl texture
 #define CHUNK_WORLD_SIZE 64
 #define FACES 6
 
