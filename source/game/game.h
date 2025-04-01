@@ -1,7 +1,9 @@
 #ifndef GAME_H
 # define GAME_H
 
-#include "engine/core.h"
+#include "engine/alloc.h"
+#include "engine/thread.h"
+#include "engine/time.h"
 #include "engine/render.h"
 #include "engine/audio.h"
 

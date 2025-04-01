@@ -1,3 +1,6 @@
+#ifndef GUI_H
+#define GUI_H
+
 #include <stdbool.h>
 #include <raylib.h>
 
@@ -51,3 +54,5 @@ bool	haven_gui_button_logic(haven_gui_button *button, Vector2 mouse_pos, bool (*
  * @param font 
  */
 void	haven_gui_button_draw(haven_gui_button *button, const Texture2D *texture, const Font font);
+
+#endif

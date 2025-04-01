@@ -1,4 +1,5 @@
 #include "render_impl.h"
+#include <rcamera.h>
 
 void	extract_frustum_from_matrix(const Matrix view, Frustum *frustum) {
 	//stub

@@ -71,4 +71,10 @@ void	haven_deferred_set_loc(Shader shader);
  */
 Model	haven_skybox_create(const Shader skybox_shader);
 
+/**
+ * @brief 
+ * 
+ */
+void	render_debug_draw(void);
+
 #endif

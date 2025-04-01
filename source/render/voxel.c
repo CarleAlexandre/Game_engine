@@ -73,9 +73,9 @@ void	voxel_render_chunks(Shader shader, Matrix transform) {
 		rlSetUniformMatrix(shader.locs[SHADER_LOC_MATRIX_MVP], MatrixMultiply(MatrixMultiply(matModel, matView), matProjection));
 		for (int i = 0; i < 0; i++) {
 			float pos[3];
-			voxel_render_elements(pos, shader);
+			voxel_render_quad_elements_instanced(pos, shader);
 		}
-	} rlDisableShader();		
+	} rlDisableShader();
 	rlSetMatrixModelview(matView);
 	rlSetMatrixProjection(matProjection);
 }

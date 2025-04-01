@@ -49,5 +49,8 @@ void	scene_render(const Model skybox, Camera3D *camera, const gbuffer_t gbuffer,
 			}
 		}
 		DrawFPS(10, 10);
+		DrawText(TextFormat("%f", GetFrameTime() * 1000), 30, 30, 10, GREEN);
+		render_debug_draw();
+
 	} EndDrawing();
 }
