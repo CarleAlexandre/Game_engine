@@ -38,11 +38,17 @@ int main(const int ac, char *av[]) {
 	ctx.engine_state = ENGINE_STATE_LOADING_SCREEN;
 
 	ctx.camera = (Camera3D){0};
-	ctx.camera.position = (Vector3){ 2.0f, 3.0f, 2.0f };// Camera position
-	ctx.camera.target = (Vector3){ 0.0f, 1.0f, 0.0f };  // Camera looking at point
-	ctx.camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };      // Camera up vector (rotation towards target)
-	ctx.camera.fovy = 45.0f;                            // Camera field-of-view Y
-	ctx.camera.projection = CAMERA_PERSPECTIVE;         // Camera projection type(Camera3D) {
+	// ctx.camera.position = (Vector3){ 2.0f, 3.0f, 2.0f };// Camera position
+	// ctx.camera.target = (Vector3){ 0.0f, 1.0f, 0.0f };  // Camera looking at point
+	// ctx.camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };      // Camera up vector (rotation towards target)
+	// ctx.camera.fovy = 45.0f;                            // Camera field-of-view Y
+	// ctx.camera.projection = CAMERA_PERSPECTIVE;         // Camera projection type(Camera3D) {
+
+	ctx.camera.fovy = 45.0f;
+	ctx.camera.projection = CAMERA_PERSPECTIVE;
+	ctx.camera.position = (Vector3){40, 40, 40};
+	ctx.camera.up = (Vector3){0, 1, 0};
+	ctx.camera.target = (Vector3){0, 0, 0};
 
 	haven_memory_system_print();
 	InitAudioDevice();
