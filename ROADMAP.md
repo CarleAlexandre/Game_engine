@@ -56,6 +56,8 @@
 3. Physical notepad
 4. Compile frequently
 
+```
+
 ██████████████████████████████████████████
 █           Core Architecture           █
 ██████████████████████████████████████████
@@ -157,3 +159,5 @@ Input → Event Queue → Spatial Partitioning
 │ CPU: 14ms         │ GPU: 9ms           │
 │ LODs: 3.2k L0     │ 1.1k L1            │
 └─────────────────────────────────────────┘
+
+```

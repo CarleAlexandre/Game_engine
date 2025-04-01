@@ -1,9 +1,7 @@
 #include "render_impl.h"
 
-#define CHUNK_RESOLUTION 1024
+#define CHUNK_RESOLUTION 32
 #define CHUNK_SIZE (CHUNK_RESOLUTION * CHUNK_RESOLUTION * CHUNK_RESOLUTION)
-#define SQRT_CHUNK 32768 //too big for opengl texture
-#define CHUNK_WORLD_SIZE 64
 #define FACES 6
 
 typedef struct chunk_texture {
@@ -26,8 +24,8 @@ void	voxel_texture_write() {
 Texture2D	voxel_texture_create(void *data) {
 	Image image = {	
 		.data = data,
-		.width = 5792,
-		.height = 5792,
+		.width = CHUNK_RESOLUTION,
+		.height = CHUNK_RESOLUTION,
 		.format = PIXELFORMAT_UNCOMPRESSED_R32,
 		.mipmaps = 1,
 	};
