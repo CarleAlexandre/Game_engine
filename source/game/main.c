@@ -63,7 +63,7 @@ int main(const int ac, char *av[]) {
 
 	ctx.font = LoadFont("assets/Monster_hunter.ttf");
 
-	// SetTargetFPS(ac == 2 ? atoi(av[1]) : 60);
+	SetTargetFPS(ac == 2 ? atoi(av[1]) : 165);
 
 	ctx.gbuffer = haven_gbuffer_init(ctx.width, ctx.height);
 	haven_deferred_set_loc(ctx.shader[SHADER_DEFERRED]);
@@ -98,15 +98,6 @@ int main(const int ac, char *av[]) {
 
 		switch (ctx.engine_state) {
 			case (ENGINE_STATE_GAME): {
-				if (IsKeyPressed(KEY_SPACE)) {
-					SetTargetFPS(20);
-				}
-				if (IsKeyPressed(KEY_Q)) {
-					SetTargetFPS(120);
-				}
-				if (IsKeyPressed(KEY_E)) {
-					SetTargetFPS(0);
-				}
 				scene_render(cube, &ctx.camera, ctx.gbuffer, ctx.shader, ctx.deferred_mode);
 				break;
 			}

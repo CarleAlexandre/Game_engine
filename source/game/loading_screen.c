@@ -16,6 +16,8 @@ void	game_loading_screen(void) {
 	int state = 0;                  // Tracking animation states (State Machine)
 	float alpha = 1.0f;             // Useful for fading
 
+	SetTargetFPS(60);
+
 	while (state != 4) {
 
 		// Update
@@ -99,4 +101,5 @@ void	game_loading_screen(void) {
 			}		
 		} EndDrawing();
 	}
+	SetTargetFPS(165);
 }
