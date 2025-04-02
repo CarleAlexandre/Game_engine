@@ -5,6 +5,16 @@
 #include <stdint.h>
 
 /**
+ * @brief The usleep() function suspends execution of the calling thread for
+       (at least) usec microseconds.  The sleep may be lengthened
+       slightly by any system activity or by the time spent processing
+       the call or by the granularity of system timers.
+ * 
+ * @param usec
+ */
+void	time_usleep(uint64_t usec);
+
+/**
  * @brief Initialize thread manager structure and start worker threads
  * 
  */

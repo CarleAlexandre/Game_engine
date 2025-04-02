@@ -5,70 +5,6 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include <cglm/cglm.h>
-#include <math.h>
-
-typedef struct	haven_octree_node_s {
-	bool				isleaf;
-	void				*data;
-	struct haven_octree_node_s	*children[8];
-}	haven_octree_node_t;
-
-typedef	struct	haven_octree_s {
-	int			size;
-	int			element;
-	int			max_depth;
-	haven_octree_node_t	*root;
-}	haven_octree_t;
-
-/**
- * @brief 
- * 
- * @param node 
- */
-void	haven_octree_node_delete(haven_octree_node_t *node);
-/**
- * @brief 
- * 
- * @param svo 
- */
-void	delete_svo(haven_octree_t *svo);
-
-/**
- * @brief 
- * 
- * @param _size 
- * @param _depth 
- * @return haven_octree_t* 
- */
-haven_octree_t	*init_svo(int _size, int _depth);
-
-/**
- * @brief 
- * 
- * @param svo 
- * @param point 
- * @param data 
- * @return true 
- * @return false 
- */
-bool	haven_octree_insert(haven_octree_t *svo, vec3 point, void *data);
-
-/**
- * @brief 
- * 
- * @param point 
- * @param svo 
- * @return void* 
- */
-void	*haven_octree_get(vec3 point, haven_octree_t *svo);
-
-/**
- * @brief 
- * 
- * @return haven_octree_node_t* 
- */
-haven_octree_node_t	*haven_octree_node_create(void);
 
 /**
  * @brief static queue data structure
@@ -174,12 +110,12 @@ void	haven_dqueue_destroy(haven_dqueue_t *q);
  * @brief dynamic array data structure
  * 
  */
-typedef struct haven_darray_s {
+typedef struct dynamic_array {
 	void*		data;
 	unsigned int	size;// Number of elements in the array
 	unsigned int	capacity;// Total capacity of the array (in bytes)
 	unsigned char	data_size;// Size of each element (in bytes)
-}	haven_darray_t;
+}	dynamic_array;
 
 /**
  * @brief 
@@ -187,7 +123,7 @@ typedef struct haven_darray_s {
  * @param array 
  * @param element 
  */
-void	haven_darray_add(haven_darray_t *array, void *element);
+void	dynamic_array_add(dynamic_array *array, void *element);
 
 /**
  * @brief 
@@ -195,14 +131,14 @@ void	haven_darray_add(haven_darray_t *array, void *element);
  * @param array 
  * @param idx 
  */
-void	haven_darray_del(haven_darray_t *array, unsigned int idx);
+void	dynamic_array_del(dynamic_array *array, unsigned int idx);
 
 /**
  * @brief 
  * 
  * @param array 
  */
-void	haven_darray_clear(haven_darray_t *array);
+void	dynamic_array_clear(dynamic_array *array);
 
 /**
  * @brief 
@@ -210,14 +146,14 @@ void	haven_darray_clear(haven_darray_t *array);
  * @param data_size 
  * @return haven_darray_t* 
  */
-haven_darray_t*	init_dyn_array(unsigned char data_size);
+dynamic_array*	dynamic_array_init(unsigned char data_size);
 
 /**
  * @brief 
  * 
  * @param array 
  */
-void	haven_darray_destroy(haven_darray_t* array);
+void	dynamic_array_destroy(dynamic_array* array);
 
 /**
  * @brief 
@@ -226,7 +162,7 @@ void	haven_darray_destroy(haven_darray_t* array);
  * @param start 
  * @param end 
  */
-void	haven_darray_range_remove(haven_darray_t* array, unsigned int start, unsigned int end);
+void	haven_darray_range_remove(dynamic_array* array, unsigned int start, unsigned int end);
 
 /*
  * @brief 
@@ -244,7 +180,7 @@ void	haven_darray_range_remove(haven_darray_t* array, unsigned int start, unsign
  * @param array 
  * @param comparator 
  */
-void	haven_darray_sort(haven_darray_t *array, int (*comparator)(const void *, const void *));
+void	haven_darray_sort(dynamic_array *array, int (*comparator)(const void *, const void *));
 
 /**
  * @brief 
@@ -253,6 +189,6 @@ void	haven_darray_sort(haven_darray_t *array, int (*comparator)(const void *, co
  * @param idx 
  * @return void* 
  */
-void*	haven_darray_get(haven_darray_t *array,unsigned int idx);
+void*	haven_darray_get(dynamic_array *array,unsigned int idx);
 
 #endif
