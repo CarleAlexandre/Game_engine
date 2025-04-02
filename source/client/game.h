@@ -1,7 +1,7 @@
 #ifndef GAME_H
 # define GAME_H
 
-#include "../engine/alloc.h"
+#include "../engine/allocator.h"
 #include "../engine/thread.h"
 #include "../engine/time.h"
 #include "../engine/render.h"

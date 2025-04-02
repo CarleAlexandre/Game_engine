@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <cglm/cglm.h>
+#include <raylib.h>
 
 typedef struct s_stats {
 	int		health;
@@ -14,15 +14,17 @@ typedef struct s_stats {
 }	entity_stats_t;// change with buff or equipement
 
 typedef struct	s_entity_info {
-	vec3	position;
-	vec3	min;
-	vec3	max;
-	vec3	direction;
-	vec3	velocity;
+	Vector3	position;
+	Vector3	min;
+	Vector3	max;
+	Vector3	direction;
+	Vector3	velocity;
 }	entity_info_t;
 
 typedef struct	s_entity_animation {
 //bones, mesh etc etc
+	int	size;
+	int	model_id;
 }	entity_animation_t;
 
 typedef struct	s_entity {
@@ -30,6 +32,8 @@ typedef struct	s_entity {
 	entity_info_t info;
 	entity_animation_t anim;
 }	entity_t;
+
+
 
 /**
  * @brief initialize entities dynamic array
