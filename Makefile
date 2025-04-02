@@ -1,6 +1,8 @@
 # Compiler and flags
 CC = gcc
-CFLAGS = -std=c99 -g -Wall
+CFLAGS = -g -Wall
+CFLAGS += -std=c99
+
 LDFLAGS = 
 
 # Directories
@@ -12,13 +14,7 @@ SRC_DIR = source/
 LIB = HavenLib.a
 
 # Sources and objects for the library
-SRC	+= $(wildcard $(SRC_DIR)core/*.c)
-SRC	+= $(wildcard $(SRC_DIR)render/*.c)
-SRC	+= $(wildcard $(SRC_DIR)audio/*.c)
-SRC	+= $(wildcard $(SRC_DIR)entity/*.c)
-SRC	+= $(wildcard $(SRC_DIR)physics/*.c)
-SRC	+= $(wildcard $(SRC_DIR)item/*.c)
-
+SRC	+= $(wildcard $(SRC_DIR)engine/*.c)
 
 OBJ = $(SRC:$(SRC_DIR)%.c=$(OBJ_DIR)%.o)
 
@@ -27,7 +23,7 @@ EXEC = Game
 EDITOR = HavenEditor
 
 EXEC_SRC = $(wildcard $(SRC_DIR)game/*.c)
-EDITOR_SRC = $(wildcard $(SRC_DIR)editor/*.c)
+EDITOR_SRC = $(wildcard $(SRC_DIR)tools/*.c)
 
 EXEC_OBJ = $(EXEC_SRC:$(SRC_DIR)%.c=$(OBJ_DIR)%.o)
 EDITOR_OBJ = $(EDITOR_SRC:$(SRC_DIR)%.c=$(OBJ_DIR)%.o)

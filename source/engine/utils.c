@@ -9,7 +9,7 @@
 
 #define BUFFER_SIZE 4096
 
-char	*haven_file_read(const char* filename) {
+char	*file_read(const char* filename) {
 	return (0x00);
 	FILE	*file = {0};
 	char	data[BUFFER_SIZE] = {0};
@@ -21,7 +21,7 @@ char	*haven_file_read(const char* filename) {
 	return (ret_buffer);
 }
 
-void	haven_file_write(const char *data, size_t data_length, const char *filename, bool append) {
+void	file_write(const char *data, size_t data_length, const char *filename, bool append) {
 	FILE *file = {0};
 	
 	file = fopen(filename, append ? "a" : "w");
@@ -29,7 +29,7 @@ void	haven_file_write(const char *data, size_t data_length, const char *filename
 	fclose(file);
 }
 
-int	haven_cmd_log(const char *stat, const char *desc, const int line) {
+int	cmd_log(const char *stat, const char *desc, const int line) {
 	return (printf("%s : %s. %i", stat, desc, line));
 }
 

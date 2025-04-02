@@ -20,11 +20,6 @@ typedef struct voxel_chunk {
 	Vector3		pos;
 }	voxel_chunk;
 
-
-void	voxel_texture_write() {
-
-}
-
 Image	voxel_binary_image_create(void *data) {
 	Image image = {	
 		.data = data,
@@ -37,14 +32,9 @@ Image	voxel_binary_image_create(void *data) {
 	return (image);
 }
 
-void	voxel_chunk_debug_draw(const voxel_chunk *chunk) {
-	//draw boundaries
-	DrawCubeWires(chunk->pos, 32, 32, 32, RED);
-	
-}
-
 void	voxel_render_quad_elements_instanced(float pos[3], Shader shader) {	
 	SetShaderValue(shader, GetShaderLocation(shader, "chunk_pos"), &pos[0], RL_SHADER_UNIFORM_VEC3);
+	// DrawCubeWires(chunk->pos, 32, 32, 32, RED);
 	
 	rlEnableVertexArray(0);
 		// int quad_count;
@@ -89,20 +79,20 @@ quad_data haven_quad_pack(unsigned char pos[3], unsigned char face, unsigned cha
 }
 
 void	haven_quad_mesh(voxel_mesh *mesh) {
-	int total_size = 0;
+	// int total_size = 0;
 
-	for (int i = 0; i < 6; i++) {
-		total_size += mesh->faces_count[i];
-	}
+	// for (int i = 0; i < 6; i++) {
+	// 	total_size += mesh->faces_count[i];
+	// }
 
-	quad_data *buffer = calloc(total_size, sizeof(quad_data));
+	// quad_data *buffer = calloc(total_size, sizeof(quad_data));
 
-	int prev = 0;
+	// int prev = 0;
 
-	for (int i = 0; i < 6; i++) {
-		memcpy(&buffer[prev], mesh->faces[i], mesh->faces_count[i] * sizeof(quad_data));
-		prev += mesh->faces_count[i];
-	}
+	// for (int i = 0; i < 6; i++) {
+	// 	memcpy(&buffer[prev], mesh->faces[i], mesh->faces_count[i] * sizeof(quad_data));
+	// 	prev += mesh->faces_count[i];
+	// }
 
 	mesh->vao = rlLoadVertexArray();
 	rlEnableVertexArray(mesh->vao);
@@ -111,16 +101,16 @@ void	haven_quad_mesh(voxel_mesh *mesh) {
 	rlSetVertexAttribute(0, 3, RL_FLOAT, false, 3 *sizeof(float), 0);
 	rlEnableVertexAttribute(0);
 
-	mesh->ebo = rlLoadVertexBufferElement(quad_indices, sizeof(quad_indices), false);
-	mesh->ibo = rlLoadVertexBuffer(buffer, total_size * sizeof(quad_data), true);
+	// mesh->ebo = rlLoadVertexBufferElement(quad_indices, sizeof(quad_indices), false);
+	// mesh->ibo = rlLoadVertexBuffer(buffer, total_size * sizeof(quad_data), true);
 
-	rlSetVertexAttribute(1, 1, RL_FLOAT, false, sizeof(quad_data), offsetof(quad_data, face_data));
-	rlEnableVertexAttribute(1);
-	rlSetVertexAttributeDivisor(1, 1);
+	// rlSetVertexAttribute(1, 1, RL_FLOAT, false, sizeof(quad_data), offsetof(quad_data, face_data));
+	// rlEnableVertexAttribute(1);
+	// rlSetVertexAttributeDivisor(1, 1);
 
-	rlSetVertexAttribute(2, 1, RL_FLOAT, false, sizeof(quad_data), offsetof(quad_data, element));
-	rlEnableVertexAttribute(2);
-	rlSetVertexAttributeDivisor(2, 1);
+	// rlSetVertexAttribute(2, 1, RL_FLOAT, false, sizeof(quad_data), offsetof(quad_data, element));
+	// rlEnableVertexAttribute(2);
+	// rlSetVertexAttributeDivisor(2, 1);
 
 	rlDisableVertexArray();
 }

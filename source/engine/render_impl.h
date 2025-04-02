@@ -8,10 +8,10 @@
 #include <raylib.h>
 #include <rlgl.h>
 #include <raymath.h>
-// #include <rcamera.h>
-// #include "extern/rlights.h"
 
-#define NUMBER_FACE 6
+# define GRAY_VALUE(c) ((float)(c.r + c.g + c.b)/3.0f)
+
+# define NUMBER_FACE 6
 
 typedef struct Plane {
 	Vector3 normal;

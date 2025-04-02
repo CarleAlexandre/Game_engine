@@ -12,15 +12,15 @@
  * @brief dynamic array data structure
  * 
  */
-typedef struct haven_darray_s {
+typedef struct dynamic_array {
 	char	data_size;// Size of each element (in bytes)
 	void*	data;
 	size_t	size;// Number of elements in the array
 	size_t	capacity;// Total capacity of the array (in bytes)
 	size_t	alignement;//Alignment requirement (must be a power of two)
-}	haven_darray_t;
+}	dynamic_array;
 
-void	haven_darray_add(haven_darray_t *array, const void *element) {
+void	dynamic_array_add(dynamic_array *array, const void *element) {
 	if ((array->size + 1) * array->data_size >= array->capacity) {
 		const uint32_t new_capacity = (unsigned int)(array->capacity * ALLOC_STEP);
 		void *tmp = _aligned_malloc(new_capacity, array->alignement);
@@ -37,7 +37,7 @@ void	haven_darray_add(haven_darray_t *array, const void *element) {
 	array->size++;
 }
 
-void	haven_darray_del(haven_darray_t *array, const unsigned int idx) {
+void	dynamic_array_del(dynamic_array *array, const unsigned int idx) {
 	if (idx >= array->size) return;
 
 	memmove((unsigned char *)array->data + idx * array->data_size,
@@ -58,13 +58,13 @@ void	haven_darray_del(haven_darray_t *array, const unsigned int idx) {
 	}
 }
 
-void	haven_darray_clear(haven_darray_t *array) {
+void	dynamic_array_clear(dynamic_array *array) {
 	memset(array->data, 0, array->capacity);
 	array->size = 0;
 }
 
-haven_darray_t*	init_dyn_array(const char data_size, const size_t alignement) {
-	haven_darray_t* array = (haven_darray_t *)malloc(sizeof(haven_darray_t));
+dynamic_array*	dynamic_array_array(const char data_size, const size_t alignement) {
+	dynamic_array* array = (dynamic_array *)malloc(sizeof(dynamic_array));
 	assert(array);
 
 	array->data = _aligned_malloc(data_size * 8, array->alignement);
@@ -78,12 +78,12 @@ haven_darray_t*	init_dyn_array(const char data_size, const size_t alignement) {
 	return array;
 }
 
-void	haven_darray_destroy(haven_darray_t* array) {
+void	dynamic_array_destroy(dynamic_array* array) {
 	_aligned_free(array->data);
 	free(array);
 }
 
-void	haven_darray_range_remove(haven_darray_t* array, const uint32_t start, const uint32_t end) {
+void	dynamic_array_range_remove(dynamic_array* array, const uint32_t start, const uint32_t end) {
 	if (start >= array->size || end >= array->size || start > end) {
 	    return;
 	}
@@ -142,115 +142,19 @@ void	haven_darray_range_move(const haven_darray_t* array, const uint32_t src_sta
 }
 */
 
-void	haven_darray_sort(const haven_darray_t *array, int (*comparator)(const void *, const void *)) {
+void	dynamic_array_sort(const dynamic_array *array, int (*comparator)(const void *, const void *)) {
 	qsort(array->data, array->size, array->data_size, comparator);
 }
 
 //return a pointer to data idx;
-void*	haven_darray_get(const haven_darray_t *array, const uint32_t idx) {
+void*	dynamic_array_get(const dynamic_array *array, const uint32_t idx) {
 	void *ret = (unsigned char *)array->data + (idx * array->data_size);
 	return (ret);
 }
 
 
-void	haven_darray_foreach(haven_darray_t *array, void (*callback)(void *)) {
+void	dynamic_array_foreach(dynamic_array *array, void (*callback)(void *)) {
 	for (uint32_t i = 0; i < array->size; i++) {
 		callback(haven_darray_get(array, i));
 	}
 }
-
-#ifdef HAVEN_UNIT_TEST
-
-#include <assert.h>
-
-static void test_darray_init() {
-	haven_darray_t array;
-	haven_darray_init(&array, sizeof(int), 4, 8);
-	
-	assert(array.data != NULL);
-	assert(array.size == 0);
-	assert(array.capacity == 8);
-	assert(array.data_size == sizeof(int));
-	assert(array.alignement == 4);
-	
-	haven_darray_free(&array);
-}
-
-static void test_darray_push() {
-	haven_darray_t array;
-	haven_darray_init(&array, sizeof(int), 4, 2);
-	
-	int values[] = {1, 2, 3, 4};
-	
-	// Test pushing within initial capacity
-	haven_darray_push(&array, &values[0]);
-	haven_darray_push(&array, &values[1]);
-	assert(array.size == 2);
-	assert(array.capacity == 2);
-	
-	// Test capacity doubling
-	haven_darray_push(&array, &values[2]);
-	assert(array.size == 3);
-	assert(array.capacity == 4);
-	
-	// Verify values
-	int *data = array.data;
-	assert(data[0] == 1);
-	assert(data[1] == 2);
-	assert(data[2] == 3);
-	
-	haven_darray_free(&array);
-}
-
-static void test_darray_pop() {
-	haven_darray_t array;
-	haven_darray_init(&array, sizeof(int), 4, 4);
-	
-	int values[] = {1, 2, 3};
-	for (int i = 0; i < 3; i++) {
-		haven_darray_push(&array, &values[i]);
-	}
-	
-	int popped;
-	haven_darray_pop(&array, &popped);
-	assert(popped == 3);
-	assert(array.size == 2);
-	
-	haven_darray_free(&array);
-}
-
-static void test_darray_sort() {
-	haven_darray_t array;
-	haven_darray_init(&array, sizeof(int), 4, 4);
-	
-	int values[] = {3, 1, 4, 2};
-	for (int i = 0; i < 4; i++) {
-		haven_darray_push(&array, &values[i]);
-	}
-	
-	int compare(const void *a, const void *b) {
-		return (*(int*)a - *(int*)b);
-	}
-	
-	haven_darray_sort(&array, compare);
-	
-	int *data = array.data;
-	assert(data[0] == 1);
-	assert(data[1] == 2); 
-	assert(data[2] == 3);
-	assert(data[3] == 4);
-	
-	haven_darray_free(&array);
-}
-
-void haven_darray_run_tests() {
-	test_darray_init();
-	test_darray_push();
-	test_darray_pop();
-	test_darray_sort();
-	printf("All dynamic array tests passed!\n");
-}
-
-#endif // HAVEN_UNIT_TEST
-
-	

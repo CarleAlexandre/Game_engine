@@ -75,10 +75,10 @@ int main(const int ac, char *av[]) {
 	haven_sound_init((const char**)sounds_files.paths, sounds_files.count);
 	UnloadDirectoryFiles(sounds_files);
 
-	FilePathList music_files = {0};
-	music_files = LoadDirectoryFiles("assets/not_free/music");
-	haven_music_init((const char**)music_files.paths, music_files.count);
-	UnloadDirectoryFiles(music_files);
+	// FilePathList music_files = {0};
+	// music_files = LoadDirectoryFiles("assets/not_free/music");
+	// haven_music_init((const char**)music_files.paths, music_files.count);
+	// UnloadDirectoryFiles(music_files);
 
 	FilePathList texture_files = {0};
 	texture_files = LoadDirectoryFiles("assets/textures");

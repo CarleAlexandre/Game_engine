@@ -1,11 +1,11 @@
 #ifndef GAME_H
 # define GAME_H
 
-#include "engine/alloc.h"
-#include "engine/thread.h"
-#include "engine/time.h"
-#include "engine/render.h"
-#include "engine/audio.h"
+#include "../engine/alloc.h"
+#include "../engine/thread.h"
+#include "../engine/time.h"
+#include "../engine/render.h"
+#include "../engine/audio.h"
 
 #include <raylib.h>
 #include <rlgl.h>
