@@ -4,8 +4,8 @@
 # include <string.h>
 # include <assert.h>
 
-#ifndef ALLOC_STEP
-# define ALLOC_STEP 1.25f
+#ifndef ARRAY_ALLOC_STEP
+# define ARRAY_ALLOC_STEP 1.25f
 #endif
 
 /**
@@ -20,9 +20,16 @@ typedef struct dynamic_array {
 	size_t	alignement;//Alignment requirement (must be a power of two)
 }	dynamic_array;
 
-void	dynamic_array_add(dynamic_array *array, const void *element) {
+/**
+ * @brief 
+ * 
+ * @param array 
+ * @param element 
+ */
+static void	dynamic_array_add(dynamic_array *array, const void *element) {
+	assert(array);
 	if ((array->size + 1) * array->data_size >= array->capacity) {
-		const uint32_t new_capacity = (unsigned int)(array->capacity * ALLOC_STEP);
+		const uint32_t new_capacity = (unsigned int)(array->capacity * ARRAY_ALLOC_STEP);
 		void *tmp = _aligned_malloc(new_capacity, array->alignement);
 		assert(tmp);
 
@@ -37,7 +44,14 @@ void	dynamic_array_add(dynamic_array *array, const void *element) {
 	array->size++;
 }
 
-void	dynamic_array_del(dynamic_array *array, const unsigned int idx) {
+/**
+ * @brief 
+ * 
+ * @param array 
+ * @param idx 
+ */
+static void	dynamic_array_del(dynamic_array *array, const unsigned int idx) {
+	assert(array);
 	if (idx >= array->size) return;
 
 	memmove((unsigned char *)array->data + idx * array->data_size,
@@ -58,12 +72,25 @@ void	dynamic_array_del(dynamic_array *array, const unsigned int idx) {
 	}
 }
 
-void	dynamic_array_clear(dynamic_array *array) {
+/**
+ * @brief 
+ * 
+ * @param array 
+ */
+static void	dynamic_array_clear(dynamic_array *array) {
+	assert(array);
 	memset(array->data, 0, array->capacity);
 	array->size = 0;
 }
 
-dynamic_array*	dynamic_array_array(const char data_size, const size_t alignement) {
+/**
+ * @brief 
+ * 
+ * @param data_size 
+ * @param alignement 
+ * @return dynamic_array* 
+ */
+static dynamic_array*	dynamic_array_init(const char data_size, const size_t alignement) {
 	dynamic_array* array = (dynamic_array *)malloc(sizeof(dynamic_array));
 	assert(array);
 
@@ -78,12 +105,26 @@ dynamic_array*	dynamic_array_array(const char data_size, const size_t alignement
 	return array;
 }
 
-void	dynamic_array_destroy(dynamic_array* array) {
+/**
+ * @brief 
+ * 
+ * @param array 
+ */
+static void	dynamic_array_destroy(dynamic_array* array) {
+	assert(array);
 	_aligned_free(array->data);
 	free(array);
 }
 
-void	dynamic_array_range_remove(dynamic_array* array, const uint32_t start, const uint32_t end) {
+/**
+ * @brief 
+ * 
+ * @param array 
+ * @param start 
+ * @param end 
+ */
+static void	dynamic_array_range_remove(dynamic_array* array, const uint32_t start, const uint32_t end) {
+	assert(array);
 	if (start >= array->size || end >= array->size || start > end) {
 	    return;
 	}
@@ -109,51 +150,40 @@ void	dynamic_array_range_remove(dynamic_array* array, const uint32_t start, cons
 	}
 }
 
-/*
-void	haven_darray_range_move(const haven_darray_t* array, const uint32_t src_start, const uint32_t src_end, const uint32_t dst) {
-	if (src_start >= array->size || src_end >= array->size || src_start > src_end || dst >= array->size) {
-		return;
-	}
-
-	const uint32_t num_elements = src_end - src_start + 1;
-
-	void *temp = _aligned_malloc(num_elements * array->data_size, array->alignement);
-	assert(temp);
-
-	memcpy(temp, (unsigned char *)array->data + src_start * array->data_size, num_elements * array->data_size);
-
-	if (dst < src_start) {
-		memmove(
-			(unsigned char *)array->data + (dst + num_elements) * array->data_size,
-			(unsigned char *)array->data + dst * array->data_size,
-			(src_start - dst) * array->data_size
-		);
-	} else if (dst > src_end) {
-		memmove(
-			(unsigned char *)array->data + src_start * array->data_size,
-			(unsigned char *)array->data + (src_end + 1) * array->data_size,
-			(dst - src_end - 1) * array->data_size
-		);
-	}
-
-	memcpy((unsigned char *)array->data + dst * array->data_size, temp, num_elements * array->data_size);
-
-	_aligned_free(temp);
-}
-*/
-
-void	dynamic_array_sort(const dynamic_array *array, int (*comparator)(const void *, const void *)) {
+/**
+ * @brief 
+ * 
+ * @param array 
+ * @param comparator 
+ */
+static void	dynamic_array_sort(const dynamic_array *array, int (*comparator)(const void *, const void *)) {
+	assert(array);
 	qsort(array->data, array->size, array->data_size, comparator);
 }
 
 //return a pointer to data idx;
-void*	dynamic_array_get(const dynamic_array *array, const uint32_t idx) {
+/**
+ * @brief 
+ * 
+ * @param array 
+ * @param idx 
+ * @return void* 
+ */
+static void*	dynamic_array_get(const dynamic_array *array, const uint32_t idx) {
+	assert(array);
 	void *ret = (unsigned char *)array->data + (idx * array->data_size);
 	return (ret);
 }
 
 
-void	dynamic_array_foreach(dynamic_array *array, void (*callback)(void *)) {
+/**
+ * @brief 
+ * 
+ * @param array 
+ * @param callback 
+ */
+static void	dynamic_array_foreach(dynamic_array *array, void (*callback)(void *)) {
+	assert(array);
 	for (uint32_t i = 0; i < array->size; i++) {
 		callback(haven_darray_get(array, i));
 	}

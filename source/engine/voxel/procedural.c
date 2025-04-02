@@ -1,6 +1,6 @@
-#include "game.h"
+#include <raylib.h>
 #define FNL_IMPL
-#include <extern/FastNoiseLite.h>
+#include <lib/FastNoiseLite.h>
 #include <stdio.h>
 
 void	island_mask(Image *input) {
@@ -73,5 +73,5 @@ void	chunk_gen_height(int x_off, int z_off, fnl_state *noise) {
 }
 
 void	gen_world() {
-	printf("Uruk The Mad God has Begun Creation\n");
+	printf("The Mad God has Begun Creation\n");
 }

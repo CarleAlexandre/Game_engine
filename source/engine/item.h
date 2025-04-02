@@ -1,35 +1,38 @@
 #ifndef HAVEN_ITEM_H
 # define HAVEN_ITEM_H
 
-typedef struct s_item_stats {
+#define INVENTORY_SIZE 64
+#define TOOL_BAR_SIZE 8
+
+typedef struct item_stats {
 	int	material;
 	int	damage;
 	int	durability;
 	int	effect;
 	int	rarity;
-}	item_stats_t;
+}	item_stats;
 
 typedef struct item_data {
 	int	type;
 	int	texture_id;
 	int	max_stack;
 	int	size;
-}	item_data_t;
+}	item_data;
 
-typedef struct s_item {
-	item_data_t	data;
-	item_stats_t	stats;
-}	item_t;
+typedef struct item {
+	item_data	data;
+	item_stats	stats;
+}	item;
 
-typedef	struct s_inventory {
-	int		money;
-	item_t		item[64];
-	unsigned int	size;
-}	inventory_t;
-
-typedef struct s_tool_bar{
+typedef struct tool_bar{
 	int	current_item;
-	item_t	item[9];
-}	tool_bar_t;
+	item	item[TOOL_BAR_SIZE];
+}	tool_bar;
+
+typedef	struct inventory {
+	int		money;
+	tool_bar	tool;
+	item		item[INVENTORY_SIZE];
+}	inventory;
 
 #endif

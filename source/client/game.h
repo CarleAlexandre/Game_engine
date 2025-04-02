@@ -3,9 +3,8 @@
 
 #include "../engine/allocator.h"
 #include "../engine/thread.h"
-#include "../engine/time.h"
-#include "../engine/render.h"
-#include "../engine/audio.h"
+#include "render.h"
+#include "audio.h"
 
 #include <raylib.h>
 #include <rlgl.h>

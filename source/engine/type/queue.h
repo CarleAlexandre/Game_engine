@@ -1,35 +1,67 @@
+/*
+
+	dynamic queue isn't done yet do not use
+
+*/
+
+
+#ifndef QUEUE_H
+# define QUEUE_H
+
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 /*
-	STATIC QUEUE (squeue)
+	STATIC QUEUE
 */
 
 #define MAX_QUEUE_SIZE 100
 
-typedef struct	haven_squeue_s {
+/**
+ * @brief 
+ * 
+ */
+typedef struct	static_queue {
 	void		*data; // Dynamic byte buffer
 	unsigned int	front;
 	unsigned int	rear;
 	unsigned int	size;
 	unsigned int	data_size; // Use larger type (not limited to 255 bytes)
 	unsigned int	capacity;
-}	haven_squeue_t;
+}	static_queue;
 
-void	haven_squeue_init(haven_squeue_t *q, unsigned int data_size) {
+/**
+ * @brief 
+ * 
+ * @param data_size 
+ * @return static_queue* 
+ */
+static static_queue*	static_queue_init(unsigned int data_size) {
+	static_queue *q;
+	q = (static_queue *)malloc(sizeof(static_queue));
+	assert(q);
 	q->front = 0;
 	q->rear = 0;
 	q->size = 0;
 	q->data_size = data_size;
 	q->capacity = MAX_QUEUE_SIZE;
 	q->data = (char *)malloc(q->capacity * q->data_size);
+	assert(q->data);
 	if (!q->data) {
-		// Handle allocation failure (e.g., set capacity to 0)
 		q->capacity = 0;
 	}
 }
 
-int	haven_squeue_push(haven_squeue_t *q, const void *value) {
+/**
+ * @brief 
+ * 
+ * @param q 
+ * @param value 
+ * @return int 
+ */
+static int	static_queue_push(static_queue *q, const void *value) {
+	assert(q);
 	if (q->size == q->capacity) {
 		return -1; // Queue full
 	}
@@ -40,7 +72,15 @@ int	haven_squeue_push(haven_squeue_t *q, const void *value) {
 	return 0;
 }
 
-int	haven_squeue_pop(haven_squeue_t *q, void *value) {
+/**
+ * @brief 
+ * 
+ * @param q 
+ * @param value 
+ * @return int 
+ */
+static int	static_queue_pop(static_queue *q, void *value) {
+	assert(q);
 	if (q->size == 0) {
 		return -1; // Queue empty
 	}
@@ -51,7 +91,13 @@ int	haven_squeue_pop(haven_squeue_t *q, void *value) {
 	return 0;
 }
 
-void	haven_squeue_destroy(haven_squeue_t *q) {
+/**
+ * @brief 
+ * 
+ * @param q 
+ */
+static void	static_queue_destroy(static_queue *q) {
+	assert(q);
 	free(q->data);
 	q->data = NULL;
 	q->capacity = 0;
@@ -59,32 +105,52 @@ void	haven_squeue_destroy(haven_squeue_t *q) {
 }
 
 /*
-	DYNAMIC QUUEUE (dqueue)
+	DYNAMIC QUEUE
 */
 
-typedef struct	haven_dqueue_s {
+/**
+ * @brief 
+ * 
+ */
+typedef struct	dynamic_queue {
 	void		*data; // Dynamic byte buffer
 	unsigned int	front;
 	unsigned int	rear;
 	unsigned int	size;
 	unsigned int	data_size; // Use larger type (not limited to 255 bytes)
 	unsigned int	capacity;
-}	haven_dqueue_t;
+}	dynamic_queue;
 
-void	haven_dqueue_init(haven_dqueue_t *q, unsigned int data_size) {
+/**
+ * @brief 
+ * 
+ * @param q 
+ * @param data_size 
+ */
+static void	dynamic_queue_init(dynamic_queue *q, unsigned int data_size) {
+	assert(q);
 	q->front = 0;
 	q->rear = 0;
 	q->size = 0;
 	q->data_size = data_size;
 	q->capacity = MAX_QUEUE_SIZE;
 	q->data = (char *)malloc(q->capacity * q->data_size);
+	assert(q->data);
 	if (!q->data) {
 		// Handle allocation failure (e.g., set capacity to 0)
 		q->capacity = 0;
 	}
 }
 
-int	haven_dqueue_push(haven_dqueue_t *q, const void *value) {
+/**
+ * @brief 
+ * 
+ * @param q 
+ * @param value 
+ * @return int 
+ */
+static int	dynamic_queue_push(dynamic_queue *q, const void *value) {
+	assert(q);
 	if (q->size == q->capacity) {
 		return -1; // Queue full
 	}
@@ -95,7 +161,15 @@ int	haven_dqueue_push(haven_dqueue_t *q, const void *value) {
 	return 0;
 }
 
-int	haven_dqueue_pop(haven_dqueue_t *q, void *value) {
+/**
+ * @brief 
+ * 
+ * @param q 
+ * @param value 
+ * @return int 
+ */
+static int	dynamic_queue_pop(dynamic_queue *q, void *value) {
+	assert(q);
 	if (q->size == 0) {
 		return -1; // Queue empty
 	}
@@ -106,9 +180,17 @@ int	haven_dqueue_pop(haven_dqueue_t *q, void *value) {
 	return 0;
 }
 
-void	haven_dqueue_destroy(haven_dqueue_t *q) {
+/**
+ * @brief 
+ * 
+ * @param q 
+ */
+static void	dynamic_queue_destroy(dynamic_queue *q) {
+	assert(q);
 	free(q->data);
 	q->data = NULL;
 	q->capacity = 0;
 	q->size = 0;
 }
+
+#endif

@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "type.h"
+#include "type/queue.h"
 
 #include <time.h>
 #include <windows.h>
@@ -31,10 +31,10 @@ typedef struct	s_task {
 }	task_t;
 
 static struct {
-	haven_squeue_t	async_tasks;
+	static_queue	*async_tasks;
 	pthread_mutex_t	async_mutex;
 	
-	haven_squeue_t	sync_tasks;
+	static_queue	*sync_tasks;
 	pthread_mutex_t sync_mutex;
 
 	
@@ -42,7 +42,7 @@ static struct {
 	pthread_mutex_t	running_mtx;
 	
 	int		next_task_id;
-	haven_squeue_t	completed_tasks;
+	static_queue	*completed_tasks;
 	pthread_mutex_t	status_mtx;
 	
 	pthread_t	workers[32];
@@ -62,14 +62,14 @@ static void	*worker_function(void *arg) {
 		bool found_task = false;
 
 		pthread_mutex_lock(&thread_mgr.sync_mutex);
-		if (haven_squeue_pop(&thread_mgr.sync_tasks, &task) == 0) {
+		if (static_queue_pop(&thread_mgr.sync_tasks, &task) == 0) {
 			found_task = true;
 		}
 		pthread_mutex_unlock(&thread_mgr.sync_mutex);
 
 		if (!found_task) {
 			pthread_mutex_lock(&thread_mgr.async_mutex);
-			if (haven_squeue_pop(&thread_mgr.async_tasks, &task) == 0) {
+			if (static_queue_pop(&thread_mgr.async_tasks, &task) == 0) {
 				found_task = true;
 			}
 			pthread_mutex_unlock(&thread_mgr.async_mutex);
@@ -79,10 +79,10 @@ static void	*worker_function(void *arg) {
 			task.result = task.func(task.arg);
 			
 			pthread_mutex_lock(&thread_mgr.status_mtx);
-			haven_squeue_push(&thread_mgr.completed_tasks, &task.id);
+			static_queue_push(&thread_mgr.completed_tasks, &task.id);
 			pthread_mutex_unlock(&thread_mgr.status_mtx);
 		} else {
-			haven_time_usleep(1000);
+			time_usleep(1000);
 		}
 		pthread_mutex_lock(&thread_mgr.running_mtx);
 		run = thread_mgr.running;
@@ -94,7 +94,7 @@ static void	*worker_function(void *arg) {
 /*
 	add task to pool, data inside arg should be used as input and output
 */
-int	haven_thread_task_add(void *(*func)(void *), void *arg, bool is_synced) {
+int	thread_task_add(void *(*func)(void *), void *arg, bool is_synced) {
 	task_t task = {
 		.func = func,
 		.arg = arg,
@@ -108,11 +108,11 @@ int	haven_thread_task_add(void *(*func)(void *), void *arg, bool is_synced) {
 
 	if (is_synced) {
 		pthread_mutex_lock(&thread_mgr.sync_mutex);
-		haven_squeue_push(&thread_mgr.sync_tasks, &task);
+		static_queue_push(&thread_mgr.sync_tasks, &task);
 		pthread_mutex_unlock(&thread_mgr.sync_mutex);
 	} else {
 		pthread_mutex_lock(&thread_mgr.async_mutex);
-		haven_squeue_push(&thread_mgr.async_tasks, &task);
+		static_queue_push(&thread_mgr.async_tasks, &task);
 		pthread_mutex_unlock(&thread_mgr.async_mutex);
 	}
 
@@ -120,16 +120,16 @@ int	haven_thread_task_add(void *(*func)(void *), void *arg, bool is_synced) {
 }
 
 //not to rework as i just need to check if first data == id, then pop and return true else return false
-bool	haven_thread_task_status(int task_id) {
+bool	thread_task_status(int task_id) {
 	pthread_mutex_lock(&thread_mgr.status_mtx);
 
-	int *completed_ids = thread_mgr.completed_tasks.data;
-	for (unsigned i = 0; i < thread_mgr.completed_tasks.size; i++) {
+	int *completed_ids = thread_mgr.completed_tasks->data;
+	for (unsigned i = 0; i < thread_mgr.completed_tasks->size; i++) {
 		if (completed_ids[i] == task_id) {
 			memmove(&completed_ids[i], &completed_ids[i+1], 
-				(thread_mgr.completed_tasks.size - i - 1) * sizeof(int));
-			thread_mgr.completed_tasks.size--;
-			// pop_queue(&thread_mgr.completed_tasks, task_id);
+				(thread_mgr.completed_tasks->size - i - 1) * sizeof(int));
+			thread_mgr.completed_tasks->size--;
+			// static_queue_pop(thread_mgr.completed_tasks, task_id);
 			pthread_mutex_unlock(&thread_mgr.status_mtx);
 			return (true);
 		}
@@ -142,10 +142,10 @@ bool	haven_thread_task_status(int task_id) {
 /*
 	init thread_mgr and worker
 */
-void	haven_thread_mgr_init() {
-	haven_squeue_init(&thread_mgr.async_tasks, sizeof(task_t));
-	haven_squeue_init(&thread_mgr.sync_tasks, sizeof(task_t));
-	haven_squeue_init(&thread_mgr.completed_tasks, sizeof(int));
+void	thread_mgr_init() {
+	thread_mgr.async_tasks = static_queue_init(sizeof(task_t));
+	thread_mgr.sync_tasks = static_queue_init(sizeof(task_t));
+	thread_mgr.completed_tasks = static_queue_init(sizeof(int));
 
 	pthread_mutex_init(&thread_mgr.async_mutex, NULL);
 	pthread_mutex_init(&thread_mgr.sync_mutex, NULL);
@@ -163,7 +163,7 @@ void	haven_thread_mgr_init() {
 /*
 	raise stopping flag to all thread then wait for them to close
 */
-void	haven_thread_mgr_close() {
+void	thread_mgr_close() {
 	pthread_mutex_lock(&thread_mgr.running_mtx);
 	thread_mgr.running = false;
 	pthread_mutex_unlock(&thread_mgr.running_mtx);
@@ -172,9 +172,9 @@ void	haven_thread_mgr_close() {
 		pthread_join(thread_mgr.workers[i], NULL);
 	}
 
-	haven_squeue_destroy(&thread_mgr.async_tasks);
-	haven_squeue_destroy(&thread_mgr.sync_tasks);
-	haven_squeue_destroy(&thread_mgr.completed_tasks);
+	static_queue_destroy(&thread_mgr.async_tasks);
+	static_queue_destroy(&thread_mgr.sync_tasks);
+	static_queue_destroy(&thread_mgr.completed_tasks);
 
 	pthread_mutex_destroy(&thread_mgr.async_mutex);
 	pthread_mutex_destroy(&thread_mgr.sync_mutex);
