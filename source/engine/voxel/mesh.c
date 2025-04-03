@@ -14,8 +14,23 @@ static const uint32_t	quad_indices[] = {
 	3,//top_right
 };
 
-void	voxel_mesh_pack() {
 
+/*
+	Face:  7 bits (0-127)
+	Width: 5 bits (0-31)
+	Height:5 bits (0-31)
+	Z:     5 bits (0-31)
+	Y:     5 bits (0-31)
+	X:     5 bits (0-31)
+*/
+void	voxel_mesh_pack(uint8_t face, uint8_t x, uint8_t y, uint8_t z, uint8_t height, uint8_t width) {
+	    /*    Mask values to prevent overflow     Shift to position */
+	return	((face   & 0x7F) << 25) |  // 7 bits for face (0-127) for marching cube
+		((width  & 0x1F) << 20) |  // 5 bits for width (0-31)
+		((height & 0x1F) << 15) |  // 5 bits for height (0-31)
+		((z      & 0x1F) << 10) |  // 5 bits for Z (0-31)
+		((y      & 0x1F) << 5)  |  // 5 bits for Y (0-31)
+		(x       & 0x1F);          // 5 bits for X (0-31)
 }
 
 voxel_chunk_render_queue*	voxel_render_queue_create() {
