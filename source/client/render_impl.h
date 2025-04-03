@@ -55,18 +55,4 @@ typedef struct voxel_mesh {
 	Texture2D	face_texture;
 }	voxel_mesh;
 
-static const float	quad_vertices[] = {
-	0.0f, 0.0f, 0.0f,//bot_left
-	0.5f, 0.0f, 0.0f,//bot_right
-	0.0f, 0.5f, 0.0f,//top_left
-	0.5f, 0.5f, 0.0f,//top_right
-};
-
-static const uint32_t	quad_indices[] = {
-	0,//bot_left
-	1,//bot_right
-	2,//top_left
-	3,//top_right
-};
-
 #endif

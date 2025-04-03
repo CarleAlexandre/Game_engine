@@ -1,28 +1,53 @@
-/*
+#include "voxel.h"
 
-quad_data haven_quad_pack(unsigned char pos[3], unsigned char face, unsigned char height, unsigned char width, unsigned short id) {
-	quad_data data;
-	data.render = false;
-	data.element = (id << 3 | face);
-	data.face_data = ((height << 24) | (width << 18) | (pos[2] << 12) | (pos[1] << 6) | pos[0]);
-	return (data);
+static const float	quad_vertices[] = {
+	0.0f, 0.0f, 0.0f,//bot_left
+	0.5f, 0.0f, 0.0f,//bot_right
+	0.0f, 0.5f, 0.0f,//top_left
+	0.5f, 0.5f, 0.0f,//top_right
+};
+
+static const uint32_t	quad_indices[] = {
+	0,//bot_left
+	1,//bot_right
+	2,//top_left
+	3,//top_right
+};
+
+void	voxel_mesh_pack() {
+
 }
 
-void	haven_quad_mesh(voxel_mesh *mesh) {
-	// int total_size = 0;
+voxel_chunk_render_queue*	voxel_render_queue_create() {
+	voxel_chunk_render_queue* rqueue = malloc(sizeof(voxel_chunk_render_queue));
+	assert(rqueue);
 
-	// for (int i = 0; i < 6; i++) {
-	// 	total_size += mesh->faces_count[i];
-	// }
+	rqueue->meshes = 0x00;
 
-	// quad_data *buffer = calloc(total_size, sizeof(quad_data));
+	rqueue->ssbo_data = 0x00;
+	rqueue->count = 0;
 
-	// int prev = 0;
+	// rlEnableShader();
 
-	// for (int i = 0; i < 6; i++) {
-	// 	memcpy(&buffer[prev], mesh->faces[i], mesh->faces_count[i] * sizeof(quad_data));
-	// 	prev += mesh->faces_count[i];
-	// }
+	glGenBuffers(1, &rqueue->ssbo);
+	assert(rqueue->ssbo);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, rqueue->ssbo);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, rqueue->count, rqueue->ssbo_data, RL_STREAM_COPY);
+	glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R8UI, GL_RED_INTEGER, GL_UNSIGNED_BYTE, NULL);// Clear buffer data to 0
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+	return (rqueue);
+}
+
+bool	voxel_render_queue_update(voxel_chunk_render_queue* rqueue) {
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, rqueue->ssbo);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, rqueue->count, rqueue->ssbo_data, RL_STREAM_COPY);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+}
+
+voxel_mesh*	voxel_mesh_create(void) {
+	voxel_mesh* mesh = malloc(sizeof(voxel_mesh));
+	assert(mesh);
 
 	mesh->vao = rlLoadVertexArray();
 	rlEnableVertexArray(mesh->vao);
@@ -31,32 +56,28 @@ void	haven_quad_mesh(voxel_mesh *mesh) {
 	rlSetVertexAttribute(0, 3, RL_FLOAT, false, 3 *sizeof(float), 0);
 	rlEnableVertexAttribute(0);
 
-	// mesh->ebo = rlLoadVertexBufferElement(quad_indices, sizeof(quad_indices), false);
-	// mesh->ibo = rlLoadVertexBuffer(buffer, total_size * sizeof(quad_data), true);
+	mesh->ebo = rlLoadVertexBufferElement(quad_indices, sizeof(quad_indices), false);
+	mesh->ibo = rlLoadVertexBuffer(mesh->faces_buffer, mesh->face_count * sizeof(int), true);
 
-	// rlSetVertexAttribute(1, 1, RL_FLOAT, false, sizeof(quad_data), offsetof(quad_data, face_data));
-	// rlEnableVertexAttribute(1);
-	// rlSetVertexAttributeDivisor(1, 1);
+	rlSetVertexAttribute(1, 1, RL_FLOAT, false, sizeof(int), 0);
+	rlEnableVertexAttribute(1);
+	rlSetVertexAttributeDivisor(1, 1);
 
-	// rlSetVertexAttribute(2, 1, RL_FLOAT, false, sizeof(quad_data), offsetof(quad_data, element));
+	// rlSetVertexAttribute(2, 1, RL_FLOAT, false, sizeof(int), offsetof(quad_data, element));
 	// rlEnableVertexAttribute(2);
 	// rlSetVertexAttributeDivisor(2, 1);
 
 	rlDisableVertexArray();
+	return (mesh);
 }
 
-
-void	voxel_render_quad_elements_instanced(float pos[3], Shader shader) {	
-	SetShaderValue(shader, GetShaderLocation(shader, "chunk_pos"), &pos[0], RL_SHADER_UNIFORM_VEC3);
-	// DrawCubeWires(chunk->pos, 32, 32, 32, RED);
-	
-	rlEnableVertexArray(0);
-		// int quad_count;
-		// glDrawElementsInstanced(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, 0, quad_count);
+void	voxel_mesh_update(voxel_mesh* mesh) {
+	rlEnableVertexArray(mesh->vao);
+	rlUpdateVertexBuffer(mesh->ibo, mesh->faces_buffer, mesh->face_count * sizeof(int), 0);
 	rlDisableVertexArray();
 }
 
-void	voxel_render_chunks(Shader shader, Matrix transform) {
+void	voxel_render_chunks(const voxel_chunk_render_queue rqueue, Shader shader, Matrix transform) {
 	Matrix matModel = MatrixIdentity();
 	Matrix matView = rlGetMatrixModelview();
 	Matrix matProjection = rlGetMatrixProjection();
@@ -75,13 +96,13 @@ void	voxel_render_chunks(Shader shader, Matrix transform) {
 			rlSetUniformMatrix(shader.locs[SHADER_LOC_MATRIX_NORMAL], MatrixTranspose(MatrixInvert(matModel)));
 		}
 		rlSetUniformMatrix(shader.locs[SHADER_LOC_MATRIX_MVP], MatrixMultiply(MatrixMultiply(matModel, matView), matProjection));
+		// rlBindShaderBuffer();
 		for (int i = 0; i < 0; i++) {
-			float pos[3];
-			voxel_render_quad_elements_instanced(pos, shader);
+			rlEnableVertexArray(rqueue.meshes[i].vao);
+			glDrawElementsInstanced(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, 0, rqueue.meshes[i].face_count);
 		}
+		rlDisableVertexArray();
 	} rlDisableShader();
 	rlSetMatrixModelview(matView);
 	rlSetMatrixProjection(matProjection);
 }
-
-*/

@@ -3,6 +3,10 @@
 #include <lib/FastNoiseLite.h>
 #include <stdio.h>
 
+voxel_data *get_chunk_voxels(voxel_world *world, int x, int y, int z) {
+	return world->voxel_arena + ((x * CHUNK_STRIDE_X + y * CHUNK_STRIDE_Y + z) * CHUNK_SIZE);
+}
+
 void	island_mask(Image *input) {
 	Image mask = GenImageGradientRadial(1024, 1024, 0.5, BLACK, WHITE);
 

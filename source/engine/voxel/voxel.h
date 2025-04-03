@@ -4,6 +4,9 @@
 #include <raylib.h>
 #include <stdint.h>
 #include "../type/octree.h"
+#include <rlgl.h>
+#include <raymath.h>
+#include <glad.h>
 
 #define CHUNK_RESOLUTION 32
 #define CHUNK_SIZE (CHUNK_RESOLUTION * CHUNK_RESOLUTION * CHUNK_RESOLUTION)
@@ -34,9 +37,20 @@ typedef struct voxel_world {
 	voxel_data	*voxel_arena;
 }	voxel_world;
 
-// Helper function to get a chunk's voxel data from the arena
-static inline voxel_data *get_chunk_voxels(voxel_world *world, int x, int y, int z) {
-	return world->voxel_arena + ((x * CHUNK_STRIDE_X + y * CHUNK_STRIDE_Y + z) * CHUNK_SIZE);
-}
+typedef struct voxel_mesh {
+	uint32_t	vao;
+	uint32_t	vbo;
+	uint32_t	ebo;
+	uint32_t	ibo;
+	int		*faces_buffer;
+	uint32_t	face_count;
+}	voxel_mesh;
+
+typedef struct voxel_chunk_render_queue {
+	uint32_t	ssbo;
+	uint32_t	count;
+	void*		ssbo_data;// should be set at the same time of mesh sorting and updated every frame(should need to change if camera not updated)
+	voxel_mesh*	meshes;//sort from farthest to nearest using player camera forward(could be easier said than done)
+} voxel_chunk_render_queue;
 
 #endif
