@@ -1,4 +1,4 @@
-#include <raylib.h>
+#include "voxel.h"
 #define FNL_IMPL
 #include <lib/FastNoiseLite.h>
 #include <stdio.h>
@@ -72,6 +72,46 @@ void	chunk_gen_height(int x_off, int z_off, fnl_state *noise) {
 	}
 }
 
-void	gen_world() {
+voxel_world	*gen_world(uint32_t seed) {
 	printf("The Mad God has Begun Creation\n");
+
+	voxel_world *world = malloc(sizeof(voxel_world));
+	assert(world);
+
+	// Allocate a single arena for all voxel data
+	world->voxel_arena = malloc(sizeof(voxel_data) * CHUNK_SIZE * 32 * 8 * 32);
+	assert(world->voxel_arena);
+
+	fnl_state noise = fnlCreateState();
+	noise.seed = seed;
+	noise.noise_type = FNL_NOISE_OPENSIMPLEX2;
+	noise.frequency = 0.02f;
+	noise.octaves = 5;
+
+	// Initialize all chunks
+	for (int x = 0; x < 32; x++) {
+		for (int y = 0; y < 8; y++) {
+			for (int z = 0; z < 32; z++) {
+				world->chunk[x][y][z] = malloc(sizeof(voxel_chunk));
+				assert(world->chunk[x][y][z]);
+				
+				// Initialize chunk position
+				world->chunk[x][y][z]->positon = (Vector3){
+					x * CHUNK_RESOLUTION,
+					y * CHUNK_RESOLUTION, 
+					z * CHUNK_RESOLUTION
+				};
+
+				// Generate terrain for this chunk
+				chunk_gen_height(x * CHUNK_RESOLUTION, z * CHUNK_RESOLUTION, &noise);
+
+				// Get this chunk's voxel data
+				voxel_data *chunk_voxels = get_chunk_voxels(world, x, y, z);
+			}
+		}
+	}
+
+	printf("World Generation Complete\n");
+
+	return (world);
 }

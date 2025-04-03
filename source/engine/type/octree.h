@@ -6,11 +6,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
-
-static const uint8_t CHILD_INDEX_TABLE[8][3] = {
-	{0, 0, 0}, {1, 0, 0}, {0, 1, 0}, {1, 1, 0},
-	{0, 0, 1}, {1, 0, 1}, {0, 1, 1}, {1, 1, 1},
-};
+#include <assert.h>
 
 typedef struct octree_node {
 	uint8_t		child_mask;
@@ -28,9 +24,9 @@ typedef struct octree {
 
 /***/
 octree_node*	octree_node_create(float center[3], float extent) {
-	octree_node* node = malloc(sizeof(node));
+	octree_node* node = (octree_node*)malloc(sizeof(octree_node));
 	assert(node);
-	memcpy(node->center, center, sizeof(float));
+	memcpy(node->center, center, sizeof(float) * 3);
 	node->extent = extent;
 	node->child_mask = 0;
 	node->data = 0x00;
@@ -112,7 +108,7 @@ void*	octree_node_insert(octree_node* root, float point[3], void* data, float mi
 
 void	octree_node_free(octree_node *node) {
 	if (!node) {
-		return (0x00);
+		return;
 	}
 	for (int i = 0; i < 8; i++) {
 		if (node->children[i]) {
