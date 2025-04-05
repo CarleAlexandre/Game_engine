@@ -1,4 +1,4 @@
-#version 430 core
+#version 460 core
 
 #define FACE_YP    0
 #define FACE_Y     1
@@ -10,11 +10,13 @@
 layout(location = 0) in vec3	aPos;
 layout(location = 1) in int	packed_data;
 layout(location = 2) in int	block_id;
+layout(std430, binding = 3) buffer ssbo {
+	int ssbo_data[];
+};
 
 uniform mat4	mvp;
 uniform mat4	matView;
 uniform mat4	matProjection;
-uniform vec3	chunk_pos;
 uniform mat4	matModel; 
 
 out vec3	frag_pos;
@@ -62,6 +64,10 @@ void main() {
 	vec3 vox_pos = vec3(x, y, z) * 0.5;
 	vec3 vPos = vec3(aPos.x * width, aPos.y * height, aPos.z);
 	vec3 rotated_aPos = ROTATIONS[face] * vPos;
+
+
+	int packed_pos = ssbo_data[gl_DrawID];//need to be called via multi draw command ???
+	vec3 chunk_pos = vec3((packed_pos & 0x1f), ((packed_pos >> 5) & 0x1f), ((packed_pos >> 10) & 0x1f));
 
 	vec3 world_pos = vox_pos + FACE_OFFSET[face] + chunk_pos + rotated_aPos;
 	gl_Position = matProjection * matView * matModel * vec4(world_pos, 1.0);

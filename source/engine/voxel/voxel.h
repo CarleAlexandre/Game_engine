@@ -23,7 +23,8 @@ typedef struct chunk_texture {
 
 typedef struct voxel_data {
 	uint16_t block_id;
-
+	uint8_t	material;
+	
 }	voxel_data;
 
 typedef struct voxel_chunk {
@@ -38,19 +39,29 @@ typedef struct voxel_world {
 }	voxel_world;
 
 typedef struct voxel_mesh {
-	uint32_t	vao;
-	uint32_t	vbo;
-	uint32_t	ebo;
-	uint32_t	ibo;
 	int		*faces_buffer;
 	uint32_t	face_count;
 }	voxel_mesh;
 
+typedef  struct {
+        uint32_t	count;
+        uint32_t	instanceCount;
+        uint32_t 	firstIndex;
+        int		baseVertex;
+        uint32_t	baseInstance;
+}	DrawElementsIndirectCommand;
+
 typedef struct voxel_chunk_render_queue {
-	uint32_t	ssbo;
-	uint32_t	count;
-	void*		ssbo_data;// should be set at the same time of mesh sorting and updated every frame(should need to change if camera not updated)
-	voxel_mesh*	meshes;//sort from farthest to nearest using player camera forward(could be easier said than done)
+	uint32_t			vao;
+	uint32_t			vbo;
+	uint32_t			ebo;
+	uint32_t			ibo;
+	uint32_t			ssbo;
+	uint32_t			count;
+	void*				ssbo_data;// should be set at the same time of mesh sorting and updated every frame(should need to change if camera not updated)
+	voxel_mesh*			meshes;//sort from farthest to nearest using player camera forward(could be easier said than done)
+	DrawElementsIndirectCommand*	draw_cmd;//one draw cmd per chunk mesh
+	// uint32_t			draw_count;
 } voxel_chunk_render_queue;
 
 #endif
