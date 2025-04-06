@@ -4,9 +4,6 @@
 
 #include "render_impl.h"
 
-#define RAYLIB_IMPLEMENTATION
-#include <raygui.h>
-
 #define BUTTON_TEX_WIDTH 64
 #define BUTTON_TEX_HEIGHT 32
 

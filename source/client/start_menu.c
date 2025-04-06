@@ -1,5 +1,5 @@
 #include "game.h"
-#include "../engine/gui.h"
+#include "../engine/render/gui.h"
 
 #define BUTTON_NUMBER 4
 

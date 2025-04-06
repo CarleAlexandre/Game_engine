@@ -6,7 +6,7 @@
 #include "../type/octree.h"
 #include <rlgl.h>
 #include <raymath.h>
-#include <GL/gl.h>
+#include <glad/glad.h>
 
 #define CHUNK_RESOLUTION 32
 #define CHUNK_SIZE (CHUNK_RESOLUTION * CHUNK_RESOLUTION * CHUNK_RESOLUTION)
@@ -34,12 +34,12 @@ typedef struct voxel_chunk {
 }	voxel_chunk;
 
 typedef struct voxel_world {
-	voxel_chunk	*chunk[32][8][32];
+	voxel_chunk	*chunk[WORLD_SIZE_X][WORLD_SIZE_Y][WORLD_SIZE_Z];
 	voxel_data	*voxel_arena;
 }	voxel_world;
 
 typedef struct voxel_mesh {
-	int		*faces_buffer;
+	uint64_t	*faces_buffer;
 	uint32_t	face_count;
 	// uint8_t		face_mask;//to filter face to push in render queue
 }	voxel_mesh;
@@ -57,17 +57,19 @@ typedef struct voxel_chunk_render_queue {
 	uint32_t			vbo;
 	uint32_t			ebo;
 	//only buffer under will be updated above should be static
-	uint32_t			ibo;//collection of all face to be rendered
+	uint32_t			ibo;//draw Cmd indirect buffer
+	uint32_t			global_vbo;//collection of all face to be rendered
+	
 	uint32_t			ssbo;
 	
 	uint32_t			face_count;
-	
+
 	uint32_t			chunk_count;
 	
 	DrawElementsIndirectCommand*	draw_cmd;//one draw cmd per chunk mesh
 	
 	void*				ssbo_data;// should be set at the same time of mesh sorting and updated every frame(should need to change if camera not updated)
-	void*				ibo_data;//should countain all face to be rendered
+	uint64_t*			global_data;//should countain all face to be rendered
 
 	voxel_mesh*			meshes;//sort from farthest to nearest using player camera forward(could be easier said than done)
 }	voxel_chunk_render_queue;

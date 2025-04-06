@@ -31,6 +31,14 @@ void	voxel_update_render_data(voxel_chunk_render_queue *rqueue) {
 	rqueue->draw_cmd = calloc(rqueue->chunk_count, sizeof(DrawElementsIndirectCommand));
 	assert(rqueue->draw_cmd);
 
+	if (rqueue->global_data) {
+		free(rqueue->global_data);
+	}
+	rqueue->global_data = calloc(rqueue->face_count, sizeof(uint64_t));
+	assert(rqueue->global_data);
+
+	uint32_t offset = 0;
+
 	for (int i = 0; i < rqueue->chunk_count; i++) {
 		rqueue->draw_cmd[i] = (DrawElementsIndirectCommand){
 			.count = 4,
@@ -39,14 +47,19 @@ void	voxel_update_render_data(voxel_chunk_render_queue *rqueue) {
 			.baseVertex = 0,
 			.baseInstance = rqueue->face_count,
 		};
-		rqueue->face_count += rqueue->meshes[i].face_count;
+		memcpy(rqueue->global_data[offset], rqueue->meshes[i].faces_buffer, sizeof(uint64_t) * rqueue->meshes[i].face_count);
+		offset += rqueue->meshes[i].face_count;
+		rqueue->face_count = offset;
 	}
 
-	if (rqueue->ibo_data) {
-		free(rqueue->ibo_data);
-	}
-	rqueue->ibo_data = calloc(rqueue->face_count, sizeof(uint64_t));
-	assert(rqueue->ibo_data);
+	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, rqueue->ibo);
+	glBufferData(GL_DRAW_INDIRECT_BUFFER, rqueue->chunk_count * sizeof(DrawElementsIndirectCommand), rqueue->draw_cmd, GL_DYNAMIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, rqueue->global_vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(uint64_t) * rqueue->face_count, rqueue->global_data, GL_DYNAMIC_DRAW);
+
+	glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 //need to sort chunk for transparency,
@@ -57,7 +70,7 @@ voxel_chunk_render_queue*	voxel_render_queue_create() {
 
 	rqueue->ssbo_data = 0x00;
 	rqueue->meshes = 0x00;
-	rqueue->ibo_data = 0x00;
+	rqueue->global_data = 0x00;
 	rqueue->face_count = 0;
 	rqueue->chunk_count = 0;
 	rqueue->draw_cmd = 0;
@@ -71,7 +84,9 @@ voxel_chunk_render_queue*	voxel_render_queue_create() {
 
 	rqueue->ebo = rlLoadVertexBufferElement(quad_indices, sizeof(quad_indices), false);
 
-	rqueue->ibo = rlLoadVertexBuffer(rqueue->ibo_data, rqueue->face_count, true);
+	rqueue->ibo = rlLoadVertexBuffer(rqueue->draw_cmd, rqueue->chunk_count, true);
+
+	rqueue->global_vbo = rlLoadVertexBuffer(rqueue->global_data, rqueue->face_count, true);
 	
 	rlSetVertexAttribute(1, 1, RL_FLOAT, false, sizeof(int64_t), 0);
 	rlEnableVertexAttribute(1);
@@ -96,7 +111,7 @@ bool	voxel_render_queue_update(voxel_chunk_render_queue* rqueue) {
 
 	rlEnableVertexArray(rqueue->vao);
 
-	rlUpdateVertexBuffer(rqueue->ibo, rqueue->ibo_data, sizeof(uint64_t) * rqueue->face_count, 0);
+	rlUpdateVertexBuffer(rqueue->global_vbo, rqueue->global_data, sizeof(uint64_t) * rqueue->face_count, 0);
 	
 	rlDisableVertexArray();
 	
