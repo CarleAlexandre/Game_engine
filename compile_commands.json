@@ -2,19 +2,18 @@
   {
     "arguments": [
       "/usr/bin/gcc",
+      "-g",
+      "-Wall",
       "-std=c99",
       "-fsanitize=address",
-      "-I",
-      "include",
-      "-I",
-      "source",
+      "-Iinclude",
       "-c",
       "-o",
-      "server/main.o",
-      "server/main.c"
+      "obj/engine/allocator.o",
+      "source/engine/allocator.c"
     ],
-    "directory": "/home/uwublaster/engine",
-    "file": "/home/uwublaster/engine/server/main.c",
-    "output": "/home/uwublaster/engine/server/main.o"
+    "directory": "/home/emilia/engine",
+    "file": "/home/emilia/engine/source/engine/allocator.c",
+    "output": "/home/emilia/engine/obj/engine/allocator.o"
   }
 ]

@@ -1,41 +1,52 @@
 #include "voxel.h"
 
 static const float	quad_vertices[] = {
-	0.0f, 0.0f, 0.0f,//bot_left
-	0.5f, 0.0f, 0.0f,//bot_right
-	0.0f, 0.5f, 0.0f,//top_left
-	0.5f, 0.5f, 0.0f,//top_right
+	0.0f, 0.0f, 0.0f,
+	0.5f, 0.0f, 0.0f,
+	0.0f, 0.5f, 0.0f,
+	0.5f, 0.5f, 0.0f,
 };
 
 static const uint32_t	quad_indices[] = {
-	0,//bot_left
-	1,//bot_right
-	2,//top_left
-	3,//top_right
+	0, 1, 2, 3,
 };
 
-/*
-	Face:  7 bits (0-127)
-	Width: 5 bits (0-31)
-	Height:5 bits (0-31)
-	Z:     5 bits (0-31)
-	Y:     5 bits (0-31)
-	X:     5 bits (0-31)
-*/
-
 uint32_t	voxel_mesh_pack_face(uint8_t face, uint8_t x, uint8_t y, uint8_t z, uint8_t height, uint8_t width) {
-	    /*    Mask values to prevent overflow     Shift to position */
-	return (((face   & 0x7F) << 25) |  // 7 bits for face (0-127) for marching cube
-		((width  & 0x1F) << 20) |  // 5 bits for width (0-31)
+	return (((face   & 0x7F) << 25) |  // 7 bits for face   (0-127) for marching cube
+		((width  & 0x1F) << 20) |  // 5 bits for width  (0-31)
 		((height & 0x1F) << 15) |  // 5 bits for height (0-31)
-		((z      & 0x1F) << 10) |  // 5 bits for Z (0-31)
-		((y      & 0x1F) << 5)  |  // 5 bits for Y (0-31)
-		(x       & 0x1F));          // 5 bits for X (0-31)
+		((z      & 0x1F) << 10) |  // 5 bits for Z      (0-31)
+		((y      & 0x1F) << 5)  |  // 5 bits for Y      (0-31)
+		(x       & 0x1F));         // 5 bits for X      (0-31)
 }
 
 uint64_t	voxel_mesh_pack_tex(uint16_t tex_id, uint16_t material, uint32_t data) {
 	return ((tex_id << 48) | (material << 32) | data);
+}
 
+void	voxel_update_render_data(voxel_chunk_render_queue *rqueue) {
+	if (rqueue->draw_cmd) {
+		free(rqueue->draw_cmd);
+	}
+	rqueue->draw_cmd = calloc(rqueue->chunk_count, sizeof(DrawElementsIndirectCommand));
+	assert(rqueue->draw_cmd);
+
+	for (int i = 0; i < rqueue->chunk_count; i++) {
+		rqueue->draw_cmd[i] = (DrawElementsIndirectCommand){
+			.count = 4,
+			.instanceCount = rqueue->meshes[i].face_count,
+			.firstIndex = 0,
+			.baseVertex = 0,
+			.baseInstance = rqueue->face_count,
+		};
+		rqueue->face_count += rqueue->meshes[i].face_count;
+	}
+
+	if (rqueue->ibo_data) {
+		free(rqueue->ibo_data);
+	}
+	rqueue->ibo_data = calloc(rqueue->face_count, sizeof(uint64_t));
+	assert(rqueue->ibo_data);
 }
 
 //need to sort chunk for transparency,
@@ -43,6 +54,13 @@ uint64_t	voxel_mesh_pack_tex(uint16_t tex_id, uint16_t material, uint32_t data) 
 voxel_chunk_render_queue*	voxel_render_queue_create() {
 	voxel_chunk_render_queue* rqueue = malloc(sizeof(voxel_chunk_render_queue));
 	assert(rqueue);
+
+	rqueue->ssbo_data = 0x00;
+	rqueue->meshes = 0x00;
+	rqueue->ibo_data = 0x00;
+	rqueue->face_count = 0;
+	rqueue->chunk_count = 0;
+	rqueue->draw_cmd = 0;
 
 	rqueue->vao = rlLoadVertexArray();
 	rlEnableVertexArray(rqueue->vao);
@@ -53,36 +71,37 @@ voxel_chunk_render_queue*	voxel_render_queue_create() {
 
 	rqueue->ebo = rlLoadVertexBufferElement(quad_indices, sizeof(quad_indices), false);
 
-	// rqueue->ibo = rlLoadVertexBuffer(mesh->faces_buffer, mesh->face_count * sizeof(int), true);
+	rqueue->ibo = rlLoadVertexBuffer(rqueue->ibo_data, rqueue->face_count, true);
 	
-	// rlSetVertexAttribute(1, 1, RL_FLOAT, false, sizeof(int), 0);
-	// rlEnableVertexAttribute(1);
-	// rlSetVertexAttributeDivisor(1, 1);
+	rlSetVertexAttribute(1, 1, RL_FLOAT, false, sizeof(int64_t), 0);
+	rlEnableVertexAttribute(1);
+	rlSetVertexAttributeDivisor(1, 1);
 
-	// rlSetVertexAttribute(2, 1, RL_FLOAT, false, sizeof(int), offsetof(quad_data, element));
-	// rlEnableVertexAttribute(2);
-	// rlSetVertexAttributeDivisor(2, 1);
-
-	rqueue->meshes = 0x00;
-
-	rqueue->ssbo_data = 0x00;
-	rqueue->count = 0;
-
+	rlDisableVertexArray();
 	// rlEnableShader();
 
 	glGenBuffers(1, &rqueue->ssbo);
 	assert(rqueue->ssbo);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, rqueue->ssbo);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, rqueue->count, rqueue->ssbo_data, RL_STREAM_COPY);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, rqueue->chunk_count, rqueue->ssbo_data, RL_STREAM_COPY);
 	glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R8UI, GL_RED_INTEGER, GL_UNSIGNED_BYTE, NULL);// Clear buffer data to 0
+	
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
 	return (rqueue);
 }
 
 bool	voxel_render_queue_update(voxel_chunk_render_queue* rqueue) {
+	//load all face if update into rqueue->ibo_data
+
+	rlEnableVertexArray(rqueue->vao);
+
+	rlUpdateVertexBuffer(rqueue->ibo, rqueue->ibo_data, sizeof(uint64_t) * rqueue->face_count, 0);
+	
+	rlDisableVertexArray();
+	
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, rqueue->ssbo);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, rqueue->count, rqueue->ssbo_data, RL_STREAM_COPY);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, rqueue->chunk_count, rqueue->ssbo_data, RL_STREAM_COPY);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 	
 }
@@ -119,7 +138,7 @@ void	voxel_render_chunks(const voxel_chunk_render_queue rqueue, Shader shader, M
 
 		// rlBindShaderBuffer();
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, rqueue.ssbo);
-		glMultiDrawElementsIndirect(GL_TRIANGLE_STRIP, GL_UNSIGNED_INT, rqueue.draw_cmd, rqueue.count, 0);
+		glMultiDrawElementsIndirect(GL_TRIANGLE_STRIP, GL_UNSIGNED_INT, rqueue.draw_cmd, rqueue.chunk_count, 0);
 		// glMultiDrawElements(,);
 		// for (int i = 0; i < 0; i++) {
 		// 	rlEnableVertexArray(rqueue.meshes[i].vao);
