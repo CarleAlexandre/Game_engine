@@ -1,8 +1,60 @@
 #include "render_impl.h"
 #include <rcamera.h>
 
-void	extract_frustum_from_matrix(const Matrix view, Frustum *frustum) {
-	//stub
+void	extract_frustum_from_matrix(const Matrix vp, Frustum *frustum, bool normalize) {
+	// Left Plane
+	frustum->planes[0].normal.x = vp.m8  + vp.m1;
+	frustum->planes[0].normal.y = vp.m9  + vp.m2;
+	frustum->planes[0].normal.z = vp.m10 + vp.m3;
+	frustum->planes[0].distance = vp.m11 + vp.m4;
+	
+	// Right Plane
+	frustum->planes[1].normal.x = vp.m8  - vp.m1;
+	frustum->planes[1].normal.y = vp.m9  - vp.m2;
+	frustum->planes[1].normal.z = vp.m10 - vp.m3;
+	frustum->planes[1].distance = vp.m11 - vp.m4;
+	
+	// Bottom Plane
+	frustum->planes[2].normal.x = vp.m8  + vp.m5;
+	frustum->planes[2].normal.y = vp.m9  + vp.m6;
+	frustum->planes[2].normal.z = vp.m10 + vp.m7;
+	frustum->planes[2].distance = vp.m11 + vp.m8;
+	
+	// Top Plane
+	frustum->planes[3].normal.x = vp.m8  - vp.m5;
+	frustum->planes[3].normal.y = vp.m9  - vp.m6;
+	frustum->planes[3].normal.z = vp.m10 - vp.m7;
+	frustum->planes[3].distance = vp.m11 - vp.m8;
+	
+	// Near Plane
+	frustum->planes[4].normal.x = vp.m8  + vp.m9;
+	frustum->planes[4].normal.y = vp.m9  + vp.m10;
+	frustum->planes[4].normal.z = vp.m10 + vp.m11;
+	frustum->planes[4].distance = vp.m11 + vp.m12;
+	
+	// Far Plane
+	frustum->planes[5].normal.x = vp.m8  - vp.m9;
+	frustum->planes[5].normal.y = vp.m9  - vp.m10;
+	frustum->planes[5].normal.z = vp.m10 - vp.m11;
+	frustum->planes[5].distance = vp.m11 - vp.m12;
+	
+		// Normalize all the planes if requested
+	if (normalize) {
+		for (int i = 0; i < NUMBER_FACE; i++) {
+			float length = sqrtf(
+				frustum->planes[i].normal.x * frustum->planes[i].normal.x +
+				frustum->planes[i].normal.y * frustum->planes[i].normal.y +
+				frustum->planes[i].normal.z * frustum->planes[i].normal.z
+			);
+	    
+			if (length != 0.0f) {
+				frustum->planes[i].normal.x /= length;
+				frustum->planes[i].normal.y /= length;
+				frustum->planes[i].normal.z /= length;
+				frustum->planes[i].distance /= length;
+			}
+		}
+	}
 }
 
 Frustum	frustum_from_camera(Camera camera) {
@@ -11,7 +63,7 @@ Frustum	frustum_from_camera(Camera camera) {
 	Matrix view = GetCameraViewMatrix(&camera);
 	Matrix proj = GetCameraProjectionMatrix(&camera, GetScreenHeight() / GetScreenWidth());
 	Matrix view_proj = MatrixMultiply(view, proj);
-	extract_frustum_from_matrix(view_proj, &frustum);
+	extract_frustum_from_matrix(view_proj, &frustum, false);
 
 	return (frustum);
 }

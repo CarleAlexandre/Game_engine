@@ -5,9 +5,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "type/queue.h"
+#include "../type/queue.h"
 
 #include <time.h>
+
+#ifdef _WIN64
+
 #include <windows.h>
 
 void	time_usleep(uint64_t usec) {
@@ -21,6 +24,16 @@ void	time_usleep(uint64_t usec) {
 	WaitForSingleObject(timer, INFINITE);
 	CloseHandle(timer);
 }
+
+#else
+
+#include <unistd.h>
+
+void	time_usleep(uint64_t usec) {
+	usleep(usec);
+}
+
+#endif
 
 typedef struct	s_task {
 	void	*(*func)(void *);

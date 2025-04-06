@@ -20,7 +20,7 @@ char	*file_read(const char* filename);
  * @param filename 
  * @param append 
  */
-void	file_write(const char *data, size_t data_length, const char *filename, bool append);
+void	file_write(const char *data, uint64_t data_length, const char *filename, bool append);
 
 /**
  * @brief 

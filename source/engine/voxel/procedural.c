@@ -1,6 +1,6 @@
 #include "voxel.h"
 #define FNL_IMPL
-#include <lib/FastNoiseLite.h>
+#include <FastNoiseLite.h>
 #include <stdio.h>
 
 voxel_data *get_chunk_voxels(voxel_world *world, int x, int y, int z) {
