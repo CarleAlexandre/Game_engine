@@ -1,7 +1,7 @@
 # Compiler and flags
 CC = gcc
 CFLAGS = -g -Wall
-CFLAGS += -std=c99
+CFLAGS += -std=c11
 
 LDFLAGS = 
 
@@ -14,7 +14,7 @@ SRC_DIR = source/
 LIB = HavenLib.a
 
 # Sources and objects for the library
-SRC	+= $(wildcard $(SRC_DIR)engine/*.c)
+SRC	+= $(wildcard $(SRC_DIR)engine/**.c)
 
 OBJ = $(SRC:$(SRC_DIR)%.c=$(OBJ_DIR)%.o)
 

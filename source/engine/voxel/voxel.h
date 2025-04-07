@@ -74,4 +74,6 @@ typedef struct voxel_chunk_render_queue {
 	voxel_mesh*			meshes;//sort from farthest to nearest using player camera forward(could be easier said than done)
 }	voxel_chunk_render_queue;
 
+
+
 #endif

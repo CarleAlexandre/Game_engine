@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 #include <string.h>
@@ -15,9 +16,10 @@ typedef struct {
 }	memory_stats;
 
 typedef struct {
-
+	bool	used;
+	size_t	size;
+	void*	ptr;
 }	memory_page;
-
 
 #define BASE_STACK_SIZE 67108864 //64Mb
 

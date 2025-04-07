@@ -4,7 +4,7 @@
       "/usr/bin/gcc",
       "-g",
       "-Wall",
-      "-std=c99",
+      "-std=c11",
       "-fsanitize=address",
       "-Iinclude",
       "-c",
